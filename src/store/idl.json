@@ -1,0 +1,454 @@
+{
+  "version": "0.1.0",
+  "name": "modern_poker_club",
+  "instructions": [
+    {
+      "name": "setCoinsValues",
+      "accounts": [
+        {
+          "name": "values",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "goldCoins",
+          "type": "u64"
+        },
+        {
+          "name": "timeCoins",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "updateCoinsValues",
+      "accounts": [
+        {
+          "name": "values",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "gold",
+          "type": "u64"
+        },
+        {
+          "name": "time",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "mpcToGold",
+      "accounts": [
+        {
+          "name": "assetAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "values",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "from",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "to",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "fromAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "toAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "count",
+          "type": "string"
+        },
+        {
+          "name": "mpc",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "mpcToTime",
+      "accounts": [
+        {
+          "name": "assetAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "values",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "from",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "to",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "fromAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "toAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "count",
+          "type": "string"
+        },
+        {
+          "name": "mpc",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "globalAccount",
+      "accounts": [
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "goldToMpcValue",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "updateGoldValue",
+      "accounts": [
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "goldToMpcValue",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "adminAddMpc",
+      "accounts": [
+        {
+          "name": "escrowAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "adminTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "mpcCoins",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "goldToMpc",
+      "accounts": [
+        {
+          "name": "escrowAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "goldCoins",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "SolAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "goldToMpcValue",
+            "type": "u64"
+          },
+          {
+            "name": "mpcCoins",
+            "type": "u64"
+          },
+          {
+            "name": "admin",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Coins",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "goldCoins",
+            "type": "u64"
+          },
+          {
+            "name": "timeCoins",
+            "type": "u64"
+          },
+          {
+            "name": "admin",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Tc",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "timeCoin",
+            "type": "f64"
+          },
+          {
+            "name": "mpcCoin",
+            "type": "u64"
+          },
+          {
+            "name": "count",
+            "type": "string"
+          },
+          {
+            "name": "ownerAddress",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Gc",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "goldCoin",
+            "type": "f64"
+          },
+          {
+            "name": "mpcCoin",
+            "type": "u64"
+          },
+          {
+            "name": "count",
+            "type": "string"
+          },
+          {
+            "name": "ownerAddress",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "BuyTc",
+      "fields": [
+        {
+          "name": "from",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "to",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timeCoin",
+          "type": "f64",
+          "index": false
+        },
+        {
+          "name": "mpcCoin",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "BuyGc",
+      "fields": [
+        {
+          "name": "from",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "to",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "goldCoin",
+          "type": "f64",
+          "index": false
+        },
+        {
+          "name": "mpcCoin",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "You have no authority to swap"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+.user-view-btn {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+}
+
+.player-scores .main-container-head .table .player-address {
+  background: transparent;
+  border: none;
+}
+
+.player-scores .main-container-head .table .player-address:hover {
+  color: #6B1A10;
+}
+
+
+
+/* ========== Custom Styles Rewards Modal =========== */
+
+
+.modal.show .modal-dialog.reward-modal {
+  transform: translate(0, 5%);
+}
+
+.reward-modal .reward-modal-logo {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.reward-modal .reward-modal-logo img {
+  width: 40%;
+}
+
+.reward-modal .reward-modal-title p {
+  color: #fff !important;
+  font-size: 24px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.reward-modal .reward-modal-line hr {
+  border-top: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+
+.reward-modal .reward-modal-body .text-field::placeholder {
+  color: #fff;
+  opacity: 0.5;
+}
+
+.group-input {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.editButton {
+  color: #000;
+  margin-right: 10px;
+}
+
+.plus-btn-back {
+  border-radius: 50px;
+  background-color: black;
+  align-items: center;
+}

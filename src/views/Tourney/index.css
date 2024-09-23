@@ -1,0 +1,143 @@
+.user-view-btn {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+}
+
+.player-scores .main-container-head .table .player-address {
+  background: transparent;
+  border: none;
+}
+
+.select-template .input-fields label {
+  display: block;
+}
+
+.select-template .input-fields .dropdown-new {
+  margin: 0;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.player-scores .main-container-head .table .player-address:hover {
+  color: #6B1A10;
+}
+
+
+
+/* ========== Custom Styles Rewards Modal =========== */
+
+.modal.show .modal-dialog.reward-modal {
+  transform: translate(0, 5%);
+}
+
+.reward-modal .reward-modal-logo {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.reward-modal .reward-modal-logo img {
+  width: 40%;
+}
+
+.reward-modal .reward-modal-title p {
+  color: #fff !important;
+  font-size: 24px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.reward-modal .reward-modal-line hr {
+  border-top: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+
+.time-piker {}
+
+.time-piker input {
+  background: #191E23 !important;
+  padding: 0 !important;
+  color: white !important;
+  border-radius: 100;
+}
+
+.time-piker .text-field {
+  color: #fff;
+}
+
+.MuiPickersBasePicker-container {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  background-color: black;
+
+}
+
+.time-piker .text-field .react-datetime-picker__wrapper {
+  background: #191e23;
+  padding: 0 0 !important;
+  color: #fff;
+  border-radius: 40px;
+  text-align: left;
+  font-size: 14px !important;
+  border: none !important;
+  margin-bottom: 6px;
+}
+
+.time-piker .text-field .react-datetime-picker__wrapper .react-datetime-picker__inputGroup {
+  padding: 0;
+  position: relative;
+  top: -11px;
+}
+
+.time-piker .text-field .react-datetime-picker__wrapper button {
+  color: #fff !important;
+}
+
+.time-piker .text-field .react-datetime-picker__wrapper button svg {
+  fill: #fff !important;
+  stroke: #fff;
+}
+
+.reward-modal .reward-modal-body .text-field::placeholder {
+  color: #fff;
+  opacity: 0.5;
+}
+
+.group-input {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.editButton {
+  color: #000;
+  margin-right: 10px;
+}
+
+.MuiPickersClock-container {
+  margin-left: 1.1rem !important;
+
+}
+
+.MuiPickersClockNumber-clockNumber {
+  color: white !important;
+}
+
+.css-6uyvd0 {
+  z-index: 100;
+  position: absolute;
+  height: 50px;
+  width: 50px;
+  background-color: #ffffff;
+  border-radius: 100%;
+  opacity: 0.6;
+  top: 50%;
+  left: 50%;
+  position: fixed;
+  left: 100;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+  -webkit-animation: animation-1ieb7bi 2.1s 0s infinite ease-in-out;
+  animation: animation-1ieb7bi 2.1s 0s infinite ease-in-out;
+}

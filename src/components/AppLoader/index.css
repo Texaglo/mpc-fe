@@ -1,0 +1,37 @@
+.app-loader {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  flex-direction: column;
+  }
+  
+  .app-loader .loader-container {
+    margin-top: 40px;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+  }
+  
+  .app-loader .loader-container .loader {
+    left: 32px;
+    position: relative;
+    width: 75px !important;
+    height: 75px !important;
+  }
+  
+  .app-loader .loader-container .loading-text {
+    color: #888;
+    font-size: 20px;
+    margin-top: -25px;
+    font-style: normal;
+    font-weight: normal;
+  }
+  
+   .app-loader .loader-container .css-19fmomo {
+    background-color: #6B1A10 !important;
+  }
+  
+   .app-loader .loader-container .css-sjlgy6 {
+    background-color: #6B1A10 !important;
+  }
+  

@@ -1,0 +1,443 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+/* 
+font-family: 'Chiller';
+font-family: 'Quicksand', sans-serif;
+  */
+
+@font-face {
+  font-family: 'Chiller';
+  src: url('../fonts/Chiller-Regular.eot');
+  src: local('Chiller'), local('Chiller-Regular'),
+    url('../fonts/Chiller-Regular.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/Chiller-Regular.woff2') format('woff2'),
+    url('../fonts/Chiller-Regular.woff') format('woff'),
+    url('../fonts/Chiller-Regular.ttf') format('truetype'),
+    url('../fonts/Chiller-Regular.svg#Chiller-Regular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+hr {
+  width: 100%;
+}
+
+p {
+  color: #ffffff !important;
+}
+
+.Toastify__toast--success {
+  background: #14A8A6;
+}
+
+/* ========== Custom Scroll Styles =========== */
+
+/* width */
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #27293d;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #333645;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #333645;
+}
+
+
+/* ========== Custom MainContainer Styles =========== */
+
+.main-container {
+  padding: 20px 30px !important;
+  color: #ffffff !important;
+  min-height: 90vh;
+  background-color: rgba(255 255 255 / 10%);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+}
+
+.main-container-head {
+  display: flex;
+  color: #00fffb !important;
+  justify-content: space-between;
+}
+
+.ReactTable {
+  border: none !important;
+}
+
+.main-container-heading {
+  color: #d0a535 !important;
+  font-size: 18px;
+  font-weight: 550;
+  margin-top: 10px;
+}
+
+/* ========== Custom Table Styles =========== */
+/* ========== Custom Table Styles =========== */
+.table .rt-tbody .rt-td {
+  display: flex;
+  background-color: #191e23;
+  color: white;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+.ReactTable .rt-tbody .rt-td {
+  border-right: 3px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.pagination-bottom {
+  background-color: #191e23;
+}
+
+.ReactTable .rt-tbody .rt-tr-group .rt-tr.-even .rt-td {
+  background-color: rgba(111, 114, 119, .25098039215686274) !important;
+}
+
+.table .rt-th .rt-resizable-header-content {
+  background-color: #191e23;
+  color: #fff;
+  font-size: 18px;
+  padding: 11px;
+  border-radius: 5px;
+}
+
+.ReactTable .rt-thead.-filters input,
+.ReactTable .rt-thead.-filters select,
+.ReactTable .-pagination .-pageJump input,
+.ReactTable .-pagination input,
+.ReactTable .-pagination select {
+  background: rgba(111, 114, 119, .25098039215686274) !important;
+  padding: 12px 15px !important;
+  color: #fff;
+  border-radius: 3px;
+  text-align: left;
+  font-size: 14px !important;
+  border: none !important;
+  margin-bottom: 6px;
+}
+
+.ReactTable .-pagination .-pageInfo {
+  color: #fff !important;
+}
+
+.table .rt-tbody .rt-tr-group {
+  border: none;
+  border-radius: 5px !important;
+}
+
+.table .rt-th .rt-th .rt-th-input {
+  background-color: gold;
+  color: navy;
+}
+
+/* ========== Custom Slider Styles =========== */
+
+.slider {
+  padding: 30px 40px;
+  width: 775px;
+}
+
+/*========== Custom Styles View Data  ============= */
+
+.view-data .view-data-main-title {
+  font-weight: 500;
+  font-size: 26px;
+  color: #ffd700;
+  padding-bottom: 5px;
+}
+
+.view-data .view-data-body .view-data-row {
+  background-color: #eaeded;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+}
+
+.view-data .view-data-body .view-data-row .view-data-title {
+  font-weight: 600;
+}
+
+.view-data .view-data-body .view-data-sub-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.view-data .view-data-footer {
+  display: flex;
+  justify-content: center;
+}
+
+
+/*========== Custom Styles Edit-Add Slider ============= */
+
+.edit-add {
+  text-align: center;
+  padding: 30px 70px;
+  border-radius: 20px;
+  transition: all .5s ease-in-out;
+  -webkit-transition: all .5s ease-in-out;
+  box-shadow: 0 4px 29px rgba(47, 47, 47, .1);
+}
+
+.edit-add .edit-add-title {
+  padding: 15px;
+  font-size: 26px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.edit-add .edit-add-sub-title {
+  font-size: 20px;
+  font-weight: 500;
+  text-align: start;
+}
+
+.edit-add .edit-add-body .edit-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: 'gray';
+}
+
+.edit-add .edit-add-body .edit-add-field .form-input-field .MuiFormLabel-root.Mui-focused {
+  color: #6B1A10;
+}
+
+.edit-add .edit-add-body .form.edit-add-field .form-input-field .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border: 1px solid #6c757d;
+}
+
+.edit-add .edit-add-body .edit-add-field .form-input-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border: 2px solid #6B1A10;
+}
+
+.edit-add .edit-add-body .edit-add-field .form-input-field .MuiOutlinedInput-notchedOutline {
+  border: 1px solid #6c757d;
+}
+
+.MuiAutocomplete-option {
+  color: #000000;
+}
+
+.edit-add .edit-add-body .edit-add-buttons {
+  display: flex;
+  padding: 30px 90px;
+  justify-content: space-between;
+}
+
+/* ========== Custom Button Styles =========== */
+
+
+.add-btn {
+  /* color: #ffffff !important; */
+  padding: 5px 25px !important;
+  border-radius: 40px !important;
+  border: none;
+  background: #d0a535 !important;
+  background-size: 200% 200%;
+  color: rgb(36, 36, 39);
+  cursor: pointer;
+  border: 1px solid #d0a535;
+  transition: all 0.3s ease-in-out;
+}
+
+.add-btn:hover {
+  background-position: right bottom;
+  color: #d0a535 !important;
+  background-color: white !important;
+  border: 1px solid #d0a535;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.view-btn {
+  min-width: 25% !important;
+  color: #333645 !important;
+  border-radius: 10px !important;
+  border: 1px solid #333645 !important;
+}
+
+.view-btn:hover {
+  color: #ffffff !important;
+  background-color: #6B1A10 !important;
+}
+
+.edit-btn {
+  margin-right: 7px;
+  min-width: 45% !important;
+  color: navy !important;
+  border-radius: 10px !important;
+  margin-right: 7 px;
+  border: 1px solid navy !important;
+}
+
+.edit-btn:hover {
+
+  color: #ffffff !important;
+  background-color: #6B1A10 !important;
+  box-shadow: rgba(0, 0, 0, 0.17) 0px -23px 25px 0px inset, rgba(0, 0, 0, 0.15) 0px -36px 30px 0px inset, rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px, rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px, rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px;
+
+}
+
+.delete-btn {
+  min-width: 30% !important;
+  color: #fff !important;
+  border: none;
+  background-color: #e0040c !important;
+  margin-left: 10px;
+  border: 1px solid #e0040c !important;
+}
+
+.delete-btn:hover {
+  color: #e0040c !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e0040c !important;
+}
+
+.cancel-btn {
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  background: #e0040c !important;
+}
+
+.cancel-btn:hover {
+  box-shadow: rgba(0, 0, 0, 0.17) 0px -23px 25px 0px inset, rgba(0, 0, 0, 0.15) 0px -36px 30px 0px inset, rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px, rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px, rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px;
+}
+
+.submit-btn {
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  background: #6B1A10 !important;
+}
+
+.confirm-btn {
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  background: #6B1A10 !important;
+}
+
+Button:focus {
+  outline: 0px !important;
+}
+
+/* ========== Custom AppLoader Styles =========== */
+
+.loader-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 85vh;
+  color: #6B1A10;
+}
+
+.blue-loader {
+  color: #6B1A10;
+}
+
+/* ========== Main Modal Styles =========== */
+
+.main-modal {
+  max-width: 500px !important;
+  top: 5%;
+}
+
+.main-modal .modal-header,
+.modal-footer {
+  border: none !important;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1050;
+  display: none;
+  overflow: hidden;
+  outline: 0;
+  background-color: rgba(255 255 255 / 10%);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.main-modal .modal-content {
+  background-color: rgba(255 255 255 / 10%);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 15px 25px;
+}
+
+.main-modal .modal-content .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0px;
+}
+
+.main-modal .modal-content .modal-header .close {
+  color: #fff !important;
+}
+
+.main-modal .modal-content .modal-header .modal-logo {
+  display: flex;
+  justify-content: center;
+}
+
+.main-modal .modal-content .modal-header .modal-logo img {
+  width: 25%;
+  padding: 10px;
+  margin: 20px 0px;
+}
+
+.main-modal .modal-content .modal-body {
+  padding: 0px;
+}
+
+.ReactTable .-pagination .-btn {
+  color: #fff !important;
+}
+
+/*========== Responsive ============= */
+
+@media only screen and (max-width: 650px) {
+
+  .slider {
+    padding: 30px;
+    width: 500px;
+  }
+
+  .slider .edit-add {
+    padding: 20px 10px;
+  }
+
+  .slider .edit-add .slider-body .edit-add-buttons {
+    padding: 30px;
+  }
+}
+
+@media only screen and (max-width: 425px) {
+  .slider {
+    padding: 20px;
+    width: 400px;
+  }
+}
+
+@media only screen and (max-width: 375px) {
+  .slider {
+    padding: 10px;
+    width: 325px;
+  }
+}
