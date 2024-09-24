@@ -1,5 +1,5 @@
 import axios from 'axios';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 import EventBus from 'eventing-bus';
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 import { setLoginData, setNonce, toggleLogin } from '../actions/Auth';
@@ -15,9 +15,11 @@ function* getNonce({ payload }) {
 
 function* login({ payload, history }) {
   const { error, response } = yield call(postCall, { path: '/users/adminLoginWithMetaMask', payload });
+
   if (error) EventBus.publish("error", error['response']['data']['message']);
   else if (response) {
-    const decoded = jwt_decode(response["data"]["body"]["token"]);
+
+    const decoded = jwtDecode(response["data"]["body"]["token"]);
     if (decoded["role"] !== "admin") {
       EventBus.publish("error", "Can't login through User account ");
       return;

@@ -2,12 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import './index.css';
 import { login } from "../../store/actions/Auth";
-import idl from '../../store/idl.json';
-// import { Connection, PublicKey, clusterApiUrl, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
-import * as solanaWeb3 from "@solana/web3.js";
-// const web3 = require("@solana/web3.js");
-// const anchor = require('@project-serum/anchor');
-
+// import idl from '../../store/idl.json';
+import { Connection, PublicKey, clusterApiUrl, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+// import { Program, AnchorProvider, web3 } from '@project-serum/anchor';
 
 
 // const PROGRAM_ID = new PublicKey('94Lp376dDFeyt5wMXAEmwpQ8w6qTzb5YCyHA4heUtkQy');
@@ -27,11 +24,11 @@ class SwapComponent extends React.Component {
         };
     }
 
-    // componentDidMount() {
-    //     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-    //     const provider = new AnchorProvider(connection, window.solana, AnchorProvider.defaultOptions());
-    //     this.setState({ provider });
-    // }
+    componentDidMount() {
+        const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+        // const provider = new AnchorProvider(connection, window.solana, AnchorProvider.defaultOptions());
+        // this.setState({ provider });
+    }
 
     handleGoldInputChange = (e) => {
         const goldValue = e.target.value;

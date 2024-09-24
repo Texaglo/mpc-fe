@@ -1,6 +1,5 @@
 import EventBus from 'eventing-bus';
 import { connect } from "react-redux";
-import * as ethUtil from 'ethereumjs-util';
 import Button from '@material-ui/core/Button';
 import React, { Fragment } from "react";
 import { ValidatorForm } from 'react-material-ui-form-validator';

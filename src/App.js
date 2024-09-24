@@ -93,7 +93,7 @@ export class App extends React.Component {
           <Switch>
             <Route path="/login" render={props => <Login {...props} />} />
             <PrivateRoute path="/home" component={props => <Admin {...props} />} />
-            <Route path="/swap" component={SwapComponent} />
+            {/* <PrivateRoute path="/swap" component={props => <SwapComponent {...props} />} /> */}
             {/* <Route path="/home" component={props => <Admin {...props} />} /> */}
             <Redirect from="/" to="/login" />
           </Switch>
