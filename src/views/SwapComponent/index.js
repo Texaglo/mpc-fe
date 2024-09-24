@@ -90,9 +90,9 @@ class SwapComponent extends React.Component {
         }
     };
 
-    getRate = () => {
-        alert(`Current conversion rate: 1 Gold Coin = ${this.state.conversionRate} MPC Token`);
-    };
+    // getRate = () => {
+    //     alert(`Current conversion rate: 1 Gold Coin = ${this.state.conversionRate} MPC Token`);
+    // };
 
     render() {
         const { goldAmount, mpcAmount, isSwappingToMPC, goldToMpcValue } = this.state;
