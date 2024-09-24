@@ -22,6 +22,8 @@ class Login extends React.Component {
     // web3.eth.net.getId((err, netId) => {
     //   this.setState({ netId })
     // });
+    console.log("***Hello");
+
     if (!window.solana) {
       EventBus.publish("error", "Please install Phantom Wallet");
       return;
