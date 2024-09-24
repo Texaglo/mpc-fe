@@ -8,7 +8,7 @@ import { Connection, PublicKey, clusterApiUrl, Transaction, sendAndConfirmTransa
 
 
 // const PROGRAM_ID = new PublicKey('94Lp376dDFeyt5wMXAEmwpQ8w6qTzb5YCyHA4heUtkQy');
-// const { SystemProgram } = web3;
+const { SystemProgram } = web3;
 
 class SwapComponent extends React.Component {
     constructor(props) {
