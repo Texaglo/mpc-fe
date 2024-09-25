@@ -3,6 +3,7 @@ const { env } = require('../config');
 
 const TokenData = require(`./${env}/Token.json`);
 const RewardData = require(`./${env}/Reward.json`);
+const Swap = require(`./${env}/swap.json`);
 
 const TokenABI = TokenData['abi'];
 const TokenAddress = TokenData['address'];
@@ -12,7 +13,11 @@ const RewardABI = RewardData['abi'];
 const RewardAddress = RewardData['address'];
 const Reward = new web3.eth.Contract(RewardABI, RewardAddress);
 
+const SwapABI = Swap['abi'];
+const SwapAddress = Swap['address'];
+
 module.exports = {
   Token, TokenABI, TokenAddress,
   Reward, RewardABI, RewardAddress,
+  SwapABI, SwapAddress
 };

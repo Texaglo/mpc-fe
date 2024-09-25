@@ -86,7 +86,7 @@ p {
 /* ========== Custom Table Styles =========== */
 .table .rt-tbody .rt-td {
   display: flex;
-  background-color: #191e23;
+  background-color: #191e23 !important;
   color: white;
   justify-content: center;
   align-items: center;

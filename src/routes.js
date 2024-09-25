@@ -6,6 +6,7 @@ import SitnGo from "./views/SitnGo/index";
 import Tourney from "./views/Tourney";
 import Template from "./views/Templates";
 import Achievement from "./views/Achievements";
+import Swap from "./views/SwapGoldCoins"
 
 var routes = [
   {
@@ -61,6 +62,13 @@ var routes = [
     path: "/Achievements",
     name: "Achievements",
     component: Achievement,
+    icon: "tim-icons icon-gift-2",
+  },
+  {
+    layout: "/home",
+    path: "/Swap",
+    name: "Swap",
+    component: Swap,
     icon: "tim-icons icon-gift-2",
   },
 ];

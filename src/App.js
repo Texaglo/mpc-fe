@@ -4,12 +4,9 @@ import React, { Component } from 'react'
 import { createBrowserHistory } from "history";
 import { ToastContainer, toast } from 'react-toastify';
 import { HashRouter as Router, Route, Switch, Redirect } from "react-router-dom";
-import SwapComponent from "../src/views/SwapComponent/index.js";
 import Login from "./views/Login/index.js";
 import Admin from "./layouts/Admin.jsx";
 import PrivateRoute from './store/PrivateRoute';
-
-// import { web3 } from "./store/web3";
 import { logout } from './store/actions/Auth';
 import { networkId, message } from "./store/config";
 
@@ -21,6 +18,8 @@ const hist = createBrowserHistory();
 export class App extends React.Component {
 
   async componentDidMount() {
+    console.log("**************Hello I'm HERE");
+
     EventBus.on('info', (e) => toast.info(e));
     EventBus.on('error', (e) => toast.error(e));
     EventBus.on('success', (e) => toast.success(e));
@@ -66,7 +65,6 @@ export class App extends React.Component {
 
     try {
       console.log("**************Hello I'm HERE");
-
       await window.solana.connect();
       // Add an event listener to detect account changes
       window.solana.on('accountChanged', (newPublicKey) => {
@@ -93,8 +91,6 @@ export class App extends React.Component {
           <Switch>
             <Route path="/login" render={props => <Login {...props} />} />
             <PrivateRoute path="/home" component={props => <Admin {...props} />} />
-            {/* <PrivateRoute path="/swap" component={props => <SwapComponent {...props} />} /> */}
-            {/* <Route path="/home" component={props => <Admin {...props} />} /> */}
             <Redirect from="/" to="/login" />
           </Switch>
         </Router>
