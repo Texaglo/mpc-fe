@@ -1,5 +1,5 @@
 .swap-container {
-  width: 500px;
+  width: 550px;
   margin: 50px auto;
   padding: 20px;
   border: 1px solid #ddd;
@@ -29,21 +29,34 @@ label {
 }
 
 input {
-  width: 100%;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
 
+/* Align input field and button on the same line with full width */
+.input-group-inline {
+    display: flex;
+    align-items: center;
+    width: 100%; /* Make the input-group take full width */
+    gap: 10px; /* Space between the input and button */
+}
+
+.input-group-inline input {
+    flex: 1; /* Makes the input take the available space */
+    padding: 8px;
+    border-radius: 5px;
+}
+
 .swap-button {
-  margin: 10px 0;
-  padding: 10px;
-  background-color: #4CAF50;
-  margin-right: 10px;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+    padding: 10px 20px; /* Maintain the padding for height */
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap; /* Prevents button text from wrapping */
 }
 
 .swap-button:hover {
