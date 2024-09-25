@@ -1,4 +1,3 @@
-import './index.css';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
@@ -12,6 +11,8 @@ import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator';
 import { getAllRingGames, updateRingGame, deleteRingGame } from "../../store/actions/Ring";
 import { getAllTemplates } from "../../store/actions/Template";
+
+import './index.css';
 
 class Ring extends React.Component {
     constructor(props) {

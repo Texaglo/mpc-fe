@@ -1,13 +1,13 @@
 import EventBus from 'eventing-bus';
 import { connect } from "react-redux";
-import React, { Component } from 'react'
-import { createBrowserHistory } from "history";
-import { ToastContainer, toast } from 'react-toastify';
-import { HashRouter as Router, Route, Switch, Redirect } from "react-router-dom";
-import Swap from "../src/views/SwapComponent/index.js";
-import Login from "./views/Login/index.js";
 import Admin from "./layouts/Admin.jsx";
+import React, { Component } from 'react';
+import Login from "./views/Login/index.js";
+import { createBrowserHistory } from "history";
 import PrivateRoute from './store/PrivateRoute';
+import { ToastContainer, toast } from 'react-toastify';
+import Swap from "../src/views/SwapComponent/index.js";
+import { HashRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 
 // import { web3 } from "./store/web3";
 import { logout } from './store/actions/Auth';
