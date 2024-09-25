@@ -11,7 +11,7 @@ import { PublicKey, Connection } from "@solana/web3.js";
 const { SystemProgram } = web3;
 const programID = new PublicKey("CdEKZxHntobPE1VjfiqXgp2Av2rDmhGWV6JxGh5bQdx");
 const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-const Marketplace = () => {
+const Swap = () => {
 
     // Create a network connection
     const network = clusterApiUrl('devnet');
@@ -84,4 +84,4 @@ const Marketplace = () => {
     );
 }
 
-export default Marketplace;
+export default Swap;

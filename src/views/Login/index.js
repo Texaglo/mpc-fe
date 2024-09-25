@@ -19,11 +19,6 @@ class Login extends React.Component {
 
 
   async componentDidMount() {
-    // web3.eth.net.getId((err, netId) => {
-    //   this.setState({ netId })
-    // });
-    console.log("***Hello");
-
     if (!window.solana) {
       EventBus.publish("error", "Please install Phantom Wallet");
       return;
@@ -71,22 +66,20 @@ class Login extends React.Component {
     let { history } = this.props;
 
     try {
-      // Request to connect to Phantom Wallet
+
       const response = await window.solana.connect();
       address = response.publicKey.toString();
-      // Create a message to sign
+
       const message = `ModernPokerClub,${nonce}`;
       const encodedMessage = new TextEncoder().encode(message);
 
-      // Request the user to sign the message
       const signature = await window.solana.signMessage(encodedMessage, 'utf8');
 
-      // The data to send to the backend
       const data = {
         publicAddress: address,
         signature: signature.signature,
       };
-      // Update state and proceed with login
+
       this.props.toggleLogin(true);
       this.props.login({ data, history });
 
@@ -113,7 +106,7 @@ class Login extends React.Component {
                   <ValidatorForm className="validator-form mt-4" onSubmit={this.getNonce}>
                     <Button type="Submit" variant="contained" className='text-white login-btn mt-4' disabled={isLogin} >
                       {!isLogin
-                        ? 'LOGIN WITH METAMASK'
+                        ? 'LOGIN WITH PHANTOM'
                         : <i className="fa fa-spinner fa-spin fa-fw"></i>
                       }
                     </Button>
