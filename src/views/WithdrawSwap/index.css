@@ -1,0 +1,135 @@
+.user-view-btn {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+}
+
+.player-scores .main-container-head .table .player-address {
+  background: transparent;
+  border: none;
+}
+
+.player-scores .main-container-head .table .player-address:hover {
+  color: #6B1A10;
+}
+
+
+
+/* ========== Custom Styles Rewards Modal =========== */
+
+.main-modal.reward-modal {
+  max-width: 750px !important;
+  top: 0% !important;
+}
+
+.modal.show .modal-dialog.reward-modal {
+  transform: translate(0, 5%);
+}
+
+.reward-modal .reward-modal-logo {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.reward-modal .reward-modal-logo img {
+  width: 40%;
+}
+
+.reward-modal .reward-modal-title p {
+  color: #fff !important;
+  font-size: 24px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.reward-modal .reward-modal-line hr {
+  border-top: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.reward-modal .reward-modal-body {
+  padding: 0 25px 30px !important;
+}
+
+.reward-modal .reward-modal-body .text-field {
+  color: #fff;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+}
+
+.reward-modal .reward-modal-body .text-field input,
+.reward-modal .reward-modal-body .text-field #mui-component-select-formatLimit,
+.reward-modal .reward-modal-body .text-field #mui-component-select-type {
+  background: #191e23;
+  padding: 15px 15px !important;
+  color: #fff;
+  border-radius: 40px;
+  text-align: left;
+  font-size: 14px !important;
+  border: none !important;
+  margin-bottom: 6px;
+}
+
+.dropdown-new {
+  margin: 9px;
+  height: 47px;
+  width: 308px;
+  background: #191E23;
+  color: #adadad;
+  padding: 13px;
+  border-radius: 31px;
+}
+
+.reward-modal .reward-modal-body .text-field svg {
+  color: #fff;
+}
+.table>:not(caption)>*>*{
+  background-color: transparent !important
+}
+.time-piker input {
+  background: none !important;
+  padding: 0 !important;
+  border-radius: 0;
+}
+
+.time-piker input:focus-visible {
+  border: none !important;
+  outline: none !important;
+}
+
+.reward-modal-body.modal-body .input-fields label {
+  font-size: 14px;
+  color: #fff;
+  display: block;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  padding: 0;
+  border: none !important;
+}
+
+.MuiGrid-grid-xs-12 .dropdown-new,
+.MuiGrid-grid-xs-6 .dropdown-new{
+  width: 100%;
+}
+.selected-range {
+  position: relative;
+  color: #fff;
+  margin-bottom: 14px;
+}
+.reward-modal .reward-modal-body .text-field::placeholder {
+  color: #fff;
+  opacity: 0.5;
+}
+
+.group-input {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.editButton {
+  color: #000;
+  margin-right: 10px;
+}

@@ -1,0 +1,74 @@
+.swap-container {
+  width: 750px;
+  margin: 15% 35%;
+  padding: 50px 35px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.swap-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Align input field and button on the same line with full width */
+.input-group-inline {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  /* Make the input-group take full width */
+  gap: 10px;
+  /* Space between the input and button */
+}
+
+.input-group-inline input {
+  flex: 1;
+  /* Makes the input take the available space */
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.submit-button {
+  height: 40px;
+  padding: 8px 30px;
+  font-size: 14px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  /* Prevents button text from wrapping */
+  box-shadow: rgba(0, 0, 0, 0.17) 0px -23px 25px 0px inset, rgba(0, 0, 0, 0.15) 0px -36px 30px 0px inset, rgba(0, 0, 0, 0.1) 0px -79px 40px 0px inset, rgba(0, 0, 0, 0.06) 0px 2px 1px, rgba(0, 0, 0, 0.09) 0px 4px 2px, rgba(0, 0, 0, 0.09) 0px 8px 4px, rgba(0, 0, 0, 0.09) 0px 16px 8px, rgba(0, 0, 0, 0.09) 0px 32px 16px;
+}
+
+.submit-button:hover {
+  background-color: #45a049;
+}
+
+input[readonly] {
+  background-color: #f9f9f9;
+}

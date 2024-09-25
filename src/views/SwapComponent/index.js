@@ -111,7 +111,7 @@ class SwapComponent extends React.Component {
                             placeholder={isSwappingToMPC ? 'Enter gold amount' : 'Enter MPC amount'}
                         />
                     </div>
-                    <button className="swap-button" onClick={this.handleSwapDirection}>
+                    <button className="submit-button" onClick={this.handleSwapDirection}>
                         Swap Direction
                     </button>
                     <div className="input-group">
@@ -133,11 +133,11 @@ class SwapComponent extends React.Component {
                                 onChange={(e) => this.setState({ goldToMpcValue: e.target.value })}
                                 placeholder="Enter new rate"
                             />
-                            <button className="swap-button" onClick={this.callEscrow}>
+                            <button className="submit-button" onClick={this.callEscrow}>
                                 Set Rate
                             </button>
                         </div>
-                        <button className="swap-button" onClick={this.getRate}>
+                        <button className="submit-button" onClick={this.getRate}>
                             Get Current Rate
                         </button>
                     </div>
