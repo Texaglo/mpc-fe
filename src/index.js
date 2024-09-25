@@ -9,10 +9,10 @@ import App from './App';
 import rootSaga from './store/sagas';
 import rootReducer from './store/reducers';
 
-import './assets/css/style.css';
 import 'react-table-6/react-table.css';
 import "./assets/css/nucleo-icons.css";
 import "./assets/scss/black-dashboard-react.css";
+import './assets/css/style.css';
 
 
 const sagaMiddleware = createSagaMiddleware();

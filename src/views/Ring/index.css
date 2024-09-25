@@ -85,7 +85,9 @@
 .reward-modal .reward-modal-body .text-field svg {
   color: #fff;
 }
-
+.table>:not(caption)>*>*{
+  background-color: transparent !important
+}
 .time-piker input {
   background: none !important;
   padding: 0 !important;
