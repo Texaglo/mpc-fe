@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
 import Loader from "../../components/Loader/index"
+import { getWithdrawSwaps } from "../../store/actions/WithdrawSwap"
 
 import './index.css';
 
@@ -11,7 +12,11 @@ class WithdrawSwap extends React.Component {
         this.state = {
             withdrawSwapData: [],
         };
-        // props.getWithdrawSwap();
+        props.getWithdrawSwaps();
+    }
+
+    componentWillReceiveProps({ allSwaps }) {
+        if(allSwaps.length > 0) this.setState({ withdrawSwapData: allSwaps })
     }
 
     render() {
@@ -20,12 +25,12 @@ class WithdrawSwap extends React.Component {
 
         const columns = [
             {
-                accessor: 'userName',
+                accessor: 'username',
                 Header: 'User Name',
             },
             {
-                accessor: 'email',
-                Header: 'Email',
+                accessor: 'publicAddress',
+                Header: 'Public Address',
             },
             {
                 accessor: 'amount',
@@ -67,10 +72,12 @@ class WithdrawSwap extends React.Component {
 }
 
 const mapDispatchToProps = {
+    getWithdrawSwaps,
 };
 
-const mapStateToProps = ({ Auth }) => {
+const mapStateToProps = ({ Auth, WithdrawSwap }) => {
     let { } = Auth;
-    return {  };
+    let { allSwaps } = WithdrawSwap;
+    return { allSwaps };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(WithdrawSwap);

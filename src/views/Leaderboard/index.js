@@ -20,7 +20,7 @@ class Leaderboard extends React.Component {
     };
 
     componentWillReceiveProps({ playersLeaderboard }) {
-        if (playersLeaderboard.length > 0) this.setState({ leaderboardArray: playersLeaderboard })
+        if(playersLeaderboard.length > 0) this.setState({ leaderboardArray: playersLeaderboard })
     }
 
     render() {
