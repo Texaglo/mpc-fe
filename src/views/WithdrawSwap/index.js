@@ -26,15 +26,15 @@ class WithdrawSwap extends React.Component {
     }
 
     componentWillReceiveProps({ allSwaps }) {
-        if(allSwaps.length > 0) this.setState({ withdrawSwapData: allSwaps })
+        if (allSwaps.length > 0) this.setState({ withdrawSwapData: allSwaps })
     }
 
     approveSwap = async (swap) => {
         try {
             const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
             const user = new PublicKey(swap['publicAddress'])
-            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account45')], programID);
-            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount45")], programID);
+            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account50')], programID);
+            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount50")], programID);
             const mpcUserAta = await getAssociatedTokenAddress(MPC, user);
 
             const tx = await program.rpc.goldToMpc(new BN(swap['amount']), {
@@ -50,8 +50,8 @@ class WithdrawSwap extends React.Component {
                     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
                 }
             });
-            if(tx) {
-                this.props.updateWithdrawSwaps({payload: swap['publicAddress']});
+            if (tx) {
+                this.props.updateWithdrawSwaps({ payload: swap['publicAddress'] });
             }
         } catch (error) {
             console.log("******ERROR", error);
@@ -80,7 +80,7 @@ class WithdrawSwap extends React.Component {
                     <div>
                         {
                             item['original']['status'] === "Running" ? <button onClick={() => this.approveSwap(item['original'])} className="add-btn">Approve</button>
-                            : <h4 className="remove-btn">Approved</h4>
+                                : <h4 className="remove-btn">Approved</h4>
                         }
                     </div>
                 ),
@@ -107,7 +107,7 @@ class WithdrawSwap extends React.Component {
                         </div>
                     </Fragment>
                 </div>
-               
+
             </div >
         );
     }
