@@ -26,9 +26,7 @@ const ConversionRate = () => {
     const [addTokensModal, toggleAddTokensModal] = useState(false);
     const [rateGoldToMPC, setRateGoldToMPC] = useState("");
     const [rateTimeToMPC, setRateTimeToMPC] = useState("");
-
-    const [mpcAmount, setMpcAmount] = useState(0);
-    const [goldAmount, setGoldAmount] = useState("");
+    const [hardWalletTokens, sethardWalletTokens] = useState(0);
     const [currentGoldToMpcValue, setCurrentGoldToMpcValue] = useState(0);
     const [currentTimeToMpcValue, setCurrentTimeToMpcValue] = useState(0);
     const [value, setValue] = React.useState('mpc-to-gold');
@@ -40,12 +38,13 @@ const ConversionRate = () => {
     useEffect(() => {
         getGoldRate();
         getTimeRate();
+        getMPCTokens();
     }, []);
 
     const getGoldRate = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account45')],
+                [Buffer.from('Account50')],
                 programID
             );
             const data = await program.account.solAccount.fetch(vaultPda);
@@ -55,15 +54,28 @@ const ConversionRate = () => {
             if (error) setIsGoldRate(true);
         }
     };
+    const getMPCTokens = async () => {
+        try {
+            const [vaultPda, _] = PublicKey.findProgramAddressSync(
+                [Buffer.from('Account50')],
+                programID
+            );
+            const data = await program.account.solAccount.fetch(vaultPda);
+            const currentTokens = data.mpcCoins.toString();
+            sethardWalletTokens(currentTokens);
+        } catch (error) {
+            if (error) setIsGoldRate(true);
+        }
+    };
 
     const getTimeRate = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('vault2')],
+                [Buffer.from('vault02')],
                 programID
             );
-            const data = await program.account.Coins.fetch(vaultPda);;
-            const currentRate = data.goldToMpcValue.toString();
+            const data = await program.account.coins.fetch(vaultPda);
+            const currentRate = data.timeCoins.toString();
             setCurrentTimeToMpcValue(currentRate);
         } catch (error) {
             if (error) setIsTimeRate(true);
@@ -73,12 +85,9 @@ const ConversionRate = () => {
     const submitRateMPC = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account45')],
+                [Buffer.from('Account50')],
                 programID
             );
-
-
-            console.log("********** IGR", web3.SystemProgram.programId.toString())
             if (isGoldRate) {
                 const tx = await program.rpc.globalAccount(new BN(rateGoldToMPC), {
                     accounts: {
@@ -87,7 +96,7 @@ const ConversionRate = () => {
                         systemProgram: web3.SystemProgram.programId
                     },
                 });
-                console.log("*****Set New Rate Transaction: ", tx);
+                console.log("***********Transaction: ", tx);
             }
             else {
                 const tx = await program.rpc.updateGoldValue(new BN(rateGoldToMPC), {
@@ -107,15 +116,14 @@ const ConversionRate = () => {
 
     const submitTimeRateMPC = async () => {
         try {
-            const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account45')],
+            const [valuesPDA] = PublicKey.findProgramAddressSync(
+                [Buffer.from('vault02')],
                 programID
             );
-
             if (isTimeRate) {
                 const tx = await program.rpc.setCoinsValues(new BN(rateTimeToMPC), {
                     accounts: {
-                        vault: vaultPda,
+                        values: valuesPDA,
                         admin: provider.wallet.publicKey,
                         systemProgram: web3.SystemProgram.programId
                     },
@@ -125,8 +133,9 @@ const ConversionRate = () => {
             else {
                 const tx = await program.rpc.updateCoinsValues(new BN(rateTimeToMPC), {
                     accounts: {
-                        vault: vaultPda,
-                        admin: provider.wallet.publicKey
+                        values: valuesPDA,
+                        admin: provider.wallet.publicKey,
+                        systemProgram: web3.SystemProgram.programId
                     },
                 });
                 console.log("*****Set Updated Rate Transaction: ", tx);
@@ -145,8 +154,8 @@ const ConversionRate = () => {
     const submitAddTokens = async () => {
         try {
             const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
-            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account45')], programID);
-            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount45")], programID);
+            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account50')], programID);
+            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount50")], programID);
             const mpcAdminAta = await getAssociatedTokenAddress(MPC, provider.wallet.publicKey);
 
             const tx = await program.rpc.adminAddMpc(new BN(addTokens), {
@@ -160,17 +169,11 @@ const ConversionRate = () => {
                     systemProgram: web3.SystemProgram.programId,
                 }
             });
+            console.log("*****Set Updated Rate Transaction: ", tx);
+            await getMPCTokens()
             setAddTokens("")
         } catch (error) { console.log("******ERROR", error) }
     };
-
-    const handleGoldSwap = (e) => {
-        const goldInput = e.target.value;
-        setGoldAmount(goldInput);
-        const addTokens = goldInput / currentGoldToMpcValue;
-        setMpcAmount(addTokens);
-    };
-
 
     return (
         <ConnectionProvider endpoint={network}>
@@ -193,7 +196,7 @@ const ConversionRate = () => {
                     <div className="swap-container">
                         <div className="current-rate"> <h2>ADD MPC TO HOT WALLETS</h2></div>
                         <div className="d-flex justify-content-around align-items-end">
-                            <h4 style={{ marginBottom: '0px' }}>Admin MPC Tokens = 0 MPC Tokens</h4>
+                            <h4 style={{ marginBottom: '0px' }}>Admin MPC Tokens = {hardWalletTokens} MPC Tokens</h4>
                             <button className="submit-button" onClick={() => handleAddTokens()}>Add</button>
                         </div>
                     </div>
