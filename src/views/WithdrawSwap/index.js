@@ -66,14 +66,16 @@ class WithdrawSwap extends React.Component {
             {
                 accessor: 'username',
                 Header: 'User Name',
+                width: 400
             },
             {
                 accessor: 'publicAddress',
-                Header: 'Public Address',
+                Header: 'Public Address'
             },
             {
                 accessor: 'amount',
                 Header: 'Gold Coin Amount',
+                width: 150
             },
             {
                 Cell: item => (
@@ -85,6 +87,7 @@ class WithdrawSwap extends React.Component {
                     </div>
                 ),
                 Header: 'Actions',
+                width: 200
             },
         ];
         return (

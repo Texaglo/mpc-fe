@@ -7,10 +7,6 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import Tab from '@mui/material/Tab';
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel'
 
 import './index.css';
 import { SwapAddress } from "../../store/contract/index";
@@ -19,7 +15,6 @@ import { program, provider } from "../../store/solanaProvider";
 const programID = new PublicKey(SwapAddress);
 
 const ConversionRate = () => {
-    console.log("******** Swap Address", SwapAddress)
     const network = clusterApiUrl('devnet');
     const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
@@ -39,13 +34,13 @@ const ConversionRate = () => {
     const [value, setValue] = React.useState('mpc-to-gold');
 
     const handleChange = (e, newValue) => {
-      setValue(newValue);
+        setValue(newValue);
     };
 
-    useEffect(() => { 
+    useEffect(() => {
         getGoldRate();
         getTimeRate();
-     }, []);
+    }, []);
 
     const getGoldRate = async () => {
         try {
@@ -182,33 +177,25 @@ const ConversionRate = () => {
             <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
                     <div className="swap-container">
-                        <TabContext value={value}>
-                                <TabList onChange={handleChange} aria-label="lab API tabs example">
-                                    <Tab label="MPC To Gold Coin" value="mpc-to-gold" />
-                                    <Tab label="MPC To Time Coin" value="mpc-to-time" />
-                                    <Tab label="Add Tokens To Wallet" value="token-to-wallet" />
-                                </TabList>
-                            <TabPanel value="mpc-to-gold">
-                                <div className="current-rate"> <h2>CONVERSION RATE</h2></div>
-                                <div className="d-flex justify-content-around align-items-end">
-                                    <h4 style={{ marginBottom: '0px' }}>1 MPC Tokens = {currentGoldToMpcValue} Gold Coin</h4>
-                                    <button className="submit-button" onClick={() => toggleGoldRateModal(true)}>Change</button>
-                                </div>
-                            </TabPanel>
-                            <TabPanel value="mpc-to-time">
-                                <div className="current-rate"> <h2>CONVERSION RATE</h2></div>
-                                <div className="d-flex justify-content-around align-items-end">
-                                    <h4 style={{ marginBottom: '0px' }}>1 MPC Tokens = {currentTimeToMpcValue} Time Coin</h4>
-                                    <button className="submit-button" onClick={() => toggleTimeRateModal(true)}>Change</button>
-                                </div>
-                            </TabPanel>
-                            <TabPanel value="token-to-wallet">
-                                <div className="d-flex justify-content-around align-items-end">
-                                    <h4 style={{ marginBottom: '0px' }}>Admin MPC Tokens = 0 MPC Tokens</h4>
-                                    <button className="submit-button" onClick={() => handleAddTokens()}>Add</button>
-                                </div>
-                            </TabPanel>
-                        </TabContext>
+                        <div className="current-rate"> <h2>MPC TO GOLD COIN CONVERSION RATE</h2></div>
+                        <div className="d-flex justify-content-around align-items-end">
+                            <h4 style={{ marginBottom: '0px' }}>1 MPC Tokens = {currentGoldToMpcValue} Gold Coin</h4>
+                            <button className="submit-button" onClick={() => toggleGoldRateModal(true)}>Change</button>
+                        </div>
+                    </div>
+                    <div className="swap-container">
+                        <div className="current-rate"> <h2>MPC TO TIME COIN CONVERSION RATE</h2></div>
+                        <div className="d-flex justify-content-around align-items-end">
+                            <h4 style={{ marginBottom: '0px' }}>1 MPC Tokens = {currentTimeToMpcValue} Time Coin</h4>
+                            <button className="submit-button" onClick={() => toggleTimeRateModal(true)}>Change</button>
+                        </div>
+                    </div>
+                    <div className="swap-container">
+                        <div className="current-rate"> <h2>ADD MPC TO HOT WALLETS</h2></div>
+                        <div className="d-flex justify-content-around align-items-end">
+                            <h4 style={{ marginBottom: '0px' }}>Admin MPC Tokens = 0 MPC Tokens</h4>
+                            <button className="submit-button" onClick={() => handleAddTokens()}>Add</button>
+                        </div>
                     </div>
 
                     {/* CONVERSION GOLD RATE MODAL */}
