@@ -4,7 +4,7 @@ import { web3, BN } from '@project-serum/anchor';
 import React, { Fragment } from 'react';
 import Loader from "../../components/Loader/index"
 import { getWithdrawSwaps, updateWithdrawSwaps } from "../../store/actions/WithdrawSwap"
-import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
@@ -32,18 +32,22 @@ class WithdrawSwap extends React.Component {
     approveSwap = async (swap) => {
         try {
             const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
-            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account30')], programID);
-            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount30")], programID);
-            const mpcAdminAta = await getAssociatedTokenAddress(MPC, provider.wallet.publicKey);
+            const user = new PublicKey(swap['publicAddress'])
+            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account45')], programID);
+            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount45")], programID);
+            const mpcUserAta = await getAssociatedTokenAddress(MPC, user);
 
             const tx = await program.rpc.goldToMpc(new BN(swap['amount']), {
                 accounts: {
                     escrowAccount: vaultPda,
-                    userTokenAccount: mpcAdminAta,
+                    userTokenAccount: mpcUserAta,
                     escrowTokenAccount: globalAta,
                     admin: provider.wallet.publicKey,
+                    user: user,
                     mint: MPC,
                     tokenProgram: TOKEN_PROGRAM_ID,
+                    systemProgram: web3.SystemProgram.programId,
+                    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
                 }
             });
             if(tx) {

@@ -16,11 +16,10 @@ import './index.css';
 import { SwapAddress } from "../../store/contract/index";
 import { program, provider } from "../../store/solanaProvider";
 
-
 const programID = new PublicKey(SwapAddress);
 
 const ConversionRate = () => {
-
+    console.log("******** Swap Address", SwapAddress)
     const network = clusterApiUrl('devnet');
     const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
@@ -51,7 +50,7 @@ const ConversionRate = () => {
     const getGoldRate = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account30')],
+                [Buffer.from('Account45')],
                 programID
             );
             const data = await program.account.solAccount.fetch(vaultPda);
@@ -65,10 +64,10 @@ const ConversionRate = () => {
     const getTimeRate = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account30')],
+                [Buffer.from('vault2')],
                 programID
             );
-            const data = await program.account.solAccount.fetch(vaultPda);
+            const data = await program.account.Coins.fetch(vaultPda);;
             const currentRate = data.goldToMpcValue.toString();
             setCurrentTimeToMpcValue(currentRate);
         } catch (error) {
@@ -79,11 +78,13 @@ const ConversionRate = () => {
     const submitRateMPC = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account30')],
+                [Buffer.from('Account45')],
                 programID
             );
 
-            if (isGoldRate || isTimeRate) {
+
+            console.log("********** IGR", web3.SystemProgram.programId.toString())
+            if (isGoldRate) {
                 const tx = await program.rpc.globalAccount(new BN(rateGoldToMPC), {
                     accounts: {
                         vault: vaultPda,
@@ -104,9 +105,40 @@ const ConversionRate = () => {
             }
 
             await getGoldRate();
-            await getTimeRate()
-            setRateGoldToMPC("");
+            setRateTimeToMPC("");
             toggleGoldRateModal(false);
+        } catch (error) { console.log("******ERROR", error) }
+    };
+
+    const submitTimeRateMPC = async () => {
+        try {
+            const [vaultPda, _] = PublicKey.findProgramAddressSync(
+                [Buffer.from('Account45')],
+                programID
+            );
+
+            if (isTimeRate) {
+                const tx = await program.rpc.setCoinsValues(new BN(rateTimeToMPC), {
+                    accounts: {
+                        vault: vaultPda,
+                        admin: provider.wallet.publicKey,
+                        systemProgram: web3.SystemProgram.programId
+                    },
+                });
+                console.log("*****Set New Rate Transaction: ", tx);
+            }
+            else {
+                const tx = await program.rpc.updateCoinsValues(new BN(rateTimeToMPC), {
+                    accounts: {
+                        vault: vaultPda,
+                        admin: provider.wallet.publicKey
+                    },
+                });
+                console.log("*****Set Updated Rate Transaction: ", tx);
+            }
+
+            await getTimeRate();
+            setRateGoldToMPC("");
             toggleTimeRateModal(false);
         } catch (error) { console.log("******ERROR", error) }
     };
@@ -118,8 +150,8 @@ const ConversionRate = () => {
     const submitAddTokens = async () => {
         try {
             const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
-            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account30')], programID);
-            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount30")], programID);
+            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account45')], programID);
+            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount45")], programID);
             const mpcAdminAta = await getAssociatedTokenAddress(MPC, provider.wallet.publicKey);
 
             const tx = await program.rpc.adminAddMpc(new BN(addTokens), {
@@ -235,7 +267,7 @@ const ConversionRate = () => {
                                     </div>
                                 </div>
                                 <div className="col-12 mt-2 d-flex justify-content-around">
-                                    <button className="submit-button" onClick={() => submitRateMPC()}>Submit</button>
+                                    <button className="submit-button" onClick={() => submitTimeRateMPC()}>Submit</button>
                                 </div>
                             </div>
                         </ModalBody>
