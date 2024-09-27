@@ -71,14 +71,14 @@ var routes = [
     path: "/conversion-rate",
     name: "Conversion Rate",
     component: ConversionRate,
-    icon: "tim-icons icon-gift-2",
+    icon: "tim-icons icon-money-coins",
   },
   {
     layout: "/home",
     path: "/withdraw-swap",
     name: "Withdraw Swap",
     component: WithdrawSwap,
-    icon: "tim-icons icon-gift-2",
+    icon: "tim-icons icon-wallet-43",
   },
 ];
 

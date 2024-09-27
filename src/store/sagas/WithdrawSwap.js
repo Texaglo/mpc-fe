@@ -9,14 +9,23 @@ import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 function* getWithdrawSwaps() {
     const { error, response } = yield call(getCall, '/withdrawSwap/');
-    console.log("******** response", response)
     if (error) EventBus.publish("error", error['response']['data']);
     else if (response) yield put(setWithdrawSwaps(response['data']['body']));
     yield put(setLoader(false));
 };
 
+function* updateWithdrawSwaps({ payload }) {
+    const { error, response } = yield call(putCall, { path: '/withdrawSwap/', payload });
+    if (error) EventBus.publish("error", error['response']['data']);
+    else if (response) {
+        yield put({ type: "GET_WITHDRAWAL_SWAPS" });
+        EventBus.publish("success", response['data']['message']);
+    }
+};
+
 function* actionWatcher() {
     yield takeEvery('GET_WITHDRAWAL_SWAPS', getWithdrawSwaps);
+    yield takeEvery('UPDATE_WITHDRAWAL_SWAPS', updateWithdrawSwaps);
 };
 
 export default function* rootSaga() {

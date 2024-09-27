@@ -1,22 +1,57 @@
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
+import { web3, BN } from '@project-serum/anchor';
 import React, { Fragment } from 'react';
 import Loader from "../../components/Loader/index"
-import { getWithdrawSwaps } from "../../store/actions/WithdrawSwap"
+import { getWithdrawSwaps, updateWithdrawSwaps } from "../../store/actions/WithdrawSwap"
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { PublicKey, clusterApiUrl } from "@solana/web3.js";
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 
 import './index.css';
+import { SwapAddress } from "../../store/contract/index";
+import { program, provider } from "../../store/solanaProvider";
+
+const programID = new PublicKey(SwapAddress);
 
 class WithdrawSwap extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            withdrawSwapData: [],
+            withdrawSwapData: []
         };
         props.getWithdrawSwaps();
     }
 
     componentWillReceiveProps({ allSwaps }) {
         if(allSwaps.length > 0) this.setState({ withdrawSwapData: allSwaps })
+    }
+
+    approveSwap = async (swap) => {
+        try {
+            const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
+            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account30')], programID);
+            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount30")], programID);
+            const mpcAdminAta = await getAssociatedTokenAddress(MPC, provider.wallet.publicKey);
+
+            const tx = await program.rpc.goldToMpc(new BN(swap['amount']), {
+                accounts: {
+                    escrowAccount: vaultPda,
+                    userTokenAccount: mpcAdminAta,
+                    escrowTokenAccount: globalAta,
+                    admin: provider.wallet.publicKey,
+                    mint: MPC,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                }
+            });
+            if(tx) {
+                this.props.updateWithdrawSwaps({payload: swap['publicAddress']});
+            }
+        } catch (error) {
+            console.log("******ERROR", error);
+        }
     }
 
     render() {
@@ -34,12 +69,15 @@ class WithdrawSwap extends React.Component {
             },
             {
                 accessor: 'amount',
-                Header: 'Amount',
+                Header: 'Gold Coin Amount',
             },
             {
-                Cell: row => (
+                Cell: item => (
                     <div>
-                        <button className="add-btn">Approve</button>
+                        {
+                            item['original']['status'] === "Running" ? <button onClick={() => this.approveSwap(item['original'])} className="add-btn">Approve</button>
+                            : <h4 className="remove-btn">Approved</h4>
+                        }
                     </div>
                 ),
                 Header: 'Actions',
@@ -60,7 +98,7 @@ class WithdrawSwap extends React.Component {
                                 columns={columns}
                                 filterable={true}
                                 data={withdrawSwapData}
-                                resolveData={data => data.map(row => row)}
+                                resolveData={data => data.map(item => item)}
                             />
                         </div>
                     </Fragment>
@@ -72,7 +110,7 @@ class WithdrawSwap extends React.Component {
 }
 
 const mapDispatchToProps = {
-    getWithdrawSwaps,
+    getWithdrawSwaps, updateWithdrawSwaps,
 };
 
 const mapStateToProps = ({ Auth, WithdrawSwap }) => {
