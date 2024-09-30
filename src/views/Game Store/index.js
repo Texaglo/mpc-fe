@@ -7,6 +7,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import { createGameStore, updateGameStore, getGameStores } from "../../store/actions/GameStore";
 
 const CustomTextField = withStyles({
     root: {
@@ -35,19 +36,20 @@ const GameStore = () => {
     const dispatch = useDispatch();
     const {
         isLoader,
-        isModal
-    } = useSelector(({ Auth }) => ({
+        isModal,
+        allGameItems
+    } = useSelector(({ Auth, GameStore }) => ({
+        allGameItems: GameStore.allGameItems,
         isLoader: Auth.isLoader,
         isModal: Auth.isModal,
     }));
 
-    const [allSitnGoGames, setAllSitnGoGames] = useState([]);
-
     useEffect(() => {
         dispatch(setLoader(false));
+        dispatch(getGameStores());
     }, [dispatch]);
 
-    const [formData, setFormData] = useState({ name: "", amount: 0 });
+    const [formData, setFormData] = useState({ _id: "", name: "", amount: 0 });
     const [selectedAsset, setSelectedAsset] = useState(null);
 
     const handleFormChange = ({ target }) => {
@@ -56,19 +58,19 @@ const GameStore = () => {
 
     const submitAsset = () => {
         if (selectedAsset) {
-            const remainData = allSitnGoGames.filter((asset) => asset._id !== selectedAsset._id);
-            setAllSitnGoGames([...remainData, formData]);
+            dispatch(updateGameStore(formData));
         } else {
-            setAllSitnGoGames([...allSitnGoGames, formData]);
+            dispatch(createGameStore(formData));
         }
+
         setSelectedAsset(null);
-        setFormData({ name: "", amount: 0 });
+        setFormData({ _id: "", name: "", amount: 0 });
         dispatch(toggleModal(false));
     };
 
     const editAsset = (asset) => {
         setSelectedAsset(asset);
-        setFormData({ ...asset });
+        setFormData({ _id: asset._id, name: asset.name, amount: asset.price });
         dispatch(toggleModal(true));
     };
 
@@ -79,11 +81,6 @@ const GameStore = () => {
             amount: 0
         });
         dispatch(toggleModal(false));
-    };
-
-    const deleteAsset = (assetId) => {
-        const remainData = allSitnGoGames.filter((asset) => asset._id !== assetId);
-        setAllSitnGoGames(remainData);
     };
 
     const columns = [
@@ -98,14 +95,13 @@ const GameStore = () => {
             Header: 'Name'
         },
         {
-            accessor: 'amount',
+            accessor: 'price',
             Header: 'Amount',
         },
         {
             Cell: row => (
                 <div>
                     <button onClick={() => editAsset(row.original)} className="add-btn">Edit</button>
-                    <button onClick={() => deleteAsset(row.original._id)} className="delete-btn add-btn">Delete</button>
                 </div>
             ),
             Header: 'Actions',
@@ -127,7 +123,7 @@ const GameStore = () => {
                     <ReactTable
                         minRows={20}
                         className="table"
-                        data={allSitnGoGames}
+                        data={allGameItems}
                         resolveData={data => data.map(row => row)}
                         columns={columns}
                         filtera ble={true}

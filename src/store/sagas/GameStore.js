@@ -1,31 +1,42 @@
 import axios from 'axios';
 import EventBus from 'eventing-bus';
-import { setWithdrawSwap } from "../actions/WithdrawSwap";
+import { setGameStore } from "../actions/GameStore";
 import { setLoader } from "../actions/Auth"
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 
-/************************** GET ALL SWAPS *****************************/
-function* getWithdrawSwaps() {
-    const { error, response } = yield call(getCall, '/swap/');
+/************************** GET ALL GAME ITEMS *****************************/
+function* getGameStores() {
+    const { error, response } = yield call(getCall, '/items/getAllItems');
     if (error) EventBus.publish("error", error['response']['data']);
-    else if (response) yield put(setWithdrawSwap(response['data']['body']));
+    else if (response) yield put(setGameStore(response['data']['body']));
     yield put(setLoader(false));
 };
 
-/************************** UPDATE WITHDRAW SWAP *****************************/
-function* updateWithdrawSwap({ payload }) {
-    const { error, response } = yield call(putCall, { path: '/swap/', payload });
+/************************** UPDATE GAME STORE ITEM *****************************/
+function* updateGameStore({ payload }) {
+    const { error, response } = yield call(putCall, { path: `/items/updateItem/${payload['_id']}`, payload: { amount: payload['amount'] } });
     if (error) EventBus.publish("error", error['response']['data']);
     else if (response) {
-        yield put({ type: "GET_WITHDRAWAL_SWAPS" });
+        yield put({ type: "GET_GAME_STORES" });
         EventBus.publish("success", response['data']['message']);
     }
 };
 
+/************************** CREATE GAME STORE ITEM *****************************/
+function* createGameStore({ payload }) {
+    const { error, response } = yield call(postCall, { path: '/items/createItem', payload });
+    if (error) EventBus.publish("error", error['response']['data']['message']);
+    else if (response) {
+      yield put({ type: "GET_GAME_STORES" });
+      EventBus.publish("success", response['data']['message']);
+    }
+  }
+
 function* actionWatcher() {
-    yield takeEvery('GET_WITHDRAWAL_SWAPS', getWithdrawSwaps);
-    yield takeEvery('UPDATE_WITHDRAWAL_SWAP', updateWithdrawSwap);
+    yield takeEvery('GET_GAME_STORES', getGameStores);
+    yield takeEvery('UPDATE_GAME_STORE', updateGameStore);
+    yield takeEvery('CREATE_GAME_STORE', createGameStore);
 };
 
 export default function* rootSaga() {

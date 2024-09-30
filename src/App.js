@@ -22,7 +22,12 @@ export class App extends React.Component {
 
     EventBus.on('info', (e) => toast.info(e));
     EventBus.on('error', (e) => toast.error(e));
-    EventBus.on('success', (e) => toast.success(e));
+    EventBus.on('success', (e) => toast.success(e, {
+      style: {
+        backgroundColor: '#4CAF50',
+        color: '#FFFFFF'
+      }
+    }));
     EventBus.on("tokenExpired", () => this.props.logout());
     this.handleWalletChanges();
   };
