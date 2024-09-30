@@ -392,9 +392,9 @@ const ConversionRate = () => {
                                 </ModalHeader>
                                 <ModalBody className="modal-body reward-modal-body" style={{ paddingBottom: '0px' }}>
                                     <div className="row justify-content-center mt-4 mb-4">
-                                        <div className="col-12">
+                                        <div className="col-md-offset-2 col-md-8 col-sm-12">
                                             <div className="input-group">
-                                                <div className="input-group-inline w-75">
+                                                <div className="input-group-inline">
                                                     <input
                                                         type="number"
                                                         value={addTokens}
