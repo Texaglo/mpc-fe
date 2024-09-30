@@ -7,6 +7,8 @@ import Leaderboard from "./Leaderboard";
 import Achievement from "./Achievement";
 import Template from "./Template";
 import WithdrawSwap from "./WithdrawSwap";
+import GameStore from "./GameStore";
+
 export default combineReducers(
   {
     Auth: Auth,
@@ -16,5 +18,6 @@ export default combineReducers(
     Tournament: Tournament,
     Leaderboard: Leaderboard,
     Achievement: Achievement,
-    WithdrawSwap: WithdrawSwap
+    WithdrawSwap: WithdrawSwap,
+    GameStore: GameStore
   });

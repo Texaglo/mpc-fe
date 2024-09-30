@@ -2,19 +2,19 @@ import { PURGE } from "redux-persist";
 
 var initialState =
 {
-    allSwaps: [],
+    allGameItems: [],
 };
 
-const WithdrawSwap = (state = initialState, { type, payload }) => {
+const GameStore = (state = initialState, { type, payload }) => {
     switch (type) {
         case PURGE: return initialState;
-        case 'SET_WITHDRAWAL_SWAP':
+        case 'SET_GAME_STORE':
             return {
                 ...state,
-                allSwaps: payload
+                allGameItems: payload
             }
         default:
             return state;
     }
 };
-export default WithdrawSwap;
+export default GameStore;

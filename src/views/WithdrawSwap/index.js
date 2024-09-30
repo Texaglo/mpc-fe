@@ -3,7 +3,7 @@ import ReactTable from 'react-table-6';
 import { web3, BN } from '@project-serum/anchor';
 import React, { Fragment } from 'react';
 import Loader from "../../components/Loader/index"
-import { getWithdrawSwaps, updateWithdrawSwaps } from "../../store/actions/WithdrawSwap"
+import { getWithdrawSwaps, updateWithdrawSwap } from "../../store/actions/WithdrawSwap"
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 
@@ -51,7 +51,7 @@ class WithdrawSwap extends React.Component {
                 }
             });
             if (tx) {
-                this.props.updateWithdrawSwaps({ payload: swap['publicAddress'] });
+                this.props.updateWithdrawSwap({ payload: swap['publicAddress'] });
                 this.props.setLoader(false);
             } else {
                 this.props.setLoader(false);
@@ -121,7 +121,7 @@ class WithdrawSwap extends React.Component {
 }
 
 const mapDispatchToProps = {
-    getWithdrawSwaps, updateWithdrawSwaps, setLoader
+    getWithdrawSwaps, updateWithdrawSwap, setLoader
 };
 
 const mapStateToProps = ({ Auth, WithdrawSwap }) => {
