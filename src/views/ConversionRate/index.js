@@ -55,7 +55,7 @@ const ConversionRate = () => {
     const getGoldRate = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account50')],
+                [Buffer.from('Account55')],
                 programID
             );
             const data = await program.account.solAccount.fetch(vaultPda);
@@ -68,7 +68,7 @@ const ConversionRate = () => {
     const getMPCTokens = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account50')],
+                [Buffer.from('Account55')],
                 programID
             );
             const data = await program.account.solAccount.fetch(vaultPda);
@@ -97,7 +97,7 @@ const ConversionRate = () => {
         try {
             dispatch(setLoader(true));
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account50')],
+                [Buffer.from('Account55')],
                 programID
             );
             if (isGoldRate) {
@@ -170,8 +170,8 @@ const ConversionRate = () => {
         try {
             dispatch(setLoader(true));
             const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
-            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account50')], programID);
-            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount50")], programID);
+            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account55')], programID);
+            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount55")], programID);
             const mpcAdminAta = await getAssociatedTokenAddress(MPC, provider.wallet.publicKey);
 
             const tx = await program.rpc.adminAddMpc(new BN(addTokens), {

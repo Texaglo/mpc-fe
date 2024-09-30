@@ -33,8 +33,8 @@ class WithdrawSwap extends React.Component {
         try {
             const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
             const user = new PublicKey(swap['publicAddress'])
-            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account50')], programID);
-            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount50")], programID);
+            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account55')], programID);
+            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount55")], programID);
             const mpcUserAta = await getAssociatedTokenAddress(MPC, user);
 
             const tx = await program.rpc.goldToMpc(new BN(swap['amount']), {
