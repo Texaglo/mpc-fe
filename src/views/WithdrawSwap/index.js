@@ -5,14 +5,13 @@ import React, { Fragment } from 'react';
 import Loader from "../../components/Loader/index"
 import { getWithdrawSwaps, updateWithdrawSwaps } from "../../store/actions/WithdrawSwap"
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { PublicKey, clusterApiUrl } from "@solana/web3.js";
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { PublicKey } from "@solana/web3.js";
 
 import './index.css';
 import { SwapAddress } from "../../store/contract/index";
 import { program, provider } from "../../store/solanaProvider";
+
+import { setLoader } from "../../store/actions/Auth";
 
 const programID = new PublicKey(SwapAddress);
 
@@ -30,6 +29,7 @@ class WithdrawSwap extends React.Component {
     }
 
     approveSwap = async (swap) => {
+        this.props.setLoader(true);
         try {
             const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
             const user = new PublicKey(swap['publicAddress'])
@@ -52,9 +52,13 @@ class WithdrawSwap extends React.Component {
             });
             if (tx) {
                 this.props.updateWithdrawSwaps({ payload: swap['publicAddress'] });
+                this.props.setLoader(false);
+            } else {
+                this.props.setLoader(false);
             }
         } catch (error) {
             console.log("******ERROR", error);
+            this.props.setLoader(false);
         }
     }
 
@@ -117,12 +121,12 @@ class WithdrawSwap extends React.Component {
 }
 
 const mapDispatchToProps = {
-    getWithdrawSwaps, updateWithdrawSwaps,
+    getWithdrawSwaps, updateWithdrawSwaps, setLoader
 };
 
 const mapStateToProps = ({ Auth, WithdrawSwap }) => {
-    let { } = Auth;
+    let { isLoader } = Auth;
     let { allSwaps } = WithdrawSwap;
-    return { allSwaps };
+    return { allSwaps, isLoader };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(WithdrawSwap);
