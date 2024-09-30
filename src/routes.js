@@ -7,7 +7,7 @@ import Tourney from "./views/Tourney";
 import Template from "./views/Templates";
 import Achievement from "./views/Achievements";
 import ConversionRate from "./views/ConversionRate";
-import WithdrawSwap from "./views/WithdrawSwap";
+import Swap from "./views/WithdrawSwap";
 import gameStore from "./views/Game Store";
 
 var routes = [
@@ -75,9 +75,9 @@ var routes = [
   },
   {
     layout: "/home",
-    path: "/withdraw-swap",
-    name: "Withdraw Swap",
-    component: WithdrawSwap,
+    path: "/swap",
+    name: "Swap",
+    component: Swap,
     icon: "tim-icons icon-wallet-43",
   },
 ];

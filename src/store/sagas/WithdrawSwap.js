@@ -8,14 +8,14 @@ import { all, takeEvery, call, put } from 'redux-saga/effects';
 /************************** GET ALL SWAS *****************************/
 
 function* getWithdrawSwaps() {
-    const { error, response } = yield call(getCall, '/withdrawSwap/');
+    const { error, response } = yield call(getCall, '/swap/');
     if (error) EventBus.publish("error", error['response']['data']);
     else if (response) yield put(setWithdrawSwaps(response['data']['body']));
     yield put(setLoader(false));
 };
 
 function* updateWithdrawSwaps({ payload }) {
-    const { error, response } = yield call(putCall, { path: '/withdrawSwap/', payload });
+    const { error, response } = yield call(putCall, { path: '/swap/', payload });
     if (error) EventBus.publish("error", error['response']['data']);
     else if (response) {
         yield put({ type: "GET_WITHDRAWAL_SWAPS" });

@@ -6,7 +6,7 @@ import Tournament from './Tournament';
 import Leaderboard from './Leaderboard';
 import Achievement from './Achievement';
 import Template from './Template';
-import WithdrawSwap from './WithdrawSwap';
+import Swap from './WithdrawSwap';
 
 export default function* rootSaga() {
   yield all([
@@ -17,7 +17,7 @@ export default function* rootSaga() {
     Tournament(),
     Leaderboard(),
     Achievement(),
-    WithdrawSwap(),
+    Swap(),
   ]);
 }
 
