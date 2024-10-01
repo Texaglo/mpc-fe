@@ -47,9 +47,11 @@ const ConversionRate = () => {
     };
 
     useEffect(() => {
+        dispatch(setLoader(true));
         getGoldRate();
         getTimeRate();
         getMPCTokens();
+        dispatch(setLoader(false));
     }, []);
 
     const getGoldRate = async () => {
