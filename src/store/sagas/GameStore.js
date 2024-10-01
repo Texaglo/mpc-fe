@@ -1,7 +1,7 @@
 import axios from 'axios';
 import EventBus from 'eventing-bus';
 import { setGameStore } from "../actions/GameStore";
-import { setLoader } from "../actions/Auth"
+import { setLoader, toggleModal } from "../actions/Auth"
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 
@@ -15,11 +15,16 @@ function* getGameStores() {
 
 /************************** UPDATE GAME STORE ITEM *****************************/
 function* updateGameStore({ payload }) {
+    yield put(setLoader(true))
     const { error, response } = yield call(putCall, { path: `/items/updateItem/${payload['_id']}`, payload: { amount: payload['amount'] } });
-    if (error) EventBus.publish("error", error['response']['data']);
+    if (error) {
+        EventBus.publish("error", error['response']['data']);
+        yield put(setLoader(false))
+    }
     else if (response) {
         yield put({ type: "GET_GAME_STORES" });
         EventBus.publish("success", response['data']['message']);
+        yield put(setLoader(false))
     }
 };
 

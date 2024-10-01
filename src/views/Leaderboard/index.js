@@ -3,9 +3,7 @@ import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
 import Loader from "../../components/Loader/index";
-import { withStyles } from '@material-ui/core/styles';
 import { setLoader } from '../../store/actions/Auth';
-import { TextValidator } from 'react-material-ui-form-validator';
 import { getPlayersLeaderboard } from "../../store/actions/Leaderboard";
 
 
