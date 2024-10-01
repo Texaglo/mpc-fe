@@ -35,16 +35,11 @@ const ConversionRate = () => {
     const [hardWalletTokens, sethardWalletTokens] = useState(0);
     const [currentGoldToMpcValue, setCurrentGoldToMpcValue] = useState(0);
     const [currentTimeToMpcValue, setCurrentTimeToMpcValue] = useState(0);
-    const [value, setValue] = React.useState('mpc-to-gold');
 
     const dispatch = useDispatch();
     const { isLoader } = useSelector(({ Auth }) => ({
         isLoader: Auth.isLoader
     }))
-
-    const handleChange = (e, newValue) => {
-        setValue(newValue);
-    };
 
     useEffect(() => {
         dispatch(setLoader(false));

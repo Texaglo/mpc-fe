@@ -50,8 +50,12 @@ class WithdrawSwap extends React.Component {
                     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
                 }
             });
-            if (tx) {
-                this.props.updateWithdrawSwap({ payload: swap['publicAddress'] });
+            const transactionDetails = await provider.connection.getTransaction(tx, {
+                commitment: "confirmed",
+                maxSupportedTransactionVersion: 0,
+            });
+            if (transactionDetails) {
+                this.props.updateWithdrawSwap({ payload: { publicAddress: swap['publicAddress'], txTime: transactionDetails.blockTime } });
                 this.props.setLoader(false);
             } else {
                 this.props.setLoader(false);
