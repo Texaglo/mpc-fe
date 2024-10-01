@@ -157,7 +157,7 @@ const ConversionRate = () => {
 
             await getTimeRate();
             setRateGoldToMPC("");
-            toggleAddTokensModal(false);
+            toggleTimeRateModal(false);
             dispatch(setLoader(false));
         } catch (error) { console.log("******ERROR", error); dispatch(setLoader(false)); }
     };
@@ -188,6 +188,7 @@ const ConversionRate = () => {
             console.log("*****Set Updated Rate Transaction: ", tx);
             await getMPCTokens()
             setAddTokens("")
+            toggleAddTokensModal(false);
             dispatch(setLoader(false));
         } catch (error) { console.log("******ERROR", error); dispatch(setLoader(false)); }
     };
