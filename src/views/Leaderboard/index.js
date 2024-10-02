@@ -37,7 +37,7 @@ class Leaderboard extends React.Component {
             },
             {
                 accessor: 'score',
-                Header: 'Score',
+                Header: 'Gold Coins',
             },
             {
                 accessor: 'faction',
