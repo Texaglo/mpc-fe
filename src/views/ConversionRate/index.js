@@ -7,54 +7,96 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import Box from '@mui/material/Box';
+import { ThemeProvider } from '@mui/material/styles';
+import Loader from "../../components/Loader/index"
 
 import './index.css';
 import { SwapAddress } from "../../store/contract/index";
 import { program, provider } from "../../store/solanaProvider";
 
+import { useDispatch, useSelector } from 'react-redux';
+import { setLoader } from "../../store/actions/Auth";
 
 const programID = new PublicKey(SwapAddress);
 
 const ConversionRate = () => {
-
     const network = clusterApiUrl('devnet');
     const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
-    const [isRate, setIsRate] = useState(false);
+    const [isGoldRate, setIsGoldRate] = useState(false);
+    const [isTimeRate, setIsTimeRate] = useState(false);
     const [addTokens, setAddTokens] = useState("");
-    const [rateModal, toggleRateModal] = useState(false);
+    const [goldRateModal, toggleGoldRateModal] = useState(false);
+    const [timeRateModal, toggleTimeRateModal] = useState(false);
     const [addTokensModal, toggleAddTokensModal] = useState(false);
     const [rateGoldToMPC, setRateGoldToMPC] = useState("");
-
-    const [mpcAmount, setMpcAmount] = useState(0);
-    const [goldAmount, setGoldAmount] = useState("");
+    const [rateTimeToMPC, setRateTimeToMPC] = useState("");
+    const [hardWalletTokens, sethardWalletTokens] = useState(0);
     const [currentGoldToMpcValue, setCurrentGoldToMpcValue] = useState(0);
+    const [currentTimeToMpcValue, setCurrentTimeToMpcValue] = useState(0);
 
+    const dispatch = useDispatch();
+    const { isLoader } = useSelector(({ Auth }) => ({
+        isLoader: Auth.isLoader
+    }))
 
-    useEffect(() => { getRate() }, []);
+    useEffect(() => {
+        dispatch(setLoader(false));
+        getGoldRate();
+        getTimeRate();
+        getMPCTokens();
+    }, [dispatch]);
 
-    const getRate = async () => {
+    const getGoldRate = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account30')],
+                [Buffer.from('Account55')],
                 programID
             );
             const data = await program.account.solAccount.fetch(vaultPda);
-            const currentRate = data.rateGoldToMPC.toString();
+            const currentRate = data.goldToMpcValue.toString();
             setCurrentGoldToMpcValue(currentRate);
         } catch (error) {
-            if (error) setIsRate(true);
+            if (error) setIsGoldRate(true);
+        }
+    };
+    const getMPCTokens = async () => {
+        try {
+            const [vaultPda, _] = PublicKey.findProgramAddressSync(
+                [Buffer.from('Account55')],
+                programID
+            );
+            const data = await program.account.solAccount.fetch(vaultPda);
+            const currentTokens = data.mpcCoins.toString();
+            sethardWalletTokens(currentTokens);
+        } catch (error) {
+            if (error) setIsGoldRate(true);
         }
     };
 
-    const submitRateMPC = async () => {
+    const getTimeRate = async () => {
         try {
             const [vaultPda, _] = PublicKey.findProgramAddressSync(
-                [Buffer.from('Account30')],
+                [Buffer.from('vault03')],
                 programID
             );
+            const data = await program.account.coins.fetch(vaultPda);
+            const currentRate = data.timeCoins.toString();
+            setCurrentTimeToMpcValue(currentRate);
+        } catch (error) {
+            if (error) setIsTimeRate(true);
+        }
+    };
 
-            if (isRate) {
+    const submitGoldRateMPC = async () => {
+        try {
+            dispatch(setLoader(true));
+            const [vaultPda, _] = PublicKey.findProgramAddressSync(
+                [Buffer.from('Account55')],
+                programID
+            );
+            if (isGoldRate) {
                 const tx = await program.rpc.globalAccount(new BN(rateGoldToMPC), {
                     accounts: {
                         vault: vaultPda,
@@ -62,7 +104,7 @@ const ConversionRate = () => {
                         systemProgram: web3.SystemProgram.programId
                     },
                 });
-                console.log("*****Set New Rate Transaction: ", tx);
+                console.log("*****Set Rate Transaction: ", tx);
             }
             else {
                 const tx = await program.rpc.updateGoldValue(new BN(rateGoldToMPC), {
@@ -74,23 +116,58 @@ const ConversionRate = () => {
                 console.log("*****Set Updated Rate Transaction: ", tx);
             }
 
-
-            await getRate();
+            await getGoldRate();
             setRateGoldToMPC("");
-            toggleRateModal(false);
-        } catch (error) { console.log("******ERROR", error) }
+            toggleGoldRateModal(false);
+            dispatch(setLoader(false));
+        } catch (error) { console.log("******ERROR", error); dispatch(setLoader(false)); }
+    };
+
+    const submitTimeRateMPC = async () => {
+        try {
+            dispatch(setLoader(true));
+            const [valuesPDA] = PublicKey.findProgramAddressSync(
+                [Buffer.from('vault03')],
+                programID
+            );
+            if (isTimeRate) {
+                const tx = await program.rpc.setCoinsValues(new BN(rateTimeToMPC), {
+                    accounts: {
+                        values: valuesPDA,
+                        admin: provider.wallet.publicKey,
+                        systemProgram: web3.SystemProgram.programId
+                    },
+                });
+                console.log("*****Set Rate Transaction: ", tx);
+            }
+            else {
+                const tx = await program.rpc.updateCoinsValues(new BN(rateTimeToMPC), {
+                    accounts: {
+                        values: valuesPDA,
+                        admin: provider.wallet.publicKey,
+                        systemProgram: web3.SystemProgram.programId
+                    },
+                });
+                console.log("*****Set Updated Rate Transaction: ", tx);
+            }
+
+            await getTimeRate();
+            setRateTimeToMPC("");
+            toggleTimeRateModal(false);
+            dispatch(setLoader(false));
+        } catch (error) { console.log("******ERROR", error); dispatch(setLoader(false)); }
     };
 
     const handleAddTokens = async () => {
-        if (addTokens == "") return EventBus.publish("error", "Please add MPC Tokens amount");
         toggleAddTokensModal(true);
     };
 
     const submitAddTokens = async () => {
         try {
+            dispatch(setLoader(true));
             const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
-            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account30')], programID);
-            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount20")], programID);
+            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account55')], programID);
+            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount55")], programID);
             const mpcAdminAta = await getAssociatedTokenAddress(MPC, provider.wallet.publicKey);
 
             const tx = await program.rpc.adminAddMpc(new BN(addTokens), {
@@ -104,125 +181,235 @@ const ConversionRate = () => {
                     systemProgram: web3.SystemProgram.programId,
                 }
             });
-            console.log("*******Transaction: ", tx);
+            console.log("*****Set Updated Rate Transaction: ", tx);
+            await getMPCTokens()
             setAddTokens("")
-        } catch (error) { console.log("******ERROR", error) }
+            toggleAddTokensModal(false);
+            dispatch(setLoader(false));
+        } catch (error) { console.log("******ERROR", error); dispatch(setLoader(false)); }
     };
-
-    const swap = async () => {
-        try {
-            const MPC = new PublicKey("Fp3kdVYE7BiVjkQNtcWHEjhpL5ntpoBiBuRZtT8figTJ");
-            const [vaultPda] = PublicKey.findProgramAddressSync([Buffer.from('Account30')], programID);
-            const [globalAta] = PublicKey.findProgramAddressSync([Buffer.from("escrowTokenAccount20")], programID);
-            const mpcAdminAta = await getAssociatedTokenAddress(MPC, provider.wallet.publicKey);
-
-            const tx = await program.rpc.goldToMpc(new BN(goldAmount), {
-                accounts: {
-                    escrowAccount: vaultPda,
-                    userTokenAccount: mpcAdminAta,
-                    escrowTokenAccount: globalAta,
-                    admin: provider.wallet.publicKey,
-                    mint: MPC,
-                    tokenProgram: TOKEN_PROGRAM_ID,
-                }
-            });
-            console.log("*******Transaction: ", tx);
-            setGoldAmount("")
-        } catch (error) {
-            console.log("******ERROR", error);
-        }
-    };
-
-    const handleGoldSwap = (e) => {
-        const goldInput = e.target.value;
-        setGoldAmount(goldInput);
-        const addTokens = goldInput / currentGoldToMpcValue;
-        setMpcAmount(addTokens);
-    };
-
 
     return (
         <ConnectionProvider endpoint={network}>
             <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
-                    <div className="swap-container">
-                        {/* Set & Update Conversion Rate */}
-                        <div className="current-rate"> <h2>CONVERSION RATE</h2></div>
-                        <div className="d-flex justify-content-around">
-                            <h2>1 MPC Tokens = {currentGoldToMpcValue} GoldCoin</h2>
-                            <button className="submit-button" onClick={() => toggleRateModal(true)}>Change</button>
-                        </div>
-                        <hr />
-                        {/* Add Admin MPC Tokens */}
-                        <div className="gold-to-mpc">
-                            <h3>Add Admin MPC Tokens</h3>
-                            <div className="d-flex justify-content-around">
-                                <div className="input-group-inline w-75">
-                                    <input
-                                        type="number"
-                                        value={addTokens}
-                                        onChange={(e) => setAddTokens(e.target.value)}
-                                        placeholder="Enter MPC Tokens"
-                                    />
-                                </div>
-                                <button className="submit-button" onClick={() => handleAddTokens()}>Submit</button>
+                    {isLoader ? <Loader /> : null}
+                    <ThemeProvider
+                        theme={{
+                            palette: {
+                                primary: {
+                                    main: '#A9A9A9',
+                                    dark: '#A0A0A0',
+                                },
+                            },
+                        }}
+                    >
+                        <Box className="swap-container mt-5"
+                            sx={{
+                                width: 750,
+                                borderRadius: 1,
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                },
+                            }}
+                        >
+                            <div className="current-rate"> <h2>MPC TO GOLD COIN CONVERSION RATE</h2></div>
+                            <div className="d-flex justify-content-around align-items-end">
+                                <h4 style={{ marginBottom: '0px' }}>1 MPC Tokens = {currentGoldToMpcValue} Gold Coin</h4>
+                                <button className="submit-button" onClick={() => toggleGoldRateModal(true)}>Change</button>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* CONVERSION RATE MODAL */}
-                    <Modal isOpen={rateModal} toggle={() => toggleRateModal(false)} className="main-modal reward-modal">
-                        <ModalHeader toggle={() => toggleRateModal(false)}>
-                            <div className="reward-modal-logo">
-                                <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
+                        </Box>
+                        <Box className="swap-container mt-5"
+                            sx={{
+                                width: 750,
+                                borderRadius: 1,
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                },
+                            }}
+                        >
+                            <div className="current-rate"> <h2>MPC TO TIME COIN CONVERSION RATE</h2></div>
+                            <div className="d-flex justify-content-around align-items-end">
+                                <h4 style={{ marginBottom: '0px' }}>1 MPC Tokens = {currentTimeToMpcValue} Time Coin</h4>
+                                <button className="submit-button" onClick={() => toggleTimeRateModal(true)}>Change</button>
                             </div>
-                            <div className="reward-modal-title"><p>CONVERSION RATE</p></div>
-                            <div className="reward-modal-line"> <hr /></div>
-                        </ModalHeader>
-                        <ModalBody className="modal-body reward-modal-body">
-                            <div className="row justify-content-center mt-3 mb-4">
-                                <div className="col-md-offset-2 col-md-8 col-sm-12">
-                                    <div className="input-group">
-                                        <label className='text-white'>{isRate ? 'Set ' : 'Update '} Gold to MPC Token Conversion Rate</label>
-                                        <div className="input-group-inline">
-                                            <input
-                                                type="number"
-                                                value={rateGoldToMPC}
-                                                placeholder="Enter the conversion rate"
-                                                onChange={(e) => setRateGoldToMPC(e.target.value)}
-                                            />
+                        </Box>
+                        <Box className="swap-container mt-5"
+                            sx={{
+                                width: 750,
+                                borderRadius: 1,
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                },
+                            }}
+                        >
+                            <div className="current-rate"> <h2>ADD MPC TO HOT WALLETS</h2></div>
+                            <div className="d-flex justify-content-around align-items-end">
+                                <h4 style={{ marginBottom: '0px' }}>Admin MPC Tokens = {hardWalletTokens} MPC Tokens</h4>
+                                <button className="submit-button" onClick={() => handleAddTokens()}>Add</button>
+                            </div>
+                        </Box>
+                    </ThemeProvider>
+                    {/* CONVERSION GOLD RATE MODAL */}
+                    <Modal isOpen={goldRateModal} toggle={() => { toggleGoldRateModal(false); dispatch(setLoader(false)); }} className="main-modal reward-modal">
+                        <ThemeProvider
+                            theme={{
+                                palette: {
+                                    primary: {
+                                        main: '#A9A9A9',
+                                        dark: '#A0A0A0',
+                                    },
+                                },
+                            }}
+                        >
+                            <Box sx={{
+                                width: 750,
+                                borderRadius: 1,
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                },
+                            }}
+                            >
+                                <ModalHeader toggle={() => { toggleGoldRateModal(false); dispatch(setLoader(false)); }} >
+                                    <div className="reward-modal-logo">
+                                        <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
+                                    </div>
+                                    <div className="reward-modal-title"><p>MPC TO GOLD COIN CONVERSION RATE</p></div>
+                                    <div className="reward-modal-line"> <hr /></div>
+                                </ModalHeader>
+                                <ModalBody className="modal-body reward-modal-body">
+                                    <div className="row justify-content-center mt-3 mb-4">
+                                        <div className="col-md-offset-2 col-md-8 col-sm-12">
+                                            <div className="input-group">
+                                                <label className='text-white'>{isGoldRate ? 'Set ' : 'Update '} Gold to MPC Token Conversion Rate</label>
+                                                <div className="input-group-inline">
+                                                    <input
+                                                        type="number"
+                                                        value={rateGoldToMPC}
+                                                        placeholder="Enter the conversion rate"
+                                                        onChange={(e) => setRateGoldToMPC(e.target.value)}
+                                                    />
+                                                </div>
+                                                <span style={{ color: '#4d4dff' }}>1 MPC Tokens = {currentGoldToMpcValue} Gold Coin</span>
+                                            </div>
+                                        </div>
+                                        <div className="col-12 mt-2 d-flex justify-content-around">
+                                            <button className="submit-button" onClick={() => submitGoldRateMPC()}>Submit</button>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="col-12 mt-2 d-flex justify-content-around">
-                                    <button className="submit-button" onClick={() => submitRateMPC()}>Submit</button>
-                                </div>
-                            </div>
-                        </ModalBody>
+                                </ModalBody>
+                            </Box>
+                        </ThemeProvider>
+                    </Modal>
+
+                    {/* CONVERSION TIME RATE MODAL */}
+                    <Modal isOpen={timeRateModal} toggle={() => { toggleTimeRateModal(false); dispatch(setLoader(false)); }} className="main-modal reward-modal">
+                        <ThemeProvider
+                            theme={{
+                                palette: {
+                                    primary: {
+                                        main: '#A9A9A9',
+                                        dark: '#A0A0A0',
+                                    },
+                                },
+                            }}
+                        >
+                            <Box sx={{
+                                width: 750,
+                                borderRadius: 1,
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                },
+                            }}
+                            >
+                                <ModalHeader toggle={() => { toggleTimeRateModal(false); dispatch(setLoader(false)); }}>
+                                    <div className="reward-modal-logo">
+                                        <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
+                                    </div>
+                                    <div className="reward-modal-title"><p>MPC TO TIME COIN CONVERSION RATE</p></div>
+                                    <div className="reward-modal-line"> <hr /></div>
+                                </ModalHeader>
+                                <ModalBody className="modal-body reward-modal-body">
+                                    <div className="row justify-content-center mt-3 mb-4">
+                                        <div className="col-md-offset-2 col-md-8 col-sm-12">
+                                            <div className="input-group">
+                                                <label className='text-white'>{isTimeRate ? 'Set ' : 'Update '} Time to MPC Token Conversion Rate</label>
+                                                <div className="input-group-inline">
+                                                    <input
+                                                        type="number"
+                                                        value={rateTimeToMPC}
+                                                        placeholder="Enter the conversion rate"
+                                                        onChange={(e) => setRateTimeToMPC(e.target.value)}
+                                                    />
+                                                </div>
+                                                <span style={{ color: '#4d4dff' }}>1 MPC Tokens = {currentTimeToMpcValue} Time Coin</span>
+                                            </div>
+                                        </div>
+                                        <div className="col-12 mt-2 d-flex justify-content-around">
+                                            <button className="submit-button" onClick={() => submitTimeRateMPC()}>Submit</button>
+                                        </div>
+                                    </div>
+                                </ModalBody>
+                            </Box>
+                        </ThemeProvider>
                     </Modal>
 
                     {/* ADD ADMIN TOKENS MODAL */}
-                    <Modal isOpen={addTokensModal} toggle={() => { setAddTokens(""); toggleAddTokensModal(false) }} className="main-modal reward-modal">
-                        <ModalHeader toggle={() => { setAddTokens(""); toggleAddTokensModal(false) }}>
-                            <div className="reward-modal-logo">
-                                <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
-                            </div>
-                            <div className="reward-modal-title"><p>ADD ADMIN TOKENS</p></div>
-                            <div className="reward-modal-line"> <hr /></div>
-                        </ModalHeader>
-                        <ModalBody className="modal-body reward-modal-body">
-                            <div className="row justify-content-center mt-4 mb-4">
-                                <div className="col-12">
-                                    <h4 className='text-center'>Are you sure you want to add ({addTokens} Tokens) to Admin Account?</h4>
-                                </div>
-                                <div className="col-12 mt-2 d-flex justify-content-around mt-4">
-                                    <button className="cancel-btn px-5 py-2" onClick={() => { setAddTokens(""); toggleAddTokensModal(false) }}>CLOSE</button>
-                                    <button className="submit-btn px-5 py-2" onClick={() => submitAddTokens()}>ADD</button>
-                                </div>
-                            </div>
-                        </ModalBody>
+                    <Modal isOpen={addTokensModal} toggle={() => { setAddTokens(""); toggleAddTokensModal(false); dispatch(setLoader(false)); }} className="main-modal reward-modal">
+                        <ThemeProvider
+                            theme={{
+                                palette: {
+                                    primary: {
+                                        main: '#A9A9A9',
+                                        dark: '#A0A0A0',
+                                    },
+                                },
+                            }}
+                        >
+                            <Box sx={{
+                                width: 750,
+                                borderRadius: 1,
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                },
+                            }}
+                            >
+                                <ModalHeader toggle={() => { setAddTokens(""); toggleAddTokensModal(false); dispatch(setLoader(false)); }}>
+                                    <div className="reward-modal-logo">
+                                        <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
+                                    </div>
+                                    <div className="reward-modal-title"><p>ADD MPC TO HOT WALLETS</p></div>
+                                    <div className="reward-modal-line"> <hr /></div>
+                                </ModalHeader>
+                                <ModalBody className="modal-body reward-modal-body" style={{ paddingBottom: '0px' }}>
+                                    <div className="row justify-content-center mt-4 mb-4">
+                                        <div className="col-md-offset-2 col-md-8 col-sm-12">
+                                            <div className="input-group">
+                                                <div className="input-group-inline">
+                                                    <input
+                                                        type="number"
+                                                        value={addTokens}
+                                                        onChange={(e) => setAddTokens(e.target.value)}
+                                                        placeholder="Enter MPC Tokens"
+                                                    />
+                                                </div>
+                                                <span style={{ color: '#4d4dff' }}>Admin MPC Tokens = {hardWalletTokens} MPC Tokens</span>
+                                            </div>
+                                            <div className="col-12 mt-2 d-flex justify-content-around">
+                                                <button className="submit-button" onClick={() => submitAddTokens()}>Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ModalBody>
+                            </Box>
+                        </ThemeProvider>
                     </Modal>
-
                 </WalletModalProvider>
             </WalletProvider>
         </ConnectionProvider>

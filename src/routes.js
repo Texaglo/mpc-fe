@@ -7,8 +7,8 @@ import Tourney from "./views/Tourney";
 import Template from "./views/Templates";
 import Achievement from "./views/Achievements";
 import ConversionRate from "./views/ConversionRate";
-import WithdrawSwap from "./views/WithdrawSwap";
-
+import Swap from "./views/WithdrawSwap";
+import gameStore from "./views/Game Store";
 
 var routes = [
   {
@@ -59,26 +59,26 @@ var routes = [
     component: factionalLeaderboard,
     icon: "tim-icons icon-molecule-40",
   },
-  // {
-  //   layout: "/home",
-  //   path: "/Achievements",
-  //   name: "Achievements",
-  //   component: Achievement,
-  //   icon: "tim-icons icon-gift-2",
-  // },
+  {
+    layout: "/home",
+    path: "/game-store",
+    name: "Game Store",
+    component: gameStore,
+    icon: "tim-icons icon-bag-16",
+  },
   {
     layout: "/home",
     path: "/conversion-rate",
     name: "Conversion Rate",
     component: ConversionRate,
-    icon: "tim-icons icon-gift-2",
+    icon: "tim-icons icon-money-coins",
   },
   {
     layout: "/home",
-    path: "/withdraw-swap",
-    name: "Withdraw Swap",
-    component: WithdrawSwap,
-    icon: "tim-icons icon-gift-2",
+    path: "/swap",
+    name: "Swap",
+    component: Swap,
+    icon: "tim-icons icon-wallet-43",
   },
 ];
 
