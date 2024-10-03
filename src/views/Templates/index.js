@@ -181,6 +181,11 @@ class Template extends React.Component {
 
         const columns = [
             {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
+            {
                 accessor: 'name',
                 Header: 'Name',
             },
@@ -369,7 +374,7 @@ class Template extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="inGameCoins">Chips</option>
+                                                <option value="goldCoins">Chips</option>
                                                 <option value="silverTickets">Silver Tickets</option>
                                                 <option value="bronzeTickets">Bronze Tickets</option>
                                                 <option value="goldTickets">Gold Tickets</option>
@@ -630,7 +635,7 @@ class Template extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="inGameCoins">Chips</option>
+                                                <option value="goldCoins">Chips</option>
                                                 <option value="silverTickets">Silver Tickets</option>
                                                 <option value="bronzeTickets">Bronze Tickets</option>
                                                 <option value="goldTickets">Gold Tickets</option>
@@ -820,7 +825,7 @@ class Template extends React.Component {
                             <div className="col-12">
                                 <ValidatorForm className="row" >
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields" item xs={12}>
+                                        <Grid className="input-fields" item xs={6}>
                                             <label>Name</label>
                                             <CustomTextField
                                                 fullWidth
@@ -836,6 +841,26 @@ class Template extends React.Component {
                                                 validators={['required']}
                                                 errorMessages={['Please Add Name']}
                                             />
+                                        </Grid>
+                                        <Grid className="input-fields" item xs={6}>
+                                            <label>BuyIn Type</label>
+                                            <select
+                                                fullWidth
+                                                className="dropdown-new"
+                                                name="buyInType"
+                                                value={buyInType}
+                                                variant="outlined"
+                                                margin="dense"
+                                                onChange={this.handleFormChange}
+                                                validators={['required']}
+                                                errorMessages={['Please Select Game Type']}
+                                            >
+                                                <option value="">Select BuyIn Type</option>
+                                                <option value="goldCoins">Chips</option>
+                                                <option value="silverTickets">Silver Tickets</option>
+                                                <option value="bronzeTickets">Bronze Tickets</option>
+                                                <option value="goldTickets">Gold Tickets</option>
+                                            </select>
                                         </Grid>
                                     </Grid>
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">

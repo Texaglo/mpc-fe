@@ -27,9 +27,9 @@ class Leaderboard extends React.Component {
 
         const columns = [
             {
-                Header: 'Rank',
+                Header: '#',
                 Cell: ({ index }) => index + 1,
-                width: 150,
+                width: 100,
             },
             {
                 accessor: 'username',

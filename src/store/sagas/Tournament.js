@@ -1,6 +1,6 @@
 import axios from 'axios';
 import EventBus from 'eventing-bus';
-import { setAllTournaments } from "../actions/Tournament";
+import { setAllTournaments, setWinners } from "../actions/Tournament";
 import { setLoader, toggleLogin } from "../actions/Auth"
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 
@@ -49,11 +49,33 @@ function* deleteTournament({ payload }) {
 }
 
 
+/************************** GET WINNERS *****************************/
+
+function* getWinners() {
+    const { error, response } = yield call(getCall, '/tournaments/getWinnerPercentage');
+    if (error) EventBus.publish("error", error['response']['data']['message']);
+    else if (response) yield put(setWinners(response['data']['body']));
+    yield put(setLoader(false));
+};
+
+/************************** UPDATE WINNERS *****************************/
+
+function* updateWinners({ payload }) {
+    const { error, response } = yield call(putCall, { path: '/tournaments/updateWinnerPercentage', payload });
+    if (error) EventBus.publish("error", error['response']['data']['message']);
+    else if (response) {
+        yield put({ type: "GET_WINNERS" });
+        EventBus.publish("success", response['data']['message']);
+    }
+}
+
 function* actionWatcher() {
     yield takeEvery('GET_ALL_TOURNAMENTS', getAllTournaments);
     yield takeEvery('ADD_TOURNAMENT', addTournament);
     yield takeEvery('UPDATE_TOURNAMENT', updateTournament);
     yield takeEvery('DELETE_TOURNAMENT', deleteTournament);
+    yield takeEvery('GET_WINNERS', getWinners);
+    yield takeEvery('UPDATE_WINNERS', updateWinners);
 };
 
 export default function* rootSaga() {

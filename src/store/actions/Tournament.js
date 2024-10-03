@@ -22,3 +22,16 @@ export const deleteTournament = (data) => ({
     payload: data,
 });
 
+export const updateWinners = (data) => ({
+    type: 'UPDATE_WINNERS',
+    payload: data,
+});
+
+export const getWinners = () => ({
+    type: 'GET_WINNERS',
+});
+
+export const setWinners = (data) => ({
+    type: 'SET_WINNERS',
+    payload: data,
+});

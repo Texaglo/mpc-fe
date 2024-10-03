@@ -6,8 +6,9 @@ import SitnGo from "./views/SitnGo/index";
 import Tourney from "./views/Tourney";
 import Template from "./views/Templates";
 import Achievement from "./views/Achievements";
+import Tournament from "./views/Tournament";
 import ConversionRate from "./views/ConversionRate";
-import Swap from "./views/WithdrawSwap";
+import Swap from "./views/Swap";
 import gameStore from "./views/Game Store";
 
 var routes = [
@@ -61,13 +62,6 @@ var routes = [
   },
   {
     layout: "/home",
-    path: "/game-store",
-    name: "Game Store",
-    component: gameStore,
-    icon: "tim-icons icon-bag-16",
-  },
-  {
-    layout: "/home",
     path: "/conversion-rate",
     name: "Conversion Rate",
     component: ConversionRate,
@@ -79,6 +73,27 @@ var routes = [
     name: "Swap",
     component: Swap,
     icon: "tim-icons icon-wallet-43",
+  },
+  {
+    layout: "/home",
+    path: "/game-store",
+    name: "Game Store",
+    component: gameStore,
+    icon: "tim-icons icon-bag-16",
+  },
+  {
+    layout: "/home",
+    path: "/achievement",
+    name: "Achievements",
+    component: Achievement,
+    icon: "tim-icons icon-book-bookmark",
+  },
+  {
+    layout: "/home",
+    path: "/tournament",
+    name: "Tournament",
+    component: Tournament,
+    icon: "tim-icons icon-trophy",
   },
 ];
 

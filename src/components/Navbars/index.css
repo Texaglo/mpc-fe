@@ -11,6 +11,10 @@
     color: #f9f9f9 !important;
 }
 
+.dropdown-navbar.dropdown-menu.dropdown-menu-end.show {
+    background: #a9a9a9;
+}
+
 .nav-bar .wallet-info .login-role span {
     font-weight: 500;
     text-transform: capitalize;

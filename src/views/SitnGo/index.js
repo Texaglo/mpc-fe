@@ -122,13 +122,18 @@ class SitnGo extends React.Component {
 
         const columns = [
             {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
+            {
                 accessor: 'name',
                 Header: 'Name',
             },
             {
                 accessor: 'buyInType',
                 Header: 'BuyIn Type',
-                Cell: row => row.original.buyInType === "inGameCoins" ? "Chips" : row.original.buyInType
+                Cell: row => row.original.buyInType === "goldCoins" ? "Chips" : row.original.buyInType
             },
             {
                 accessor: 'buyIn',
@@ -247,7 +252,7 @@ class SitnGo extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="inGameCoins">Chips</option>
+                                                <option value="goldCoins">Chips</option>
                                                 <option value="silverTickets">Silver Tickets</option>
                                                 <option value="bronzeTickets">Bronze Tickets</option>
                                                 <option value="goldTickets">Gold Tickets</option>

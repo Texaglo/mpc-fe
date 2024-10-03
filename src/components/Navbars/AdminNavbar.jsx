@@ -20,7 +20,7 @@ import {
 } from "reactstrap";
 
 import './index.css';
-import { logout } from '../../store/actions/Auth';
+import { logout, setNonce } from '../../store/actions/Auth';
 // import { web3 } from '../../store/web3';
 
 class AdminNavbar extends React.Component {
@@ -79,7 +79,8 @@ class AdminNavbar extends React.Component {
 
   logout = () => {
     this.props.logout();
-    this.props.history.push('/');
+    this.props.setNonce('');
+    this.props.history.push('/login');
   };
 
   copied = () => EventBus.publish("success", 'Address is Copied');
@@ -167,7 +168,7 @@ class AdminNavbar extends React.Component {
   }
 }
 
-const mapDispatchToProps = { logout };
+const mapDispatchToProps = { logout, setNonce };
 
 const mapStateToProps = ({ Auth }) => {
   let { role, balance, address } = Auth;

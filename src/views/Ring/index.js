@@ -105,6 +105,11 @@ class Ring extends React.Component {
 
         const columns = [
             {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
+            {
                 accessor: 'name',
                 Header: 'Ring Name',
             },

@@ -130,6 +130,11 @@ class Tournament extends React.Component {
 
         const columns = [
             {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
+            {
                 accessor: 'name',
                 Header: 'Name',
             },
@@ -327,7 +332,7 @@ class Tournament extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="inGameCoins">Chips</option>
+                                                <option value="goldCoins">Chips</option>
                                                 <option value="silverTickets">Silver Tickets</option>
                                                 <option value="bronzeTickets">Bronze Tickets</option>
                                                 <option value="goldTickets">Gold Tickets</option>
