@@ -11,7 +11,6 @@ import Button from '@material-ui/core/Button';
 import { Add, Remove } from '@mui/icons-material';
 import { MuiPickersUtilsProvider, DateTimePicker, } from '@material-ui/pickers';
 // import DateTimePicker from 'react-datetime-picker';
-import Loader from "../../components/Loader/index";
 import { withStyles } from '@material-ui/core/styles';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { createTemplate } from "../../store/actions/Template"
@@ -174,7 +173,7 @@ class Template extends React.Component {
 
     render() {
         const { selectedGame, tournamentModal, selectedOption, selectGameModal, ringModal, sngModal } = this.state;
-        let { isLoader, allTemplates } = this.props;
+        let { allTemplates } = this.props;
         const allTournamentsArray = Object.values(allTemplates);
         let { name, startingStack, buyIn, buyInType, tournamentStartingDate, smallBlinds, bigBlinds, minCoins, maxCoins, seatLimit, duration,
             region, gameVariant, formatLimit, minPlayers, maxPlayers, blinds, fee, prizePool } = this.state.formData;
@@ -218,7 +217,6 @@ class Template extends React.Component {
                         }} className="add-btn">Create New Template</button>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -1070,8 +1068,8 @@ const mapDispatchToProps = {
 };
 const mapStateToProps = ({ Auth, Template, }) => {
     let { allTemplates } = Template;
-    let { publicAddress, isLoader, RingsData, isModal } = Auth;
+    let { publicAddress, RingsData, isModal } = Auth;
 
-    return { allTemplates, isLoader, publicAddress, RingsData, isModal };
+    return { allTemplates, publicAddress, RingsData, isModal };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Template);

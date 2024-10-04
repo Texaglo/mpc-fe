@@ -2,7 +2,6 @@ import React, { useState, useEffect, Fragment } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ReactTable from 'react-table-6';
 import Grid from '@material-ui/core/Grid';
-import Loader from "../../components/Loader/index";
 import { withStyles } from '@material-ui/core/styles';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { updateWinners, getWinners } from '../../store/actions/Tournament';
@@ -41,10 +40,8 @@ const Tournament = () => {
     const dispatch = useDispatch();
     const {
         winners,
-        isLoader,
         isModal
     } = useSelector(({ Auth, Tournament }) => ({
-        isLoader: Auth.isLoader,
         isModal: Auth.isModal,
         winners: Tournament.winners
     }));
@@ -104,7 +101,7 @@ const Tournament = () => {
         {
             accessor: 'name',
             Header: 'Winner',
-            Cell: ({ value }) => value === "firstWinner" ? "1st Winner" : value === "secondWinner" ? "2nd Winner" : value === "thirdWinner" ? "3rd Winner" : "Faction Reward",
+            Cell: ({ value }) => value === "firstWinner" ? "1st Winner" : value === "secondWinner" ? "2nd Winner" : value === "thirdWinner" ? "3rd Winner" : value,
         },
         {
             accessor: 'percentage',
@@ -118,13 +115,9 @@ const Tournament = () => {
             <div className="main-container player-scores">
                 <div className='main-container-head mb-3'>
                     <p className="main-container-heading">Tournament</p>
-                    <button onClick={() => {
-                        dispatch(toggleModal(true));
-                        editAsset();
-                    }} className="add-btn">Edit Tournament</button>
+                    <button onClick={() => editAsset()} className="add-btn">Edit Tournament</button>
                 </div>
                 <Fragment>
-                    {isLoader ? <Loader /> : null}
                     <div className='main-container-head mb-3'>
                         <ReactTable
                             minRows={20}
@@ -152,7 +145,7 @@ const Tournament = () => {
                                     formData.length > 0 && formData.map((data, index) => (
                                         <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                             <Grid className="input-fields" item xs={12}>
-                                                <label>{data.name}</label>
+                                                <label>{data.name === "firstWinner" ? "1st Winner" : data.name === "secondWinner" ? "2nd Winner" : data.name === "thirdWinner" ? "3rd Winner" : data.name}</label>
                                                 <CustomTextField
                                                     fullWidth
                                                     className="text-field"

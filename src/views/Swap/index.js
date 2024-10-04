@@ -67,7 +67,6 @@ class Swap extends React.Component {
     }
 
     render() {
-        let { isLoader } = this.props;
         let { withdrawSwapData } = this.state;
 
         const columns = [
@@ -110,7 +109,6 @@ class Swap extends React.Component {
                         <p className="main-container-heading">WITHDRAW SWAP</p>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -133,9 +131,8 @@ const mapDispatchToProps = {
     getWithdrawSwaps, updateWithdrawSwap, setLoader
 };
 
-const mapStateToProps = ({ Auth, WithdrawSwap }) => {
-    let { isLoader } = Auth;
+const mapStateToProps = ({ WithdrawSwap }) => {
     let { allSwaps } = WithdrawSwap;
-    return { allSwaps, isLoader };
+    return { allSwaps };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Swap);

@@ -116,7 +116,7 @@ class SitnGo extends React.Component {
     render() {
         const { selectedGame, template } = this.state;
         let { name, seatLimit, buyInType, buyIn, startingStack, region, gameVariant, formatLimit, duration, blinds } = this.state.formData
-        let { isModal, isLoader, allSitnGoGames, allTemplates } = this.props;
+        let { isModal, allSitnGoGames, allTemplates } = this.props;
 
         const allSitnGoGamesArray = Object.values(allSitnGoGames);
 
@@ -168,7 +168,6 @@ class SitnGo extends React.Component {
                         }} className="add-btn">Create Sit'n'Go Game</button>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -489,7 +488,7 @@ const mapDispatchToProps = {
 const mapStateToProps = ({ Auth, SitnGo, Template }) => {
     let { allSitnGoGames } = SitnGo;
     let { allTemplates } = Template;
-    let { publicAddress, isLoader, isModal } = Auth;
-    return { allSitnGoGames, allTemplates, publicAddress, isLoader, isModal };
+    let { publicAddress, isModal } = Auth;
+    return { allSitnGoGames, allTemplates, publicAddress, isModal };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(SitnGo);    

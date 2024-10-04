@@ -2,7 +2,6 @@ import './index.css';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
-import Loader from "../../components/Loader/index";
 import { setLoader } from '../../store/actions/Auth';
 import { getPlayersLeaderboard } from "../../store/actions/Leaderboard";
 
@@ -22,7 +21,6 @@ class Leaderboard extends React.Component {
     }
 
     render() {
-        let { isLoader } = this.props;
         let { leaderboardArray } = this.state;
 
         const columns = [
@@ -52,7 +50,6 @@ class Leaderboard extends React.Component {
                         <p className="main-container-heading">Players Leaderboard</p>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -73,10 +70,9 @@ class Leaderboard extends React.Component {
 const mapDispatchToProps = {
     getPlayersLeaderboard, setLoader
 };
-const mapStateToProps = ({ Auth, Leaderboard }) => {
+const mapStateToProps = ({ Leaderboard }) => {
     let { playersLeaderboard } = Leaderboard;
-    let { isLoader } = Auth;
 
-    return { playersLeaderboard, isLoader };
+    return { playersLeaderboard };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Leaderboard);

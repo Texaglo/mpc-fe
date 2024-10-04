@@ -13,8 +13,20 @@ function* getAchievements() {
     yield put(setLoader(false));
 };
 
+/************************** UPDATE ACHIVEMENT *****************************/
+
+function* updateAchievement({ payload }) {
+    const { error, response } = yield call(putCall, { path: `/achievements/updateAchievements/${payload['_id']}`, payload });
+    if (error) EventBus.publish("error", error['response']['data']['message']);
+    else if (response) {
+        yield put({ type: "GET_ACHIEVEMENTS" });
+        EventBus.publish("success", response['data']['message']);
+    }
+}
+
 function* actionWatcher() {
     yield takeEvery('GET_ACHIEVEMENTS', getAchievements);
+    yield takeEvery('UPDATE_ACHIEVEMENT', updateAchievement);
 };
 
 export default function* rootSaga() {

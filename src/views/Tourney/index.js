@@ -9,7 +9,6 @@ import Button from '@material-ui/core/Button';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, DateTimePicker, } from '@material-ui/pickers';
 // import DateTimePicker from 'react-datetime-picker';
-import Loader from "../../components/Loader/index";
 import { Add, Remove } from '@mui/icons-material';
 import { withStyles } from '@material-ui/core/styles';
 import Countdown from 'react-countdown';
@@ -124,7 +123,7 @@ class Tournament extends React.Component {
     };
     render() {
         const { selectedGame, template } = this.state;
-        let { isModal, isLoader, allTournaments, allTemplates } = this.props;
+        let { isModal, allTournaments, allTemplates } = this.props;
         const allTournamentsArray = Object.values(allTournaments);
         let { name, startingStack, buyIn, buyInType, tournamentStartingDate, region, gameVariant, minPlayers, maxPlayers, blinds, fee, prizePool } = this.state.formData;
 
@@ -182,7 +181,6 @@ class Tournament extends React.Component {
                         }} className="add-btn">Create New Tourney</button>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -527,8 +525,8 @@ const mapDispatchToProps = {
 const mapStateToProps = ({ Auth, Tournament, Template }) => {
     let { allTournaments } = Tournament;
     let { allTemplates } = Template;
-    let { publicAddress, isLoader, RingsData, isModal } = Auth;
+    let { publicAddress, RingsData, isModal } = Auth;
 
-    return { allTournaments, allTemplates, isLoader, publicAddress, RingsData, isModal };
+    return { allTournaments, allTemplates, publicAddress, RingsData, isModal };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Tournament);

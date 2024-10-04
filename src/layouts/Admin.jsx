@@ -98,7 +98,7 @@ class Admin extends React.Component {
     let { isLoader } = this.props;
     return (
       <div className="wrapper">
-        {/* {isLoader && <Loader />} */}
+        {isLoader && <Loader />}
         <Sidebar
           {...this.props}
           routes={routes}

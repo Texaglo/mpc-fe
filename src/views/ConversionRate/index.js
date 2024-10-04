@@ -1,4 +1,3 @@
-import EventBus from 'eventing-bus';
 import { web3, BN } from '@project-serum/anchor';
 import { PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -9,13 +8,12 @@ import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Box } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
-import Loader from "../../components/Loader/index"
 
 import './index.css';
 import { SwapAddress } from "../../store/contract/index";
 import { program, provider } from "../../store/solanaProvider";
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setLoader } from "../../store/actions/Auth";
 
 const programID = new PublicKey(SwapAddress);
@@ -37,9 +35,6 @@ const ConversionRate = () => {
     const [currentTimeToMpcValue, setCurrentTimeToMpcValue] = useState(0);
 
     const dispatch = useDispatch();
-    const { isLoader } = useSelector(({ Auth }) => ({
-        isLoader: Auth.isLoader
-    }))
 
     useEffect(() => {
         dispatch(setLoader(false));
@@ -193,7 +188,6 @@ const ConversionRate = () => {
         <ConnectionProvider endpoint={network}>
             <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
-                    {isLoader ? <Loader /> : null}
                     <ThemeProvider
                         theme={{
                             palette: {

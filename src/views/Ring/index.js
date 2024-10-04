@@ -84,7 +84,7 @@ class Ring extends React.Component {
     render() {
         const { selectedGame, template } = this.state;
         let { name, seatLimit, smallBlinds, bigBlinds, region, gameVariant, gameSize } = this.state.formData
-        let { isModal, isLoader, allTemplates, allRingGames } = this.props;
+        let { isModal, allTemplates, allRingGames } = this.props;
         const allRingGamesArray = Object.values(allRingGames);
 
         // Define gameSizeOptions
@@ -158,7 +158,6 @@ class Ring extends React.Component {
                         }} className="add-btn">Create Ring Game</button>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -432,7 +431,7 @@ const mapDispatchToProps = {
 const mapStateToProps = ({ Auth, Ring, Template }) => {
     let { allRingGames } = Ring;
     let { allTemplates } = Template;
-    let { publicAddress, RingsData, isLoader, isModal } = Auth;
-    return { allRingGames, allTemplates, publicAddress, isLoader, RingsData, isModal };
+    let { publicAddress, RingsData, isModal } = Auth;
+    return { allRingGames, allTemplates, publicAddress, RingsData, isModal };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Ring);
