@@ -5,38 +5,43 @@ import { ValidatorForm } from 'react-material-ui-form-validator';
 import logo from '../../assets/img/logo.png';
 import EventBus from 'eventing-bus';
 import { message } from "../../store/config";
-import { login, toggleLogin, getNonce } from "../../store/actions/Auth";
+import { login, toggleLogin, getNonce, setNonce } from "../../store/actions/Auth";
 import './index.css';
 
 const Login = ({ history }) => {
-  const [address, setAddress] = useState('');
+  // const [address, setAddress] = useState('');
   const dispatch = useDispatch();
   const isLogin = useSelector(state => state.Auth.isLogin);
   const userNonce = useSelector(state => state.Auth.userNonce);
 
   useEffect(() => {
-    if (!window.solana) {
-      EventBus.publish("error", "Please install Phantom Wallet");
-      return;
-    }
-    checkAddresses();
+    // if (!window.solana) {
+    //   EventBus.publish("error", "Please install Phantom Wallet");
+    //   return;
+    // }
+
+    dispatch(setNonce(""));
+    // checkAddresses()
   }, []);
 
   useEffect(() => {
     if (userNonce !== '') handleLogin(userNonce);
   }, [userNonce]);
 
-  const checkAddresses = async () => {
-    const response = await window.solana.connect();
-    const address = response.publicKey.toString();
-    setAddress(address);
-  };
+  // const checkAddresses = async () => {
+  //   const response = await window.solana.connect();
+  //   const address = response.publicKey.toString();
+  //   setAddress(address);
+  // };
 
   const Nonce = async () => {
     if (!window.solana) {
       EventBus.publish("error", "Please install Phantom Wallet");
       return;
     }
+
+    const response = await window.solana.connect();
+    const address = response.publicKey.toString();
 
     dispatch(toggleLogin(true));
     dispatch(getNonce({ data: address }));
