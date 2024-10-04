@@ -15,24 +15,12 @@ const Login = ({ history }) => {
   const userNonce = useSelector(state => state.Auth.userNonce);
 
   useEffect(() => {
-    // if (!window.solana) {
-    //   EventBus.publish("error", "Please install Phantom Wallet");
-    //   return;
-    // }
-
     dispatch(setNonce(""));
-    // checkAddresses()
   }, []);
 
   useEffect(() => {
     if (userNonce !== '') handleLogin(userNonce);
   }, [userNonce]);
-
-  // const checkAddresses = async () => {
-  //   const response = await window.solana.connect();
-  //   const address = response.publicKey.toString();
-  //   setAddress(address);
-  // };
 
   const Nonce = async () => {
     if (!window.solana) {
