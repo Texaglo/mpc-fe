@@ -121,7 +121,7 @@ const GameStore = () => {
                         data={allGameItems}
                         resolveData={data => data.map(row => row)}
                         columns={columns}
-                        filtera ble={true}
+                        filterable={true}
                     />
                 </div>
             </Fragment>

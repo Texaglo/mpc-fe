@@ -128,7 +128,7 @@ const Tournament = () => {
                             data={winners}
                             resolveData={data => data.map(row => row)}
                             columns={columns}
-                            filtera ble={true}
+                            filterable={true}
                         />
                     </div>
                 </Fragment>

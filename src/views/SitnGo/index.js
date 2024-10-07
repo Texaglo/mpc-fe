@@ -185,7 +185,7 @@ class SitnGo extends React.Component {
                                 data={allSitnGoGamesArray}
                                 resolveData={data => data.map(row => row)}
                                 columns={columns}
-                                filtera ble={true}
+                                filterable={true}
                             />
                         </div>
                     </Fragment>
