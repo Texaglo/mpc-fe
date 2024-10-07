@@ -383,10 +383,7 @@ class Template extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="goldCoins">Chips</option>
-                                                <option value="silverTickets">Silver Tickets</option>
-                                                <option value="bronzeTickets">Bronze Tickets</option>
-                                                <option value="goldTickets">Gold Tickets</option>
+                                                <option value="goldCoins">Gold Coins</option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
@@ -529,7 +526,7 @@ class Template extends React.Component {
                                             />
                                         </Grid>
                                     </Grid>
-                                    {blinds && blinds.length > 0 && blinds.map((blind, index) => (
+                                    {blinds.length > 0 && blinds.map((blind, index) => (
                                         <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                             <Grid className="input-fields" item xs={6}>
                                                 <label>Small Blind</label>
@@ -644,10 +641,7 @@ class Template extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="goldCoins">Chips</option>
-                                                <option value="silverTickets">Silver Tickets</option>
-                                                <option value="bronzeTickets">Bronze Tickets</option>
-                                                <option value="goldTickets">Gold Tickets</option>
+                                                <option value="goldCoins">Gold Coins</option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
@@ -752,7 +746,7 @@ class Template extends React.Component {
                                             </select>
                                         </Grid>
                                     </Grid>
-                                    {blinds && blinds.length > 0 && blinds.map((blind, index) => (
+                                    {blinds.length > 0 && blinds.map((blind, index) => (
                                         <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                             <Grid className="input-fields" item xs={4}>
                                                 <label>Small Blind</label>
@@ -865,10 +859,7 @@ class Template extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="goldCoins">Chips</option>
-                                                <option value="silverTickets">Silver Tickets</option>
-                                                <option value="bronzeTickets">Bronze Tickets</option>
-                                                <option value="goldTickets">Gold Tickets</option>
+                                                <option value="goldCoins">Gold Coins</option>
                                             </select>
                                         </Grid>
                                     </Grid>
