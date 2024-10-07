@@ -10,7 +10,6 @@ import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator';
 import { getAllRingGames, updateRingGame, deleteRingGame } from "../../store/actions/Ring";
 import { getAllTemplates } from "../../store/actions/Template";
-import EventBus from 'eventing-bus';
 
 import './index.css';
 
@@ -45,12 +44,20 @@ class Ring extends React.Component {
     handleTemplateChange = ({ target }) => {
         this.setState({ template: target.value });
         let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
-        this.setState({ formData: { ...template[0] } })
+        if (template.length > 0) this.setState({ formData: { ...template[0] } })
+        else this.setState({ formData: { 
+            name: '',
+            seatLimit: '',
+            smallBlinds: '',
+            bigBlinds: '',
+            formatLimit: '',
+            gameVariant: 'Select Game Type',
+            region: 'Select Region',
+            gameSize: '' } })
     };
 
     submitRing = () => {
         const { formData, selectedGame } = this.state;
-        if(!this.state.selectedGame && this.state.template === '') return EventBus.publish("error", "Please select template");
 
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"

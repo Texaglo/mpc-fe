@@ -11,7 +11,6 @@ import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { getAllSitnGoGames, updateSitnGoGame, deleteSitnGoGame } from "../../store/actions/SitnGo";
 import { getAllTemplates } from "../../store/actions/Template";
-import EventBus from 'eventing-bus';
 
 class SitnGo extends React.Component {
     constructor(props) {
@@ -67,12 +66,23 @@ class SitnGo extends React.Component {
     handleTemplateChange = ({ target }) => {
         this.setState({ template: target.value });
         let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
-        this.setState({ formData: { ...template[0] } })
+        if (template.length > 0) this.setState({ formData: { ...template[0] } })
+        else this.setState({ formData: {  
+            name: '',
+            seatLimit: '',
+            buyIn: '',
+            buyInType: '',
+            startingStack: '',
+            formatLimit: 'Select Format Limit',
+            gameVariant: 'Select Game Type',
+            region: 'Select Region',
+            duration: '',
+            type: '',
+            blinds: [{ smallBlind: '', bigBlind: '', duration: '' }] } })
     };
 
     submitRing = () => {
         const { formData, selectedGame } = this.state;
-        if(!this.state.selectedGame && this.state.template === '') return EventBus.publish("error", "Please select template");
 
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
@@ -133,8 +143,7 @@ class SitnGo extends React.Component {
             },
             {
                 accessor: 'buyInType',
-                Header: 'BuyIn Type',
-                Cell: row => row.original.buyInType === "goldCoins" ? "Chips" : row.original.buyInType
+                Header: 'BuyIn Type'
             },
             {
                 accessor: 'buyIn',
@@ -252,10 +261,7 @@ class SitnGo extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="goldCoins">Chips</option>
-                                                <option value="silverTickets">Silver Tickets</option>
-                                                <option value="bronzeTickets">Bronze Tickets</option>
-                                                <option value="goldTickets">Gold Tickets</option>
+                                                <option value="goldCoins">Gold Coins</option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
@@ -384,7 +390,7 @@ class SitnGo extends React.Component {
                                             </select>
                                         </Grid>
                                     </Grid>
-                                    {blinds && blinds.length > 0 && blinds.map((blind, index) => (
+                                    {blinds.length > 0 && blinds.map((blind, index) => (
                                         <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                             <Grid className="input-fields" item xs={4}>
                                                 <label>Small Blind</label>

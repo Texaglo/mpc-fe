@@ -12,7 +12,6 @@ import { MuiPickersUtilsProvider, DateTimePicker, } from '@material-ui/pickers';
 import { Add, Remove } from '@mui/icons-material';
 import { withStyles } from '@material-ui/core/styles';
 import Countdown from 'react-countdown';
-import { MomentCountdown } from 'react-moment-countdown';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { addTournament } from "../../store/actions/Tournament"
 import { toggleModal, setLoader } from '../../store/actions/Auth';
@@ -78,12 +77,26 @@ class Tournament extends React.Component {
     handleTemplateChange = ({ target }) => {
         this.setState({ template: target.value });
         let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
-        this.setState({ formData: { ...template[0] } })
+        if(template.length > 0) this.setState({ formData: { ...template[0] } })
+        else this.setState({ formData: { 
+            fee: '',
+            time: '',
+            name: '',
+            buyIn: '',
+            buyInType: '',
+            prizePool: '',
+            minPlayers: '',
+            formatLimit: '',
+            maxPlayers: '',
+            startingStack: '',
+            region: 'Select Region',
+            gameVariant: 'Select Game Type',
+            blinds: [{ smallBlind: '', bigBlind: '' }],
+            tournamentStartingDate: new Date(Date.now()) } })
     };
 
     submitRing = () => {
         const { formData, selectedGame, } = this.state;
-        if(!this.state.selectedGame && this.state.template === '') return EventBus.publish("error", "Please select template");
 
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
@@ -334,10 +347,7 @@ class Tournament extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="goldCoins">Chips</option>
-                                                <option value="silverTickets">Silver Tickets</option>
-                                                <option value="bronzeTickets">Bronze Tickets</option>
-                                                <option value="goldTickets">Gold Tickets</option>
+                                                <option value="goldCoins">Gold Coins</option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
