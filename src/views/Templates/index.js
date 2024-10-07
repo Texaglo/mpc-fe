@@ -11,7 +11,6 @@ import Button from '@material-ui/core/Button';
 import { Add, Remove } from '@mui/icons-material';
 import { MuiPickersUtilsProvider, DateTimePicker, } from '@material-ui/pickers';
 // import DateTimePicker from 'react-datetime-picker';
-import Loader from "../../components/Loader/index";
 import { withStyles } from '@material-ui/core/styles';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { createTemplate } from "../../store/actions/Template"
@@ -174,12 +173,17 @@ class Template extends React.Component {
 
     render() {
         const { selectedGame, tournamentModal, selectedOption, selectGameModal, ringModal, sngModal } = this.state;
-        let { isLoader, allTemplates } = this.props;
+        let { allTemplates } = this.props;
         const allTournamentsArray = Object.values(allTemplates);
         let { name, startingStack, buyIn, buyInType, tournamentStartingDate, smallBlinds, bigBlinds, minCoins, maxCoins, seatLimit, duration,
             region, gameVariant, formatLimit, minPlayers, maxPlayers, blinds, fee, prizePool } = this.state.formData;
 
         const columns = [
+            {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
             {
                 accessor: 'name',
                 Header: 'Name',
@@ -213,7 +217,6 @@ class Template extends React.Component {
                         }} className="add-btn">Create New Template</button>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -369,7 +372,7 @@ class Template extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="inGameCoins">Chips</option>
+                                                <option value="goldCoins">Chips</option>
                                                 <option value="silverTickets">Silver Tickets</option>
                                                 <option value="bronzeTickets">Bronze Tickets</option>
                                                 <option value="goldTickets">Gold Tickets</option>
@@ -630,7 +633,7 @@ class Template extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="inGameCoins">Chips</option>
+                                                <option value="goldCoins">Chips</option>
                                                 <option value="silverTickets">Silver Tickets</option>
                                                 <option value="bronzeTickets">Bronze Tickets</option>
                                                 <option value="goldTickets">Gold Tickets</option>
@@ -820,7 +823,7 @@ class Template extends React.Component {
                             <div className="col-12">
                                 <ValidatorForm className="row" >
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields" item xs={12}>
+                                        <Grid className="input-fields" item xs={6}>
                                             <label>Name</label>
                                             <CustomTextField
                                                 fullWidth
@@ -836,6 +839,26 @@ class Template extends React.Component {
                                                 validators={['required']}
                                                 errorMessages={['Please Add Name']}
                                             />
+                                        </Grid>
+                                        <Grid className="input-fields" item xs={6}>
+                                            <label>BuyIn Type</label>
+                                            <select
+                                                fullWidth
+                                                className="dropdown-new"
+                                                name="buyInType"
+                                                value={buyInType}
+                                                variant="outlined"
+                                                margin="dense"
+                                                onChange={this.handleFormChange}
+                                                validators={['required']}
+                                                errorMessages={['Please Select Game Type']}
+                                            >
+                                                <option value="">Select BuyIn Type</option>
+                                                <option value="goldCoins">Chips</option>
+                                                <option value="silverTickets">Silver Tickets</option>
+                                                <option value="bronzeTickets">Bronze Tickets</option>
+                                                <option value="goldTickets">Gold Tickets</option>
+                                            </select>
                                         </Grid>
                                     </Grid>
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
@@ -1045,8 +1068,8 @@ const mapDispatchToProps = {
 };
 const mapStateToProps = ({ Auth, Template, }) => {
     let { allTemplates } = Template;
-    let { publicAddress, isLoader, RingsData, isModal } = Auth;
+    let { publicAddress, RingsData, isModal } = Auth;
 
-    return { allTemplates, isLoader, publicAddress, RingsData, isModal };
+    return { allTemplates, publicAddress, RingsData, isModal };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Template);

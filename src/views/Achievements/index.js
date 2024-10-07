@@ -2,99 +2,93 @@ import './index.css';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import Loader from "../../components/Loader/index"
-import { withStyles } from '@material-ui/core/styles';
-import { addSitnGoGame } from "../../store/actions/SitnGo";
-import { Modal, ModalHeader, ModalBody } from "reactstrap";
-import { toggleModal, setLoader } from '../../store/actions/Auth';
-import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator';
 import { getAchievements, updateAchievement } from "../../store/actions/Achievement";
+import Grid from '@material-ui/core/Grid';
+import { withStyles } from '@material-ui/core/styles';
+import { toggleModal, setLoader } from '../../store/actions/Auth';
+import { updateWinners, getWinners } from '../../store/actions/Tournament';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { Modal, ModalHeader, ModalBody } from "reactstrap";
 
 class Achievement extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            formData: {
-                name: '',
-                reward: '',
-                rewardType: '',
-                description: '',
-                achievementType: '',
-            },
-            selectedGame: null,
+            _id: '',
+            name: '',
+            description: '',
+            goldCoin: 0
         };
-        props.getAchievements();
         props.setLoader(true);
+        props.getAchievements();
     }
 
-    handleFormChange = ({ target }) => {
-        const { formData } = this.state;
-        formData[target.name] = target.value;
-        this.setState({ formData });
+    editAchievement = (item) => {
+        this.setState({ _id: item?._id, name: item.name, description: item.description, goldCoin: item.goldCoin });
+        this.props.toggleModal(true);
+    }
+
+    handleFormChange = (e) => {
+        const { name, value } = e.target;
+        this.setState({ ...this.state, [name]: value });
     };
 
-    submitRing = () => {
-        const { formData, selectedGame } = this.state;
-        this.props.toggleModal(false)
-        if (selectedGame) this.props.updateAchievement(formData)
+    submitAchievement = () => {
+        this.props.updateAchievement(this.state);
+        this.setState({ _id: '', name: '', description: '', goldCoin: 0 });
+        this.props.toggleModal(false);
     };
 
-    editRing = (ring) => this.setState({ selectedGame: ring, formData: { ...ring } }, () => this.props.toggleModal(true));
-    cancelModal = () => this.setState({ selectedGame: null, formData: '' }, () => this.props.toggleModal(false));
+    cancelModal = () => {
+        this.setState({ name: '', description: '', goldCoin: 0 });
+        this.props.toggleModal(false);
+    };
 
     render() {
-        let { selectedGame } = this.state;
-        let { reward, rewardType } = this.state.formData
-        let { isModal, isLoader, allAchievemets } = this.props;
-        let allAchievementsArray = Object.values(allAchievemets);
+        let { allAchievemets, isModal } = this.props;
 
         const columns = [
             {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
+            {
                 accessor: 'name',
                 Header: 'Name',
-                width: 300,
+                width: 350,
             },
             {
                 accessor: 'description',
                 Header: 'description',
             },
             {
-                accessor: 'rewardType',
-                Header: 'Reward Type',
+                accessor: 'goldCoin',
+                Header: 'Gold Coin',
                 width: 200,
             },
             {
-                accessor: 'reward',
-                Header: 'Reward',
-                width: 150,
-            },
-            {
+                Header: 'Action',
                 Cell: row => (
-                    <div><button onClick={() => this.editRing(row.original)} className="add-btn">Edit Reward</button></div>
+                    <div>
+                        <button className="add-btn" onClick={() => this.editAchievement(row.original)}>Edit</button>
+                    </div>
                 ),
-                Header: 'Actions',
-                width: 200,
-            },
-        ];
+            }
+        ]
+
         return (
             <div className='content'>
                 <div className="main-container player-scores">
                     <div className='main-container-head mb-3'>
                         <p className="main-container-heading">ACHIEVEMENTS</p>
-                        {/* <button onClick={() => {
-                            this.props.toggleModal(true);
-                            this.setState({ selectedGame: null, formData: {} })
-                        }} className="add-btn">Create Sit'n'Go Game</button> */}
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
                                 className="table"
-                                data={allAchievementsArray}
+                                data={allAchievemets}
                                 resolveData={data => data.map(row => row)}
                                 columns={columns}
                                 filterable={true}
@@ -102,55 +96,61 @@ class Achievement extends React.Component {
                         </div>
                     </Fragment>
                 </div>
-                {/* ---------------ADD RING MODAL--------------- */}
-                <Modal isOpen={isModal} toggle={() => this.props.toggleModal(false)} className="main-modal reward-modal">
-                    <ModalHeader toggle={() => this.props.toggleModal(false)}>
-                        <div className="reward-modal-logo">
-                            <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
-                        </div>
-                        <div className="reward-modal-title"><p className=''> {selectedGame ? 'Edit Game' : 'Create Game'}</p></div>
+
+                {/* ---------------ADD SNG MODAL--------------- */}
+                <Modal isOpen={isModal} toggle={() => this.cancelModal()} className="main-modal reward-modal">
+                    <ModalHeader toggle={() => this.cancelModal()}>
+                        <div className="reward-modal-title"><p className=''>Edit Achievement</p></div>
                         <div className="reward-modal-line"><hr /></div>
                     </ModalHeader>
-                    <ModalBody className="modal-body reward-modal-body">
+                    <ModalBody className="modal-body modal-height reward-modal-body">
                         <div className="row">
                             <div className="col-12">
-                                <ValidatorForm className="row" >
+                                <ValidatorForm className="row">
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Reward Type</label>
-                                            <SelectValidator
-                                                fullWidth
-                                                className="text-field"
-                                                placeholder="Format Limit"
-                                                name="rewardType"
-                                                value={rewardType}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Add Reward Type']}
-                                            >
-                                                <option value="Chips">Chips</option>
-                                                <option value="Silver Ticket">Silver Ticket</option>
-                                                <option value="Bronze Ticket">Bronze Ticket</option>
-                                                <option value="Gold Ticket">Gold Ticket</option>
-                                            </SelectValidator>
-                                        </Grid>
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Reward</label>
+                                        <Grid className="input-fields" item xs={12}>
+                                            <label>Name</label>
                                             <CustomTextField
                                                 fullWidth
                                                 className="text-field"
                                                 autoComplete='on'
-                                                placeholder="reward"
-                                                name="reward"
                                                 type="text"
-                                                value={reward}
+                                                name="name"
+                                                value={this.state.name}
                                                 variant="outlined"
                                                 margin="dense"
-                                                onChange={this.handleFormChange}
+                                                disabled={true}
+                                            />
+                                        </Grid>
+                                        <Grid className="input-fields" item xs={12}>
+                                            <label>Description</label>
+                                            <CustomTextField
+                                                fullWidth
+                                                className="text-field"
+                                                autoComplete='on'
+                                                type="text"
+                                                name="description"
+                                                value={this.state.description}
+                                                variant="outlined"
+                                                margin="dense"
+                                                disabled={true}
+                                            />
+                                        </Grid>
+                                        <Grid className="input-fields" item xs={12}>
+                                            <label>Gold Coin</label>
+                                            <CustomTextField
+                                                fullWidth
+                                                className="text-field"
+                                                autoComplete='on'
+                                                placeholder="Gold Coins"
+                                                type="number"
+                                                name="goldCoin"
+                                                value={this.state.goldCoin}
+                                                variant="outlined"
+                                                margin="dense"
+                                                onChange={(e) => this.handleFormChange(e)}
                                                 validators={['required']}
-                                                errorMessages={['Please Enter reward Amount']}
+                                                errorMessages={['Please Enter Gold Coins']}
                                             />
                                         </Grid>
                                     </Grid>
@@ -158,13 +158,12 @@ class Achievement extends React.Component {
                             </div>
 
                             <div className="col-12 mt-2 d-flex justify-content-around">
-                                <Button className="delete-btn add-btn col-4" type='button' onClick={this.cancelModal}>Cancel</Button>
-                                <Button className="add-btn col-4" type='button' onClick={this.submitRing}>{selectedGame ? 'Update' : 'Create'}</Button>
+                                <button className="delete-btn add-btn col-4" type='button' onClick={() => this.cancelModal()}>Cancel</button>
+                                <button className="add-btn col-4" type='button' onClick={() => this.submitAchievement()}>Update</button>
                             </div>
                         </div>
                     </ModalBody>
                 </Modal>
-
             </div>
         );
     }
@@ -173,16 +172,16 @@ class Achievement extends React.Component {
 const CustomTextField = withStyles({
     root: {
         '& .MuiInputBase-input': {
-            color: '#fff', // Text color
+            color: '#fff',
         },
         '& .MuiInput-underline:before': {
-            borderBottomColor: '#fff', // Semi-transparent underline
+            borderBottomColor: '#fff',
         },
         '& .MuiInput-underline:hover:before': {
-            borderBottomColor: '#fff', // Solid underline on hover
+            borderBottomColor: '#fff',
         },
         '& .MuiInput-underline:after': {
-            borderBottomColor: '#fa6634', // Solid underline on focus
+            borderBottomColor: '#fa6634',
         },
     },
     input: {
@@ -194,12 +193,12 @@ const CustomTextField = withStyles({
 })(TextValidator);
 
 const mapDispatchToProps = {
-    getAchievements, addSitnGoGame, toggleModal, setLoader, updateAchievement
+    getAchievements, setLoader, updateAchievement, toggleModal
 };
 
-const mapStateToProps = ({ Auth, Achievement }) => {
+const mapStateToProps = ({ Achievement, Auth }) => {
     let { allAchievemets } = Achievement;
-    let { publicAddress, isLoader, isModal } = Auth;
-    return { allAchievemets, publicAddress, isLoader, isModal };
+    let { isModal } = Auth
+    return { allAchievemets, isModal };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Achievement);    

@@ -2,7 +2,6 @@ import React, { useState, useEffect, Fragment } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ReactTable from 'react-table-6';
 import Grid from '@material-ui/core/Grid';
-import Loader from "../../components/Loader/index";
 import { withStyles } from '@material-ui/core/styles';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
@@ -35,12 +34,10 @@ const CustomTextField = withStyles({
 const GameStore = () => {
     const dispatch = useDispatch();
     const {
-        isLoader,
         isModal,
         allGameItems
     } = useSelector(({ Auth, GameStore }) => ({
         allGameItems: GameStore.allGameItems,
-        isLoader: Auth.isLoader,
         isModal: Auth.isModal,
     }));
 
@@ -85,10 +82,9 @@ const GameStore = () => {
 
     const columns = [
         {
-            accessor: 'index',
             Header: '#',
             Cell: ({ index }) => index + 1,
-            width: 150
+            width: 100
         },
         {
             accessor: 'name',
@@ -118,7 +114,6 @@ const GameStore = () => {
                 }} className="add-btn">Create Game Asset</button>
             </div>
             <Fragment>
-                {isLoader ? <Loader /> : null}
                 <div className='main-container-head mb-3'>
                     <ReactTable
                         minRows={20}

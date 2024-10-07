@@ -3,7 +3,6 @@ import ReactTable from 'react-table-6';
 import 'react-table-6/react-table.css';
 import React, { Fragment } from 'react';
 import Button from '@material-ui/core/Button';
-import Loader from "../../components/Loader/index";
 import { setLoader } from '../../store/actions/Auth';
 import { withStyles } from '@material-ui/core/styles';
 import { toggleModal } from '../../store/actions/Auth';
@@ -43,15 +42,15 @@ class Leaderboard extends React.Component {
     };
 
     render() {
-        const { isLoader, isModal, factionalLeaderboard } = this.props;
+        const { isModal, factionalLeaderboard } = this.props;
         const leaderboardArray = Object.values(factionalLeaderboard);
         const { selectedFaction } = this.state;
 
         const columns = [
             {
-                Header: 'Rank',
+                Header: '#',
                 Cell: ({ index }) => index + 1,
-                width: 150,
+                width: 100,
             },
             {
                 Header: 'Faction',
@@ -92,7 +91,6 @@ class Leaderboard extends React.Component {
                         <p className="main-container-heading">Factional Leaderboard</p>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -174,9 +172,9 @@ const mapDispatchToProps = {
 
 const mapStateToProps = ({ Auth, Leaderboard }) => {
     const { factionalLeaderboard } = Leaderboard;
-    const { isLoader, isModal } = Auth;
+    const { isModal } = Auth;
 
-    return { factionalLeaderboard, isLoader, isModal };
+    return { factionalLeaderboard, isModal };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Leaderboard);

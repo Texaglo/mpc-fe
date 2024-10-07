@@ -6,7 +6,6 @@ import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 
 /************************** GET ALL ACHIEVEMENTS *****************************/
-
 function* getAchievements() {
     const { error, response } = yield call(getCall, '/achievements/adminAchievements');
     if (error) EventBus.publish("error", error['response']['data']['message']);
@@ -14,10 +13,10 @@ function* getAchievements() {
     yield put(setLoader(false));
 };
 
-/************************** UPDATE ACHIEVMENT *****************************/
+/************************** UPDATE ACHIVEMENT *****************************/
 
 function* updateAchievement({ payload }) {
-    const { error, response } = yield call(putCall, { path: '/achievements/updateAchievement', payload });
+    const { error, response } = yield call(putCall, { path: `/achievements/updateAchievements/${payload['_id']}`, payload });
     if (error) EventBus.publish("error", error['response']['data']['message']);
     else if (response) {
         yield put({ type: "GET_ACHIEVEMENTS" });
@@ -25,12 +24,9 @@ function* updateAchievement({ payload }) {
     }
 }
 
-
-
 function* actionWatcher() {
     yield takeEvery('GET_ACHIEVEMENTS', getAchievements);
     yield takeEvery('UPDATE_ACHIEVEMENT', updateAchievement);
-
 };
 
 export default function* rootSaga() {

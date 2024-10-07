@@ -4,7 +4,6 @@ import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Add, Remove } from '@mui/icons-material';
-import Loader from "../../components/Loader/index"
 import { withStyles } from '@material-ui/core/styles';
 import { addSitnGoGame } from "../../store/actions/SitnGo";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -67,7 +66,19 @@ class SitnGo extends React.Component {
     handleTemplateChange = ({ target }) => {
         this.setState({ template: target.value });
         let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
-        this.setState({ formData: { ...template[0] } })
+        if (template.length > 0) this.setState({ formData: { ...template[0] } })
+        else this.setState({ formData: {  
+            name: '',
+            seatLimit: '',
+            buyIn: '',
+            buyInType: '',
+            startingStack: '',
+            formatLimit: 'Select Format Limit',
+            gameVariant: 'Select Game Type',
+            region: 'Select Region',
+            duration: '',
+            type: '',
+            blinds: [{ smallBlind: '', bigBlind: '', duration: '' }] } })
     };
 
     submitRing = () => {
@@ -116,19 +127,23 @@ class SitnGo extends React.Component {
     render() {
         const { selectedGame, template } = this.state;
         let { name, seatLimit, buyInType, buyIn, startingStack, region, gameVariant, formatLimit, duration, blinds } = this.state.formData
-        let { isModal, isLoader, allSitnGoGames, allTemplates } = this.props;
+        let { isModal, allSitnGoGames, allTemplates } = this.props;
 
         const allSitnGoGamesArray = Object.values(allSitnGoGames);
 
         const columns = [
+            {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
             {
                 accessor: 'name',
                 Header: 'Name',
             },
             {
                 accessor: 'buyInType',
-                Header: 'BuyIn Type',
-                Cell: row => row.original.buyInType === "inGameCoins" ? "Chips" : row.original.buyInType
+                Header: 'BuyIn Type'
             },
             {
                 accessor: 'buyIn',
@@ -163,7 +178,6 @@ class SitnGo extends React.Component {
                         }} className="add-btn">Create Sit'n'Go Game</button>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -190,7 +204,7 @@ class SitnGo extends React.Component {
                         <div className="row">
                             <div className="col-12">
                                 <ValidatorForm className="row" >
-
+                                    { !selectedGame &&
                                     <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Select Template</label>
@@ -212,7 +226,7 @@ class SitnGo extends React.Component {
                                             </select>
                                         </Grid>
                                     </Grid>
-
+                                    }
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Name</label>
@@ -247,10 +261,7 @@ class SitnGo extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="inGameCoins">Chips</option>
-                                                <option value="silverTickets">Silver Tickets</option>
-                                                <option value="bronzeTickets">Bronze Tickets</option>
-                                                <option value="goldTickets">Gold Tickets</option>
+                                                <option value="goldCoins">Gold Coins</option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
@@ -484,7 +495,7 @@ const mapDispatchToProps = {
 const mapStateToProps = ({ Auth, SitnGo, Template }) => {
     let { allSitnGoGames } = SitnGo;
     let { allTemplates } = Template;
-    let { publicAddress, isLoader, isModal } = Auth;
-    return { allSitnGoGames, allTemplates, publicAddress, isLoader, isModal };
+    let { publicAddress, isModal } = Auth;
+    return { allSitnGoGames, allTemplates, publicAddress, isModal };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(SitnGo);    

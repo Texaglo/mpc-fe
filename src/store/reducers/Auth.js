@@ -3,7 +3,7 @@ import { setToken } from '../axios';
 
 var initialState = {
   isLogin: false,
-  userNonce: {},
+  userNonce: '',
   auth: localStorage.getItem('token'),
   publicAddress: localStorage.getItem('publicAddress'),
   isLoader: { message: 'Please Wait...', status: false },

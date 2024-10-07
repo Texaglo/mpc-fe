@@ -6,10 +6,10 @@ const AppMode = [''];
 // const AppMode = ['development'];
 
 /* -- set API URLs --*/
-const development = 'https://dpoker.metawarriors.world';
+const development = 'https://dserver.modernpokerclub.com';
 // const development = 'http://localhost:4008';
-const production = 'https://dpoker.metawarriors.world';
-const testing = 'https://dpoker.metawarriors.world';
+const production = 'https://dserver.modernpokerclub.com';
+const testing = 'https://dserver.modernpokerclub.com';
 
 let SocketUrl;
 let env = AppMode[0] || 'development', networkId = '', message = '', explorer = '';

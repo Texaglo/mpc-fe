@@ -3,7 +3,6 @@ import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import Loader from "../../components/Loader/index"
 import { withStyles } from '@material-ui/core/styles';
 import { addRingGame } from "../../store/actions/Ring"
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -45,13 +44,24 @@ class Ring extends React.Component {
     handleTemplateChange = ({ target }) => {
         this.setState({ template: target.value });
         let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
-        this.setState({ formData: { ...template[0] } })
+        if (template.length > 0) this.setState({ formData: { ...template[0] } })
+        else this.setState({ formData: { 
+            name: '',
+            seatLimit: '',
+            smallBlinds: '',
+            bigBlinds: '',
+            formatLimit: '',
+            gameVariant: 'Select Game Type',
+            region: 'Select Region',
+            gameSize: '' } })
     };
 
     submitRing = () => {
         const { formData, selectedGame } = this.state;
+
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
+
         this.props.toggleModal(false)
         if (selectedGame) {
             this.props.updateRingGame(formData)
@@ -84,7 +94,7 @@ class Ring extends React.Component {
     render() {
         const { selectedGame, template } = this.state;
         let { name, seatLimit, smallBlinds, bigBlinds, region, gameVariant, gameSize } = this.state.formData
-        let { isModal, isLoader, allTemplates, allRingGames } = this.props;
+        let { isModal, allTemplates, allRingGames } = this.props;
         const allRingGamesArray = Object.values(allRingGames);
 
         // Define gameSizeOptions
@@ -104,6 +114,11 @@ class Ring extends React.Component {
         };
 
         const columns = [
+            {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
             {
                 accessor: 'name',
                 Header: 'Ring Name',
@@ -153,7 +168,6 @@ class Ring extends React.Component {
                         }} className="add-btn">Create Ring Game</button>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -179,6 +193,7 @@ class Ring extends React.Component {
                         <div className="row">
                             <div className="col-12">
                                 <ValidatorForm className="row" >
+                                    { !selectedGame &&
                                     <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Select Template</label>
@@ -200,7 +215,7 @@ class Ring extends React.Component {
                                             </select>
                                         </Grid>
                                     </Grid>
-
+                                    }
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={6}>
                                             <label>Name</label>
@@ -427,7 +442,7 @@ const mapDispatchToProps = {
 const mapStateToProps = ({ Auth, Ring, Template }) => {
     let { allRingGames } = Ring;
     let { allTemplates } = Template;
-    let { publicAddress, RingsData, isLoader, isModal } = Auth;
-    return { allRingGames, allTemplates, publicAddress, isLoader, RingsData, isModal };
+    let { publicAddress, RingsData, isModal } = Auth;
+    return { allRingGames, allTemplates, publicAddress, RingsData, isModal };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Ring);

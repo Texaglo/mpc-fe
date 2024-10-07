@@ -15,7 +15,7 @@ import { setLoader } from "../../store/actions/Auth";
 
 const programID = new PublicKey(SwapAddress);
 
-class WithdrawSwap extends React.Component {
+class Swap extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -67,10 +67,14 @@ class WithdrawSwap extends React.Component {
     }
 
     render() {
-        let { isLoader } = this.props;
         let { withdrawSwapData } = this.state;
 
         const columns = [
+            {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
             {
                 accessor: 'username',
                 Header: 'User Name',
@@ -105,7 +109,6 @@ class WithdrawSwap extends React.Component {
                         <p className="main-container-heading">WITHDRAW SWAP</p>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -128,9 +131,8 @@ const mapDispatchToProps = {
     getWithdrawSwaps, updateWithdrawSwap, setLoader
 };
 
-const mapStateToProps = ({ Auth, WithdrawSwap }) => {
-    let { isLoader } = Auth;
+const mapStateToProps = ({ WithdrawSwap }) => {
     let { allSwaps } = WithdrawSwap;
-    return { allSwaps, isLoader };
+    return { allSwaps };
 };
-export default connect(mapStateToProps, mapDispatchToProps)(WithdrawSwap);
+export default connect(mapStateToProps, mapDispatchToProps)(Swap);

@@ -4,6 +4,7 @@ var initialState =
 {
     allTournaments: [],
     allTemplates: [],
+    winners: [],
 };
 
 const Tournament = (state = initialState, { type, payload }) => {
@@ -18,6 +19,11 @@ const Tournament = (state = initialState, { type, payload }) => {
             return {
                 ...state,
                 allTemplates: payload,
+            }
+        case 'SET_WINNERS':
+            return {
+                ...state,
+                winners: payload,
             }
         default:
             return state;

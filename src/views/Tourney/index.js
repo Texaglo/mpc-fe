@@ -9,11 +9,9 @@ import Button from '@material-ui/core/Button';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, DateTimePicker, } from '@material-ui/pickers';
 // import DateTimePicker from 'react-datetime-picker';
-import Loader from "../../components/Loader/index";
 import { Add, Remove } from '@mui/icons-material';
 import { withStyles } from '@material-ui/core/styles';
 import Countdown from 'react-countdown';
-import { MomentCountdown } from 'react-moment-countdown';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { addTournament } from "../../store/actions/Tournament"
 import { toggleModal, setLoader } from '../../store/actions/Auth';
@@ -79,13 +77,30 @@ class Tournament extends React.Component {
     handleTemplateChange = ({ target }) => {
         this.setState({ template: target.value });
         let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
-        this.setState({ formData: { ...template[0] } })
+        if(template.length > 0) this.setState({ formData: { ...template[0] } })
+        else this.setState({ formData: { 
+            fee: '',
+            time: '',
+            name: '',
+            buyIn: '',
+            buyInType: '',
+            prizePool: '',
+            minPlayers: '',
+            formatLimit: '',
+            maxPlayers: '',
+            startingStack: '',
+            region: 'Select Region',
+            gameVariant: 'Select Game Type',
+            blinds: [{ smallBlind: '', bigBlind: '' }],
+            tournamentStartingDate: new Date(Date.now()) } })
     };
 
     submitRing = () => {
         const { formData, selectedGame, } = this.state;
+
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
+
         this.props.toggleModal(false);
         if (selectedGame) this.props.updateTournament(formData)
         else this.props.addTournament(formData);
@@ -124,11 +139,16 @@ class Tournament extends React.Component {
     };
     render() {
         const { selectedGame, template } = this.state;
-        let { isModal, isLoader, allTournaments, allTemplates } = this.props;
+        let { isModal, allTournaments, allTemplates } = this.props;
         const allTournamentsArray = Object.values(allTournaments);
         let { name, startingStack, buyIn, buyInType, tournamentStartingDate, region, gameVariant, minPlayers, maxPlayers, blinds, fee, prizePool } = this.state.formData;
 
         const columns = [
+            {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100
+            },
             {
                 accessor: 'name',
                 Header: 'Name',
@@ -177,7 +197,6 @@ class Tournament extends React.Component {
                         }} className="add-btn">Create New Tourney</button>
                     </div>
                     <Fragment>
-                        {isLoader ? <Loader /> : null}
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
@@ -201,6 +220,7 @@ class Tournament extends React.Component {
                         <div className="row">
                             <div className="col-12">
                                 <ValidatorForm className="row" >
+                                    {!selectedGame &&
                                     <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Select Template</label>
@@ -222,7 +242,7 @@ class Tournament extends React.Component {
                                             </select>
                                         </Grid>
                                     </Grid>
-
+                                    }
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Name</label>
@@ -327,10 +347,7 @@ class Tournament extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select BuyIn Type</option>
-                                                <option value="inGameCoins">Chips</option>
-                                                <option value="silverTickets">Silver Tickets</option>
-                                                <option value="bronzeTickets">Bronze Tickets</option>
-                                                <option value="goldTickets">Gold Tickets</option>
+                                                <option value="goldCoins">Gold Coins</option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
@@ -522,8 +539,8 @@ const mapDispatchToProps = {
 const mapStateToProps = ({ Auth, Tournament, Template }) => {
     let { allTournaments } = Tournament;
     let { allTemplates } = Template;
-    let { publicAddress, isLoader, RingsData, isModal } = Auth;
+    let { publicAddress, RingsData, isModal } = Auth;
 
-    return { allTournaments, allTemplates, isLoader, publicAddress, RingsData, isModal };
+    return { allTournaments, allTemplates, publicAddress, RingsData, isModal };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Tournament);

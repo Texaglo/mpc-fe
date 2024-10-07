@@ -1,4 +1,3 @@
-import EventBus from 'eventing-bus';
 import { web3, BN } from '@project-serum/anchor';
 import { PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -7,15 +6,14 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import Box from '@mui/material/Box';
-import { ThemeProvider } from '@mui/material/styles';
-import Loader from "../../components/Loader/index"
+import { Box } from '@material-ui/core';
+import { ThemeProvider } from '@material-ui/core/styles';
 
 import './index.css';
 import { SwapAddress } from "../../store/contract/index";
 import { program, provider } from "../../store/solanaProvider";
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setLoader } from "../../store/actions/Auth";
 
 const programID = new PublicKey(SwapAddress);
@@ -37,9 +35,6 @@ const ConversionRate = () => {
     const [currentTimeToMpcValue, setCurrentTimeToMpcValue] = useState(0);
 
     const dispatch = useDispatch();
-    const { isLoader } = useSelector(({ Auth }) => ({
-        isLoader: Auth.isLoader
-    }))
 
     useEffect(() => {
         dispatch(setLoader(false));
@@ -193,13 +188,11 @@ const ConversionRate = () => {
         <ConnectionProvider endpoint={network}>
             <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
-                    {isLoader ? <Loader /> : null}
                     <ThemeProvider
                         theme={{
                             palette: {
                                 primary: {
-                                    main: '#A9A9A9',
-                                    dark: '#A0A0A0',
+                                    main: '#a9a9a9'
                                 },
                             },
                         }}
@@ -208,10 +201,7 @@ const ConversionRate = () => {
                             sx={{
                                 width: 750,
                                 borderRadius: 1,
-                                bgcolor: 'primary.main',
-                                '&:hover': {
-                                    bgcolor: 'primary.dark',
-                                },
+                                bgcolor: 'primary.main'
                             }}
                         >
                             <div className="current-rate"> <h2>MPC TO GOLD COIN CONVERSION RATE</h2></div>
@@ -224,10 +214,7 @@ const ConversionRate = () => {
                             sx={{
                                 width: 750,
                                 borderRadius: 1,
-                                bgcolor: 'primary.main',
-                                '&:hover': {
-                                    bgcolor: 'primary.dark',
-                                },
+                                bgcolor: 'primary.main'
                             }}
                         >
                             <div className="current-rate"> <h2>MPC TO TIME COIN CONVERSION RATE</h2></div>
@@ -240,10 +227,7 @@ const ConversionRate = () => {
                             sx={{
                                 width: 750,
                                 borderRadius: 1,
-                                bgcolor: 'primary.main',
-                                '&:hover': {
-                                    bgcolor: 'primary.dark',
-                                },
+                                bgcolor: 'primary.main'
                             }}
                         >
                             <div className="current-rate"> <h2>ADD MPC TO HOT WALLETS</h2></div>
@@ -255,160 +239,118 @@ const ConversionRate = () => {
                     </ThemeProvider>
                     {/* CONVERSION GOLD RATE MODAL */}
                     <Modal isOpen={goldRateModal} toggle={() => { toggleGoldRateModal(false); dispatch(setLoader(false)); }} className="main-modal reward-modal">
-                        <ThemeProvider
-                            theme={{
-                                palette: {
-                                    primary: {
-                                        main: '#A9A9A9',
-                                        dark: '#A0A0A0',
-                                    },
-                                },
-                            }}
-                        >
-                            <Box sx={{
-                                width: 750,
-                                borderRadius: 1,
-                                bgcolor: 'primary.main',
-                                '&:hover': {
-                                    bgcolor: 'primary.dark',
-                                },
-                            }}
-                            >
-                                <ModalHeader toggle={() => { toggleGoldRateModal(false); dispatch(setLoader(false)); }} >
-                                    <div className="reward-modal-logo">
-                                        <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
-                                    </div>
-                                    <div className="reward-modal-title"><p>MPC TO GOLD COIN CONVERSION RATE</p></div>
-                                    <div className="reward-modal-line"> <hr /></div>
-                                </ModalHeader>
-                                <ModalBody className="modal-body reward-modal-body">
-                                    <div className="row justify-content-center mt-3 mb-4">
-                                        <div className="col-md-offset-2 col-md-8 col-sm-12">
-                                            <div className="input-group">
-                                                <label className='text-white'>{isGoldRate ? 'Set ' : 'Update '} Gold to MPC Token Conversion Rate</label>
-                                                <div className="input-group-inline">
-                                                    <input
-                                                        type="number"
-                                                        value={rateGoldToMPC}
-                                                        placeholder="Enter the conversion rate"
-                                                        onChange={(e) => setRateGoldToMPC(e.target.value)}
-                                                    />
-                                                </div>
-                                                <span style={{ color: '#4d4dff' }}>1 MPC Tokens = {currentGoldToMpcValue} Gold Coin</span>
-                                            </div>
+                        <ModalHeader toggle={() => { toggleGoldRateModal(false); dispatch(setLoader(false)); }} >
+                            <div className="reward-modal-logo">
+                                <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
+                            </div>
+                            <div className="reward-modal-title"><p>MPC TO GOLD COIN CONVERSION RATE</p></div>
+                            <div className="reward-modal-line"> <hr /></div>
+                        </ModalHeader>
+                        <ModalBody className="modal-body reward-modal-body">
+                            <div className="row justify-content-center mt-3 mb-4">
+                                <div className="col-md-offset-2 col-md-8 col-sm-12">
+                                    <div className="input-group">
+                                        <label className='text-white'>{isGoldRate ? 'Set ' : 'Update '} Gold to MPC Token Conversion Rate</label>
+                                        <div className="input-group-inline">
+                                            <input
+                                                type="number"
+                                                value={rateGoldToMPC}
+                                                placeholder="Enter the conversion rate"
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === '' || /^[1-9]\d*$/.test(value)) setRateGoldToMPC(value)
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    const validKeys = ['Backspace', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                                                    if (!/[0-9]/.test(e.key) && !validKeys.includes(e.key)) e.preventDefault()
+                                                }}
+                                            />
                                         </div>
-                                        <div className="col-12 mt-2 d-flex justify-content-around">
-                                            <button className="submit-button" onClick={() => submitGoldRateMPC()}>Submit</button>
-                                        </div>
+                                        <span style={{ color: '#4d4dff' }}>1 MPC Tokens = {currentGoldToMpcValue} Gold Coin</span>
                                     </div>
-                                </ModalBody>
-                            </Box>
-                        </ThemeProvider>
+                                </div>
+                                <div className="col-12 mt-2 d-flex justify-content-around">
+                                    <button className="submit-button" onClick={() => submitGoldRateMPC()}>Submit</button>
+                                </div>
+                            </div>
+                        </ModalBody>
                     </Modal>
 
                     {/* CONVERSION TIME RATE MODAL */}
                     <Modal isOpen={timeRateModal} toggle={() => { toggleTimeRateModal(false); dispatch(setLoader(false)); }} className="main-modal reward-modal">
-                        <ThemeProvider
-                            theme={{
-                                palette: {
-                                    primary: {
-                                        main: '#A9A9A9',
-                                        dark: '#A0A0A0',
-                                    },
-                                },
-                            }}
-                        >
-                            <Box sx={{
-                                width: 750,
-                                borderRadius: 1,
-                                bgcolor: 'primary.main',
-                                '&:hover': {
-                                    bgcolor: 'primary.dark',
-                                },
-                            }}
-                            >
-                                <ModalHeader toggle={() => { toggleTimeRateModal(false); dispatch(setLoader(false)); }}>
-                                    <div className="reward-modal-logo">
-                                        <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
-                                    </div>
-                                    <div className="reward-modal-title"><p>MPC TO TIME COIN CONVERSION RATE</p></div>
-                                    <div className="reward-modal-line"> <hr /></div>
-                                </ModalHeader>
-                                <ModalBody className="modal-body reward-modal-body">
-                                    <div className="row justify-content-center mt-3 mb-4">
-                                        <div className="col-md-offset-2 col-md-8 col-sm-12">
-                                            <div className="input-group">
-                                                <label className='text-white'>{isTimeRate ? 'Set ' : 'Update '} Time to MPC Token Conversion Rate</label>
-                                                <div className="input-group-inline">
-                                                    <input
-                                                        type="number"
-                                                        value={rateTimeToMPC}
-                                                        placeholder="Enter the conversion rate"
-                                                        onChange={(e) => setRateTimeToMPC(e.target.value)}
-                                                    />
-                                                </div>
-                                                <span style={{ color: '#4d4dff' }}>1 MPC Tokens = {currentTimeToMpcValue} Time Coin</span>
-                                            </div>
+                        <ModalHeader toggle={() => { toggleTimeRateModal(false); dispatch(setLoader(false)); }}>
+                            <div className="reward-modal-logo">
+                                <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
+                            </div>
+                            <div className="reward-modal-title"><p>MPC TO TIME COIN CONVERSION RATE</p></div>
+                            <div className="reward-modal-line"> <hr /></div>
+                        </ModalHeader>
+                        <ModalBody className="modal-body reward-modal-body">
+                            <div className="row justify-content-center mt-3 mb-4">
+                                <div className="col-md-offset-2 col-md-8 col-sm-12">
+                                    <div className="input-group">
+                                        <label className='text-white'>{isTimeRate ? 'Set ' : 'Update '} Time to MPC Token Conversion Rate</label>
+                                        <div className="input-group-inline">
+                                            <input
+                                                type="number"
+                                                value={rateTimeToMPC}
+                                                placeholder="Enter the conversion rate"
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === '' || /^[1-9]\d*$/.test(value)) setRateTimeToMPC(value)
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    const validKeys = ['Backspace', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                                                    if (!/[0-9]/.test(e.key) && !validKeys.includes(e.key)) e.preventDefault()
+                                                }}
+                                            />
                                         </div>
-                                        <div className="col-12 mt-2 d-flex justify-content-around">
-                                            <button className="submit-button" onClick={() => submitTimeRateMPC()}>Submit</button>
-                                        </div>
+                                        <span style={{ color: '#4d4dff' }}>1 MPC Tokens = {currentTimeToMpcValue} Time Coin</span>
                                     </div>
-                                </ModalBody>
-                            </Box>
-                        </ThemeProvider>
+                                </div>
+                                <div className="col-12 mt-2 d-flex justify-content-around">
+                                    <button className="submit-button" onClick={() => submitTimeRateMPC()}>Submit</button>
+                                </div>
+                            </div>
+                        </ModalBody>
                     </Modal>
 
                     {/* ADD ADMIN TOKENS MODAL */}
                     <Modal isOpen={addTokensModal} toggle={() => { setAddTokens(""); toggleAddTokensModal(false); dispatch(setLoader(false)); }} className="main-modal reward-modal">
-                        <ThemeProvider
-                            theme={{
-                                palette: {
-                                    primary: {
-                                        main: '#A9A9A9',
-                                        dark: '#A0A0A0',
-                                    },
-                                },
-                            }}
-                        >
-                            <Box sx={{
-                                width: 750,
-                                borderRadius: 1,
-                                bgcolor: 'primary.main',
-                                '&:hover': {
-                                    bgcolor: 'primary.dark',
-                                },
-                            }}
-                            >
-                                <ModalHeader toggle={() => { setAddTokens(""); toggleAddTokensModal(false); dispatch(setLoader(false)); }}>
-                                    <div className="reward-modal-logo">
-                                        <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
-                                    </div>
-                                    <div className="reward-modal-title"><p>ADD MPC TO HOT WALLETS</p></div>
-                                    <div className="reward-modal-line"> <hr /></div>
-                                </ModalHeader>
-                                <ModalBody className="modal-body reward-modal-body" style={{ paddingBottom: '0px' }}>
-                                    <div className="row justify-content-center mt-4 mb-4">
-                                        <div className="col-md-offset-2 col-md-8 col-sm-12">
-                                            <div className="input-group">
-                                                <div className="input-group-inline">
-                                                    <input
-                                                        type="number"
-                                                        value={addTokens}
-                                                        onChange={(e) => setAddTokens(e.target.value)}
-                                                        placeholder="Enter MPC Tokens"
-                                                    />
-                                                </div>
-                                                <span style={{ color: '#4d4dff' }}>Admin MPC Tokens = {hardWalletTokens} MPC Tokens</span>
-                                            </div>
-                                            <div className="col-12 mt-2 d-flex justify-content-around">
-                                                <button className="submit-button" onClick={() => submitAddTokens()}>Submit</button>
-                                            </div>
+                        <ModalHeader toggle={() => { setAddTokens(""); toggleAddTokensModal(false); dispatch(setLoader(false)); }}>
+                            <div className="reward-modal-logo">
+                                <img src={require('../../assets/img/logo.png')} alt="modal-logo" />
+                            </div>
+                            <div className="reward-modal-title"><p>ADD MPC TO HOT WALLETS</p></div>
+                            <div className="reward-modal-line"> <hr /></div>
+                        </ModalHeader>
+                        <ModalBody className="modal-body reward-modal-body" style={{ paddingBottom: '0px' }}>
+                            <div className="row justify-content-center mt-4 mb-4">
+                                <div className="col-md-offset-2 col-md-8 col-sm-12">
+                                    <div className="input-group">
+                                        <div className="input-group-inline">
+                                            <input
+                                                type="number"
+                                                value={addTokens}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === '' || /^[1-9]\d*$/.test(value)) setAddTokens(value)
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    const validKeys = ['Backspace', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+                                                    if (!/[0-9]/.test(e.key) && !validKeys.includes(e.key)) e.preventDefault()
+                                                }}
+                                                placeholder="Enter MPC Tokens"
+                                            />
                                         </div>
+                                        <span style={{ color: '#4d4dff' }}>Admin MPC Tokens = {hardWalletTokens} MPC Tokens</span>
                                     </div>
-                                </ModalBody>
-                            </Box>
-                        </ThemeProvider>
+                                    <div className="col-12 mt-2 d-flex justify-content-around">
+                                        <button className="submit-button" onClick={() => submitAddTokens()}>Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </ModalBody>
                     </Modal>
                 </WalletModalProvider>
             </WalletProvider>

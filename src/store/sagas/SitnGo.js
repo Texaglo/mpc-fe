@@ -18,6 +18,7 @@ function* getAllSitnGoGames() {
 /************************** CREATE NEW SITNGO GAME *****************************/
 
 function* addSitnGoGame({ payload }) {
+    console.log("🚀 ~ file: Ring.js:22 ~ function*updateSitnGoGame ~ payload:", payload)
     const { error, response } = yield call(postCall, { path: '/sitNgo/createSitnGo', payload });
     if (error) EventBus.publish("error", error['response']['data']['message']);
     else if (response) {

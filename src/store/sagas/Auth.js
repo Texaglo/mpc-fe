@@ -2,7 +2,7 @@ import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
 import EventBus from 'eventing-bus';
 import { all, takeEvery, call, put } from 'redux-saga/effects';
-import { setLoginData, setNonce, toggleLogin } from '../actions/Auth';
+import { setLoginData, setNonce, toggleLogin, setLoader } from '../actions/Auth';
 
 /*========== LOGIN FUNCTIONS =============*/
 
