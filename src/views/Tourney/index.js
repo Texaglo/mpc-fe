@@ -147,11 +147,15 @@ class Tournament extends React.Component {
             {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
-                width: 100
+                width: 100,
+                filterable: false
             },
             {
                 accessor: 'name',
                 Header: 'Name',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 accessor: 'tournamentStartingDate',
@@ -161,20 +165,26 @@ class Tournament extends React.Component {
 
                     return <Countdown date={scheduleDate + 10000} />
                 },
+                filterable: false
             },
             {
                 accessor: 'participants',
                 Header: 'Registered Players',
                 Cell: row => `${row.original.totalRegisteredPlayers}`,
+                filterable: false
             },
             {
                 accessor: 'participants',
                 Header: 'Participants',
                 Cell: row => `${row.original.playersJoined}/${row.original.maxPlayers}`,
+                filterable: false
             },
             {
                 accessor: 'status',
                 Header: 'Status',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 Cell: row => (
@@ -184,6 +194,7 @@ class Tournament extends React.Component {
                     </div>
                 ),
                 Header: 'Actions',
+                filterable: false
             },
         ];
         return (

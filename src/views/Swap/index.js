@@ -73,12 +73,16 @@ class Swap extends React.Component {
             {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
-                width: 100
+                width: 100,
+                filterable: false
             },
             {
                 accessor: 'username',
                 Header: 'User Name',
-                width: 400
+                width: 400,
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 accessor: 'publicAddress',
@@ -99,7 +103,8 @@ class Swap extends React.Component {
                     </div>
                 ),
                 Header: 'Actions',
-                width: 200
+                width: 200,
+                filterable: false
             },
         ];
         return (

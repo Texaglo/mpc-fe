@@ -6,7 +6,6 @@ import { getAchievements, updateAchievement } from "../../store/actions/Achievem
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
-import { updateWinners, getWinners } from '../../store/actions/Tournament';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 
@@ -51,16 +50,23 @@ class Achievement extends React.Component {
             {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
-                width: 100
+                width: 100,
+                filterable: false
             },
             {
                 accessor: 'name',
                 Header: 'Name',
                 width: 350,
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 accessor: 'description',
                 Header: 'description',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 accessor: 'goldCoin',
@@ -74,6 +80,7 @@ class Achievement extends React.Component {
                         <button className="add-btn" onClick={() => this.editAchievement(row.original)}>Edit</button>
                     </div>
                 ),
+                filterable: false
             }
         ]
 

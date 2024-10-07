@@ -28,10 +28,14 @@ class Leaderboard extends React.Component {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
                 width: 100,
+                filterable: false
             },
             {
                 accessor: 'username',
                 Header: 'Username',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 accessor: 'score',
@@ -40,6 +44,9 @@ class Leaderboard extends React.Component {
             {
                 accessor: 'faction',
                 Header: 'Faction',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
         ];
 

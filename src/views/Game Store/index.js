@@ -84,11 +84,15 @@ const GameStore = () => {
         {
             Header: '#',
             Cell: ({ index }) => index + 1,
-            width: 100
+            width: 100,
+            filterable: false
         },
         {
             accessor: 'name',
-            Header: 'Name'
+            Header: 'Name',
+            filterMethod: (filter, row) => {
+                return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+            },
         },
         {
             accessor: 'price',
@@ -101,6 +105,7 @@ const GameStore = () => {
                 </div>
             ),
             Header: 'Actions',
+            filterable: false
         },
     ];
 

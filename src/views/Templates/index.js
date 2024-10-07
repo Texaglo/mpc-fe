@@ -182,19 +182,29 @@ class Template extends React.Component {
             {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
-                width: 100
+                width: 100,
+                filterable: false
             },
             {
                 accessor: 'name',
                 Header: 'Name',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 accessor: 'gameType',
                 Header: 'Game Mode',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 accessor: 'gameVariant',
                 Header: 'Game Variant',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 Cell: row => (
@@ -204,6 +214,7 @@ class Template extends React.Component {
                     </div>
                 ),
                 Header: 'Actions',
+                filterable: false
             },
         ];
         return (

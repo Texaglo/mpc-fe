@@ -51,10 +51,14 @@ class Leaderboard extends React.Component {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
                 width: 100,
+                filterable: false
             },
             {
                 Header: 'Faction',
                 accessor: 'faction',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 Header: 'Score',
@@ -67,6 +71,7 @@ class Leaderboard extends React.Component {
                         <button onClick={() => this.viewMembers(row.original)} className="add-btn">View Members</button>
                     </div>
                 ),
+                filterable: false
             }
         ];
 

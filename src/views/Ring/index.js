@@ -117,35 +117,41 @@ class Ring extends React.Component {
             {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
-                width: 100
+                width: 100,
+                filterable: false
             },
             {
                 accessor: 'name',
                 Header: 'Ring Name',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
-                // accessor: 'blinds',
                 Header: 'Blinds',
                 Cell: row => `${row.original.smallBlinds}/${row.original.bigBlinds}`,
+                filterable: false
             },
             {
                 accessor: 'participants',
                 Header: 'Participants',
                 Cell: row => `${row.original.playersJoined}/${row.original.seatLimit}`,
+                filterable: false
             },
             {
                 accessor: 'gameVariant',
                 Header: 'Game Type',
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
-            // {
-            //     // accessor: 'status',
-            //     Header: 'Min/Max Coins',
-            //     Cell: row => `${row.original.minCoins}/${row.original.maxCoins}`,
-            // },
             {
                 Header: 'Game Size',
                 accessor: 'gameSize',
                 Cell: row => row.original.gameSize,
+                filterMethod: (filter, row) => {
+                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+                },
             },
             {
                 Cell: row => (
@@ -155,6 +161,7 @@ class Ring extends React.Component {
                     </div>
                 ),
                 Header: 'Actions',
+                filterable: false
             },
         ];
         return (

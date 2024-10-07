@@ -99,12 +99,16 @@ const Tournament = () => {
         {
             Header: '#',
             Cell: ({ index }) => index + 1,
-            width: 100
+            width: 100,
+            filterable: false
         },
         {
             accessor: 'name',
             Header: 'Winner',
-            Cell: ({ value }) => value === "firstWinner" ? "1st Winner" : value === "secondWinner" ? "2nd Winner" : value === "thirdWinner" ? "3rd Winner" : value,
+            Cell: ({ value }) => value === "firstWinner" ? "First Winner" : value === "secondWinner" ? "Second Winner" : value === "thirdWinner" ? "Third Winner" : value,
+            filterMethod: (filter, row) => {
+                return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
+            },
         },
         {
             accessor: 'percentage',
@@ -148,7 +152,7 @@ const Tournament = () => {
                                     formData.length > 0 && formData.map((data, index) => (
                                         <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                             <Grid className="input-fields" item xs={12}>
-                                                <label>{data.name === "firstWinner" ? "1st Winner" : data.name === "secondWinner" ? "2nd Winner" : data.name === "thirdWinner" ? "3rd Winner" : data.name}</label>
+                                                <label>{data.name === "firstWinner" ? "First Winner" : data.name === "secondWinner" ? "Second Winner" : data.name === "thirdWinner" ? "Third Winner" : data.name}</label>
                                                 <CustomTextField
                                                     fullWidth
                                                     className="text-field"
