@@ -7,6 +7,7 @@ import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { updateWinners, getWinners } from '../../store/actions/Tournament';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import EventBus from 'eventing-bus';
 
 import "./index.css";
 
@@ -35,6 +36,7 @@ const CustomTextField = withStyles({
 
 const Tournament = () => {
     const [formData, setFormData] = useState([]);
+    const [prevData, setPrevData] = useState([]);
     const [totalPercent, setTotalPercent] = useState(100);
 
     const dispatch = useDispatch();
@@ -66,13 +68,14 @@ const Tournament = () => {
     };
 
     const submitAsset = () => {
-        if(totalPercent !== 100) {
-            alert("Total percentage should be 100");
-            return;
+        if(totalPercent === 100) {
+            dispatch(updateWinners(formData));
+            dispatch(toggleModal(false));
+        } else {
+            dispatch(getWinners());
+            setFormData(winners);
+            EventBus.publish("error", "Total percentage should be 100");
         }
-
-        dispatch(updateWinners(formData));
-        dispatch(toggleModal(false));
     };
 
     const editAsset = () => {

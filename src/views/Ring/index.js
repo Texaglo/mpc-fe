@@ -3,7 +3,6 @@ import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import Loader from "../../components/Loader/index"
 import { withStyles } from '@material-ui/core/styles';
 import { addRingGame } from "../../store/actions/Ring"
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -11,6 +10,7 @@ import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator';
 import { getAllRingGames, updateRingGame, deleteRingGame } from "../../store/actions/Ring";
 import { getAllTemplates } from "../../store/actions/Template";
+import EventBus from 'eventing-bus';
 
 import './index.css';
 
@@ -50,8 +50,11 @@ class Ring extends React.Component {
 
     submitRing = () => {
         const { formData, selectedGame } = this.state;
+        if(!this.state.selectedGame && this.state.template === '') return EventBus.publish("error", "Please select template");
+
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
+
         this.props.toggleModal(false)
         if (selectedGame) {
             this.props.updateRingGame(formData)
@@ -183,6 +186,7 @@ class Ring extends React.Component {
                         <div className="row">
                             <div className="col-12">
                                 <ValidatorForm className="row" >
+                                    { !selectedGame &&
                                     <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Select Template</label>
@@ -204,7 +208,7 @@ class Ring extends React.Component {
                                             </select>
                                         </Grid>
                                     </Grid>
-
+                                    }
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={6}>
                                             <label>Name</label>

@@ -83,8 +83,11 @@ class Tournament extends React.Component {
 
     submitRing = () => {
         const { formData, selectedGame, } = this.state;
+        if(!this.state.selectedGame && this.state.template === '') return EventBus.publish("error", "Please select template");
+
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
+
         this.props.toggleModal(false);
         if (selectedGame) this.props.updateTournament(formData)
         else this.props.addTournament(formData);
@@ -204,6 +207,7 @@ class Tournament extends React.Component {
                         <div className="row">
                             <div className="col-12">
                                 <ValidatorForm className="row" >
+                                    {!selectedGame &&
                                     <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Select Template</label>
@@ -225,7 +229,7 @@ class Tournament extends React.Component {
                                             </select>
                                         </Grid>
                                     </Grid>
-
+                                    }
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Name</label>

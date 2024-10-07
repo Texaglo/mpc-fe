@@ -4,7 +4,6 @@ import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Add, Remove } from '@mui/icons-material';
-import Loader from "../../components/Loader/index"
 import { withStyles } from '@material-ui/core/styles';
 import { addSitnGoGame } from "../../store/actions/SitnGo";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -12,6 +11,7 @@ import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { getAllSitnGoGames, updateSitnGoGame, deleteSitnGoGame } from "../../store/actions/SitnGo";
 import { getAllTemplates } from "../../store/actions/Template";
+import EventBus from 'eventing-bus';
 
 class SitnGo extends React.Component {
     constructor(props) {
@@ -72,6 +72,7 @@ class SitnGo extends React.Component {
 
     submitRing = () => {
         const { formData, selectedGame } = this.state;
+        if(!this.state.selectedGame && this.state.template === '') return EventBus.publish("error", "Please select template");
 
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
@@ -194,7 +195,7 @@ class SitnGo extends React.Component {
                         <div className="row">
                             <div className="col-12">
                                 <ValidatorForm className="row" >
-
+                                    { !selectedGame &&
                                     <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Select Template</label>
@@ -216,7 +217,7 @@ class SitnGo extends React.Component {
                                             </select>
                                         </Grid>
                                     </Grid>
-
+                                    }
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={12}>
                                             <label>Name</label>
@@ -383,7 +384,7 @@ class SitnGo extends React.Component {
                                             </select>
                                         </Grid>
                                     </Grid>
-                                    {blinds.length > 0 && blinds.map((blind, index) => (
+                                    {blinds && blinds.length > 0 && blinds.map((blind, index) => (
                                         <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                             <Grid className="input-fields" item xs={4}>
                                                 <label>Small Blind</label>
