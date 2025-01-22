@@ -3,13 +3,15 @@ version: 0.2
 phases:
   install: 
     commands:
-      - npm i npm@8.19.2 -g
-      - pip install --upgrade pip
-      - pip install --upgrade awscli
+       # - npm i npm@6.14.18 -g
       - apt-get update
-      - apt-get install libssl-dev g++ make --yes
+      # - pip install --upgrade pip
+      # - apt-get install libssl-dev g++ make --yes
       - npm i n
-      - n 18.12.0
+      - n 18
+      # - n 14.21.3
+      - npm --version
+      - node --version
   pre_build:
     commands:
       - npm install --force
