@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install: 
+    commands:
+      - npm i npm@8.19.2 -g
+      - pip install --upgrade pip
+      - apt-get update
+      - npm i n
+      - n 18.12.0
+  pre_build:
+    commands:
+      - sudo npm i --force
+  build:
+    commands:
+      - npm run build
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: no
+  base-directory: build
