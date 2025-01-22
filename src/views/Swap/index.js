@@ -2,7 +2,6 @@ import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import { web3, BN } from '@project-serum/anchor';
 import React, { Fragment } from 'react';
-import Loader from "../../components/Loader/index"
 import { getWithdrawSwaps, updateWithdrawSwap } from "../../store/actions/WithdrawSwap"
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
