@@ -371,27 +371,27 @@ class Ring extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select Game Type</option>
-                                                <option value="Omaha">Omaha (PLO)</option>
-                                                <option value="Texas Hold'em">Texas Hold'em (NLH)</option>
+                                                <option value="Omaha">Omaha</option>
+                                                <option value="Texas Hold'em">Texas Hold'em</option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
-                                            <label>Game Limit</label>
+                                            <label>Format Limit</label>
                                             <select
                                                 fullWidth
                                                 className="dropdown-new"
-                                                placeholder="Game Limit"
+                                                placeholder="Format Limit"
                                                 name="formatLimit"
                                                 value={this.state.formatLimit}
                                                 variant="outlined"
                                                 margin="dense"
                                                 onChange={this.handleFormChange}
                                                 validators={['required']}
-                                                errorMessages={['Please Select Game Limit']}
+                                                errorMessages={['Please Add Format Limit']}
                                             >
-                                                <option value="">Select Game Limit</option>
-                                                <option value="Pot Limit">Pot Limit (PLO)</option>
-                                                <option value="No Limit"> No Limit (NLH)</option>
+                                                <option value="">Select Format Limit</option>
+                                                <option value="Pot Limit">Pot Limit (PL)</option>
+                                                <option value="No Limit"> No Limit (NL)</option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>

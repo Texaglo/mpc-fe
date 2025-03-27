@@ -84,8 +84,8 @@ class SitnGo extends React.Component {
     submitRing = () => {
         const { formData, selectedGame } = this.state;
 
-        if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
-        if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
+        // if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
+        // if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
 
         this.props.toggleModal(false)
         if (selectedGame) {
@@ -346,9 +346,9 @@ class SitnGo extends React.Component {
                                                 errorMessages={['Please Add format Limit']}
                                             >
                                                 <option value="Select Format Limit" selected>Select Format Limit</option>
-                                                <option value="No Limit">No Limit</option>
-                                                <option value="Pot Limit">Pot Limit</option>
-                                                <option value="Fixed Limit">Fixed Limit</option>
+                                                <option value="No Limit">No Limit (NL)</option>
+                                                <option value="Pot Limit">Pot Limit (PL)</option>
+                                                {/* <option value="Fixed Limit">Fixed Limit (FL)</option> */}
                                             </select>
                                         </Grid>
                                     </Grid>
@@ -368,8 +368,8 @@ class SitnGo extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select Game Type</option>
-                                                <option value="Omaha">Omaha (PLO)</option>
-                                                <option value="Texas Hold'em">Texas Hold'em (NLH)</option>
+                                                <option value="Omaha">Omaha </option>
+                                                <option value="Texas Hold'em">Texas Hold'em </option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
