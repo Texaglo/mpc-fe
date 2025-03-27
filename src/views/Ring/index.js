@@ -59,8 +59,8 @@ class Ring extends React.Component {
     submitRing = () => {
         const { formData, selectedGame } = this.state;
 
-        if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
-        if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
+        // if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
+        // if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
 
         this.props.toggleModal(false)
         if (selectedGame) {
@@ -371,8 +371,27 @@ class Ring extends React.Component {
                                                 errorMessages={['Please Select Game Type']}
                                             >
                                                 <option value="">Select Game Type</option>
-                                                <option value="Omaha">Omaha (PLO)</option>
-                                                <option value="Texas Hold'em">Texas Hold'em (NLH)</option>
+                                                <option value="Omaha">Omaha</option>
+                                                <option value="Texas Hold'em">Texas Hold'em</option>
+                                            </select>
+                                        </Grid>
+                                        <Grid className="input-fields" item xs={6}>
+                                            <label>Format Limit</label>
+                                            <select
+                                                fullWidth
+                                                className="dropdown-new"
+                                                placeholder="Format Limit"
+                                                name="formatLimit"
+                                                value={this.state.formatLimit}
+                                                variant="outlined"
+                                                margin="dense"
+                                                onChange={this.handleFormChange}
+                                                validators={['required']}
+                                                errorMessages={['Please Add Format Limit']}
+                                            >
+                                                <option value="">Select Format Limit</option>
+                                                <option value="Pot Limit">Pot Limit (PL)</option>
+                                                <option value="No Limit"> No Limit (NL)</option>
                                             </select>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
