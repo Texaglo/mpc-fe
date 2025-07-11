@@ -26,7 +26,7 @@ class SitnGo extends React.Component {
                 gameVariant: 'Select Game Type',
                 region: 'Select Region',
                 duration: '',
-                type: '',
+                type: 'Select Type',
                 blinds: [{ smallBlind: '', bigBlind: '', duration: '' }]
             },
             blind: { smallBlind: '', bigBlind: '', duration: '' },
@@ -67,18 +67,21 @@ class SitnGo extends React.Component {
         this.setState({ template: target.value });
         let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
         if (template.length > 0) this.setState({ formData: { ...template[0] } })
-        else this.setState({ formData: {  
-            name: '',
-            seatLimit: '',
-            buyIn: '',
-            buyInType: '',
-            startingStack: '',
-            formatLimit: 'Select Format Limit',
-            gameVariant: 'Select Game Type',
-            region: 'Select Region',
-            duration: '',
-            type: '',
-            blinds: [{ smallBlind: '', bigBlind: '', duration: '' }] } })
+        else this.setState({
+            formData: {
+                name: '',
+                seatLimit: '',
+                buyIn: '',
+                buyInType: '',
+                startingStack: '',
+                formatLimit: 'Select Format Limit',
+                gameVariant: 'Select Game Type',
+                region: 'Select Region',
+                duration: '',
+                type: 'Select Type',
+                blinds: [{ smallBlind: '', bigBlind: '', duration: '' }]
+            }
+        })
     };
 
     submitRing = () => {
@@ -115,7 +118,7 @@ class SitnGo extends React.Component {
                 gameVariant: 'Select Game Type',
                 region: 'Select Region',
                 duration: '',
-                type: '',
+                type: 'Select Type',
                 blinds: [{ smallBlind: '', bigBlind: '', duration: '' }]
             },
         })
@@ -126,7 +129,7 @@ class SitnGo extends React.Component {
     }
     render() {
         const { selectedGame, template } = this.state;
-        let { name, seatLimit, buyInType, buyIn, startingStack, region, gameVariant, formatLimit, duration, blinds } = this.state.formData
+        let { name, seatLimit, buyInType, buyIn, startingStack, region, gameVariant, formatLimit, duration, blinds, type } = this.state.formData
         let { isModal, allSitnGoGames, allTemplates } = this.props;
 
         const allSitnGoGamesArray = Object.values(allSitnGoGames);
@@ -216,28 +219,28 @@ class SitnGo extends React.Component {
                         <div className="row">
                             <div className="col-12">
                                 <ValidatorForm className="row" >
-                                    { !selectedGame &&
-                                    <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
-                                        <Grid className="input-fields" item xs={12}>
-                                            <label>Select Template</label>
-                                            <select
-                                                fullWidth
-                                                className="dropdown-new"
-                                                placeholder="Select"
-                                                name="template"
-                                                value={template}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleTemplateChange}
-                                            >
-                                                <option value="">Select Template</option>
-                                                {allTemplates.map(template => {
-                                                    if (template['gameType'] == "SNG")
-                                                        return <option key={template['_id']} value={template['_id']}>{template['name']}</option>
-                                                })}
-                                            </select>
+                                    {!selectedGame &&
+                                        <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
+                                            <Grid className="input-fields" item xs={12}>
+                                                <label>Select Template</label>
+                                                <select
+                                                    fullWidth
+                                                    className="dropdown-new"
+                                                    placeholder="Select"
+                                                    name="template"
+                                                    value={template}
+                                                    variant="outlined"
+                                                    margin="dense"
+                                                    onChange={this.handleTemplateChange}
+                                                >
+                                                    <option value="">Select Template</option>
+                                                    {allTemplates.map(template => {
+                                                        if (template['gameType'] == "SNG")
+                                                            return <option key={template['_id']} value={template['_id']}>{template['name']}</option>
+                                                    })}
+                                                </select>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
                                     }
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={12}>
@@ -330,28 +333,46 @@ class SitnGo extends React.Component {
                                             />
                                         </Grid>
                                     </Grid>
-                                    <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Format Limit</label>
-                                            <select
-                                                fullWidth
-                                                className="dropdown-new"
-                                                placeholder="Format Limit"
-                                                name="formatLimit"
-                                                value={formatLimit}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Add format Limit']}
-                                            >
-                                                <option value="Select Format Limit" selected>Select Format Limit</option>
-                                                <option value="No Limit">No Limit (NL)</option>
-                                                <option value="Pot Limit">Pot Limit (PL)</option>
-                                                {/* <option value="Fixed Limit">Fixed Limit (FL)</option> */}
-                                            </select>
-                                        </Grid>
+                                    <Grid className="input-fields" item xs={6}>
+                                        <label>Format Limit</label>
+                                        <select
+                                            fullWidth
+                                            className="dropdown-new"
+                                            placeholder="Format Limit"
+                                            name="formatLimit"
+                                            value={formatLimit}
+                                            variant="outlined"
+                                            margin="dense"
+                                            onChange={this.handleFormChange}
+                                            validators={['required']}
+                                            errorMessages={['Please Add format Limit']}
+                                        >
+                                            <option value="Select Format Limit" selected>Select Format Limit</option>
+                                            <option value="No Limit">No Limit (NL)</option>
+                                            <option value="Pot Limit">Pot Limit (PL)</option>
+                                            {/* <option value="Fixed Limit">Fixed Limit (FL)</option> */}
+                                        </select>
                                     </Grid>
+                                    <Grid className="input-fields" item xs={6}>
+                                        <label>Type</label>
+                                        <select
+                                            fullWidth
+                                            className="dropdown-new"
+                                            placeholder="Type"
+                                            name="type"
+                                            value={type}
+                                            variant="outlined"
+                                            margin="dense"
+                                            onChange={this.handleFormChange}
+                                            validators={['required']}
+                                            errorMessages={['Please select type']}
+                                        >
+                                            <option value="Select Type">Select Type</option>
+                                            <option value="free">Free</option>
+                                            <option value="paid">Paid</option>
+                                        </select>
+                                    </Grid>
+
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={6}>
                                             <label>Game Type</label>

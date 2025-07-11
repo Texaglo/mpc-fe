@@ -6,8 +6,8 @@ const AppTitle = 'ADMIN MODERN POKER';
 const AppMode = ['development'];
 
 /* -- set API URLs --*/
-const development = 'https://dserver.modernpokerclub.com';
-// const development = 'http://localhost:4008';
+// const development = 'https://dserver.modernpokerclub.com';
+const development = 'http://localhost:4000';
 const production = 'https://dserver.modernpokerclub.com';
 const testing = 'https://dserver.modernpokerclub.com';
 
