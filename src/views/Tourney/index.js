@@ -42,6 +42,7 @@ class Tournament extends React.Component {
                 gameVariant: 'Select Game Type',
                 blinds: [{ smallBlind: '', bigBlind: '' }],
                 tournamentStartingDate: new Date(Date.now()),
+                type: 'Select Type',
             },
             template: '',
             selectedGame: null,
@@ -77,22 +78,26 @@ class Tournament extends React.Component {
     handleTemplateChange = ({ target }) => {
         this.setState({ template: target.value });
         let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
-        if(template.length > 0) this.setState({ formData: { ...template[0] } })
-        else this.setState({ formData: { 
-            fee: '',
-            time: '',
-            name: '',
-            buyIn: '',
-            buyInType: '',
-            prizePool: '',
-            minPlayers: '',
-            formatLimit: '',
-            maxPlayers: '',
-            startingStack: '',
-            region: 'Select Region',
-            gameVariant: 'Select Game Type',
-            blinds: [{ smallBlind: '', bigBlind: '' }],
-            tournamentStartingDate: new Date(Date.now()) } })
+        if (template.length > 0) this.setState({ formData: { ...template[0] } })
+        else this.setState({
+            formData: {
+                fee: '',
+                time: '',
+                name: '',
+                buyIn: '',
+                buyInType: '',
+                prizePool: '',
+                minPlayers: '',
+                formatLimit: '',
+                maxPlayers: '',
+                startingStack: '',
+                region: 'Select Region',
+                gameVariant: 'Select Game Type',
+                type: 'Select Type',
+                blinds: [{ smallBlind: '', bigBlind: '' }],
+                tournamentStartingDate: new Date(Date.now())
+            }
+        })
     };
 
     submitRing = () => {
@@ -141,7 +146,7 @@ class Tournament extends React.Component {
         const { selectedGame, template } = this.state;
         let { isModal, allTournaments, allTemplates } = this.props;
         const allTournamentsArray = Object.values(allTournaments);
-        let { name, startingStack, buyIn, buyInType, tournamentStartingDate, region, gameVariant, minPlayers, maxPlayers, blinds, fee, prizePool } = this.state.formData;
+        let { name, startingStack, buyIn, buyInType, tournamentStartingDate, region, gameVariant, minPlayers, maxPlayers, blinds, fee, prizePool, type } = this.state.formData;
 
         const columns = [
             {
@@ -232,30 +237,31 @@ class Tournament extends React.Component {
                             <div className="col-12">
                                 <ValidatorForm className="row" >
                                     {!selectedGame &&
-                                    <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
-                                        <Grid className="input-fields" item xs={12}>
-                                            <label>Select Template</label>
-                                            <select
-                                                fullWidth
-                                                className="dropdown-new"
-                                                placeholder="Select"
-                                                name="template"
-                                                value={template}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleTemplateChange}
-                                            >
-                                                <option value="">Select Template</option>
-                                                {allTemplates.map(template => {
-                                                    if (template['gameType'] == "MTT")
-                                                        return <option key={template['_id']} value={template['_id']}>{template['name']}</option>
-                                                })}
-                                            </select>
+                                        <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
+                                            <Grid className="input-fields" item xs={12}>
+                                                <label>Select Template</label>
+                                                <select
+                                                    fullWidth
+                                                    className="dropdown-new"
+                                                    placeholder="Select"
+                                                    name="template"
+                                                    value={template}
+                                                    variant="outlined"
+                                                    margin="dense"
+                                                    onChange={this.handleTemplateChange}
+                                                >
+                                                    <option value="">Select Template</option>
+                                                    {allTemplates.map(template => {
+                                                        if (template['gameType'] == "MTT")
+                                                            return <option key={template['_id']} value={template['_id']}>{template['name']}</option>
+                                                    })}
+                                                </select>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
                                     }
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields" item xs={12}>
+                                        {/* Tournament Name Field */}
+                                        <Grid className="input-fields" item xs={6}>
                                             <label>Name</label>
                                             <CustomTextField
                                                 fullWidth
@@ -271,6 +277,27 @@ class Tournament extends React.Component {
                                                 validators={['required']}
                                                 errorMessages={['Please Add Name']}
                                             />
+                                        </Grid>
+
+                                        {/* Type Field */}
+                                        <Grid className="input-fields" item xs={6}>
+                                            <label>Type</label>
+                                            <select
+                                                fullWidth
+                                                className="dropdown-new"
+                                                placeholder="Type"
+                                                name="type"
+                                                value={type}
+                                                variant="outlined"
+                                                margin="dense"
+                                                onChange={this.handleFormChange}
+                                                validators={['required']}
+                                                errorMessages={['Please select type']}
+                                            >
+                                                <option value="Select Type">Select Type</option>
+                                                <option value="free">Free</option>
+                                                <option value="paid">Paid</option>
+                                            </select>
                                         </Grid>
                                     </Grid>
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
