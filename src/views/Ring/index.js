@@ -26,6 +26,7 @@ class Ring extends React.Component {
                 gameVariant: 'Select Game Type',
                 region: 'Select Region',
                 gameSize: '',
+                type: 'Select Type',
             },
             selectedGame: null,
             template: '',
@@ -45,15 +46,19 @@ class Ring extends React.Component {
         this.setState({ template: target.value });
         let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
         if (template.length > 0) this.setState({ formData: { ...template[0] } })
-        else this.setState({ formData: { 
-            name: '',
-            seatLimit: '',
-            smallBlinds: '',
-            bigBlinds: '',
-            formatLimit: '',
-            gameVariant: 'Select Game Type',
-            region: 'Select Region',
-            gameSize: '' } })
+        else this.setState({
+            formData: {
+                name: '',
+                seatLimit: '',
+                smallBlinds: '',
+                bigBlinds: '',
+                formatLimit: '',
+                gameVariant: 'Select Game Type',
+                region: 'Select Region',
+                gameSize: '',
+                type: 'Select Type',
+            }
+        })
     };
 
     submitRing = () => {
@@ -93,7 +98,7 @@ class Ring extends React.Component {
 
     render() {
         const { selectedGame, template } = this.state;
-        let { name, seatLimit, smallBlinds, bigBlinds, region, gameVariant, gameSize } = this.state.formData
+        let { name, seatLimit, smallBlinds, bigBlinds, region, gameVariant, gameSize, type } = this.state.formData
         let { isModal, allTemplates, allRingGames } = this.props;
         const allRingGamesArray = Object.values(allRingGames);
 
@@ -200,28 +205,28 @@ class Ring extends React.Component {
                         <div className="row">
                             <div className="col-12">
                                 <ValidatorForm className="row" >
-                                    { !selectedGame &&
-                                    <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
-                                        <Grid className="input-fields" item xs={12}>
-                                            <label>Select Template</label>
-                                            <select
-                                                fullWidth
-                                                className="dropdown-new"
-                                                placeholder="Select"
-                                                name="template"
-                                                value={template}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleTemplateChange}
-                                            >
-                                                <option value="">Select Template</option>
-                                                {allTemplates.map(template => {
-                                                    if (template['gameType'] == "RING")
-                                                        return <option key={template['_id']} value={template['_id']}>{template['name']}</option>
-                                                })}
-                                            </select>
+                                    {!selectedGame &&
+                                        <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
+                                            <Grid className="input-fields" item xs={12}>
+                                                <label>Select Template</label>
+                                                <select
+                                                    fullWidth
+                                                    className="dropdown-new"
+                                                    placeholder="Select"
+                                                    name="template"
+                                                    value={template}
+                                                    variant="outlined"
+                                                    margin="dense"
+                                                    onChange={this.handleTemplateChange}
+                                                >
+                                                    <option value="">Select Template</option>
+                                                    {allTemplates.map(template => {
+                                                        if (template['gameType'] == "RING")
+                                                            return <option key={template['_id']} value={template['_id']}>{template['name']}</option>
+                                                    })}
+                                                </select>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
                                     }
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={6}>
@@ -330,30 +335,72 @@ class Ring extends React.Component {
                                                 errorMessages={['Please Enter Maximum Coins',]}
                                             />
                                         </Grid> */}
-                                        <Grid className="input-fields" item xs={12}>
-                                            <label>Game Size</label>
-                                            <select
-                                                value={gameSize}
-                                                onChange={this.handleFormChange}
-                                                name="gameSize"
-                                                fullWidth
-                                                className="dropdown-new"
-                                                variant="outlined"
-                                                margin="dense"
-                                            >
-                                                {gameSizeOptions.map(option => (
-                                                    <option key={option.value} value={option.value}>
-                                                        {option.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {/* Display selected range */}
-                                            {gameSize && gameSize !== '' && (
-                                                <div className="selected-range">
-                                                    Range: {gameSizeRanges[gameSize]}
+                                        <Grid container spacing={2} className="group-input" alignItems="flex-start">
+                                            <Grid className="input-fields" item xs={6} style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <div style={{ flex: '0 0 auto' }}>
+                                                    <label>Game Size</label>
+                                                    <select
+                                                        value={gameSize}
+                                                        onChange={this.handleFormChange}
+                                                        name="gameSize"
+                                                        fullWidth
+                                                        className="dropdown-new"
+                                                        variant="outlined"
+                                                        margin="dense"
+                                                    >
+                                                        {gameSizeOptions.map(option => (
+                                                            <option key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
                                                 </div>
-                                            )}
+                                                <div style={{
+                                                    flex: '0 0 auto',
+                                                    height: gameSize ? '24px' : '0',
+                                                    visibility: gameSize ? 'visible' : 'hidden',
+                                                    transition: 'height 0.2s ease'
+                                                }}>
+                                                    {gameSize && gameSize !== '' && (
+                                                        <div className="selected-range">
+                                                            Range: {gameSizeRanges[gameSize]}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </Grid>
+
+                                            <Grid className="input-fields" item xs={6} style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <div style={{ flex: '0 0 auto' }}>
+                                                    <label>Type</label>
+                                                    <select
+                                                        fullWidth
+                                                        className="dropdown-new"
+                                                        placeholder="Type"
+                                                        name="type"
+                                                        value={type}
+                                                        variant="outlined"
+                                                        margin="dense"
+                                                        onChange={this.handleFormChange}
+                                                        validators={['required']}
+                                                        errorMessages={['Please select type']}
+                                                    >
+                                                        <option value="Select Type">Select Type</option>
+                                                        <option value="free">Free</option>
+                                                        <option value="paid">Paid</option>
+                                                    </select>
+                                                </div>
+                                                {/* Invisible spacer to match height */}
+                                                <div style={{
+                                                    flex: '0 0 auto',
+                                                    height: gameSize ? '24px' : '0',
+                                                    visibility: 'hidden'
+                                                }}>
+                                                    &nbsp;
+                                                </div>
+                                            </Grid>
                                         </Grid>
+
+
                                     </Grid>
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={6}>
