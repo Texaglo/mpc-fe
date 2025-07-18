@@ -371,7 +371,7 @@ class Tournament extends React.Component {
                                         </Grid>
                                     </Grid>
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields" item xs={6}>
+                                        {/* <Grid className="input-fields" item xs={6}>
                                             <label>BuyIn Type</label>
                                             <select
                                                 fullWidth
@@ -387,7 +387,7 @@ class Tournament extends React.Component {
                                                 <option value="">Select BuyIn Type</option>
                                                 <option value="goldCoins">Gold Coins</option>
                                             </select>
-                                        </Grid>
+                                        </Grid> */}
                                         <Grid className="input-fields" item xs={6}>
                                             <label>Buy In</label>
                                             <CustomTextField
