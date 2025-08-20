@@ -1,0 +1,273 @@
+.pending-withdrawals {
+    background-color: #1e1e2e;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.pending-withdrawals .main-container-heading {
+    color: #fa6634;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.withdrawals-table {
+    background-color: #27293d !important;
+}
+
+.withdrawals-table .rt-thead.-header {
+    background-color: #1e1e2e;
+    border-bottom: 2px solid #fa6634;
+}
+
+.withdrawals-table .rt-th {
+    color: #fa6634 !important;
+    font-weight: bold;
+    text-align: center;
+    padding: 15px 10px;
+    border-right: 1px solid #3a3b4d;
+}
+
+.withdrawals-table .rt-tbody .rt-tr {
+    background-color: #27293d;
+    border-bottom: 1px solid #3a3b4d;
+}
+
+.withdrawals-table .rt-tbody .rt-tr:hover {
+    background-color: #32344a;
+}
+
+.withdrawals-table .rt-td {
+    color: #fff;
+    text-align: center;
+    padding: 12px 10px;
+    border-right: 1px solid #3a3b4d;
+}
+
+.withdrawals-table .-pagination {
+    background-color: #1e1e2e;
+    color: #fff;
+    padding: 15px;
+    border-top: 2px solid #fa6634;
+}
+
+.withdrawals-table .-pagination .-btn {
+    background-color: #fa6634;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.withdrawals-table .-pagination .-btn:hover {
+    background-color: #ff7c4d;
+}
+
+.withdrawals-table .-pagination .-btn:disabled {
+    background-color: #3a3b4d;
+    cursor: not-allowed;
+}
+
+.withdrawals-table .rt-noData {
+    background-color: #27293d;
+    color: #fff;
+    padding: 30px;
+    text-align: center;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.approve-btn, .reject-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.approve-btn {
+    background-color: #4caf50;
+    color: white;
+}
+
+.approve-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.reject-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.reject-btn:hover {
+    background-color: #da190b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+}
+
+.bank-details {
+    text-align: left;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.bank-details div {
+    margin: 2px 0;
+}
+
+.balances {
+    text-align: left;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.balances div {
+    margin: 2px 0;
+}
+
+.kyc-status {
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.kyc-status.verified {
+    background-color: #4caf50;
+    color: white;
+}
+
+.kyc-status.pending {
+    background-color: #ff9800;
+    color: white;
+}
+
+.withdrawals-table input {
+    background-color: #1e1e2e;
+    color: #fff;
+    border: 1px solid #fa6634;
+    padding: 5px 10px;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.withdrawals-table input:focus {
+    outline: none;
+    border-color: #ff7c4d;
+    box-shadow: 0 0 5px rgba(250, 102, 52, 0.3);
+}
+
+.withdrawals-table select {
+    background-color: #1e1e2e;
+    color: #fff;
+    border: 1px solid #fa6634;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+/* Modal Styles */
+.reward-modal .modal-content {
+    background-color: #27293d;
+    border: 2px solid #fa6634;
+}
+
+.reward-modal .modal-header {
+    background-color: #1e1e2e;
+    border-bottom: 2px solid #fa6634;
+}
+
+.reward-modal-title p {
+    color: #fa6634;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.reward-modal-line hr {
+    border-color: #fa6634;
+    margin: 10px 0;
+}
+
+.reward-modal-body {
+    background-color: #27293d;
+    padding: 20px;
+}
+
+.withdrawal-details {
+    background-color: #1e1e2e;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #3a3b4d;
+}
+
+.withdrawal-details h5 {
+    margin-bottom: 15px;
+}
+
+.withdrawal-details p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.text-field textarea {
+    background-color: #1e1e2e !important;
+    color: #fff !important;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.approve-modal-btn {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.approve-modal-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.reject-modal-btn {
+    background-color: #f44336;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.reject-modal-btn:hover {
+    background-color: #da190b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+}
+
+.approval-warning {
+    background-color: rgba(255, 152, 0, 0.1);
+    border-left: 3px solid #ff9800;
+    padding: 10px;
+    border-radius: 5px;
+}

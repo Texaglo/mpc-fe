@@ -10,6 +10,7 @@ import Tournament from "./views/Tournament";
 import ConversionRate from "./views/ConversionRate";
 import Swap from "./views/Swap";
 import gameStore from "./views/Game Store";
+import PendingWithdrawals from "./views/PendingWithdrawals";
 
 var routes = [
   {
@@ -94,6 +95,13 @@ var routes = [
     name: "Tournament",
     component: Tournament,
     icon: "tim-icons icon-trophy",
+  },
+  {
+    layout: "/home",
+    path: "/pending-withdrawals",
+    name: "Pending Withdrawals",
+    component: PendingWithdrawals,
+    icon: "tim-icons icon-credit-card",
   },
 ];
 
