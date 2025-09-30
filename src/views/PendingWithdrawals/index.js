@@ -121,6 +121,11 @@ class PendingWithdrawals extends React.Component {
         document.body.style.overflow = 'unset';
     }
 
+    componentWillUnmount() {
+        // Cleanup: restore scroll when component unmounts
+        document.body.style.overflow = 'unset';
+    }
+
     render() {
         let { pendingWithdrawalsData, selectedWithdrawal, adminNotes, modalAction, isBalanceModalOpen } = this.state;
         const { isModal, walletBalance } = this.props;
@@ -129,13 +134,12 @@ class PendingWithdrawals extends React.Component {
             {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
-                width: 50,
+                width: 100,
                 filterable: false
             },
             {
                 accessor: 'username',
                 Header: 'Username',
-                width: 150,
                 filterMethod: (filter, row) => {
                     return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
                 },
@@ -144,35 +148,36 @@ class PendingWithdrawals extends React.Component {
             {
                 accessor: 'paidAmount',
                 Header: 'Paid Amount',
-                width: 150,
                 Cell: ({ original }) => {
                     if (original.paidAmount && original.paidCoinType) {
                         return `${original.paidAmount} ${original.paidCoinType.toUpperCase()}`;
                     }
                     return 'N/A';
-                }
+                },
+                filterable: false
             },
             {
                 accessor: 'receivedAmount',
                 Header: 'Received Amount',
-                width: 180,
                 Cell: ({ original }) => {
                     if (original.receivedAmount && original.receivedCoinType) {
                         return `${original.receivedAmount} ${original.receivedCoinType.toUpperCase()}`;
                     }
                     return 'N/A';
-                }
+                },
+                filterable: false
             },
             {
                 accessor: 'withdrawalMethod',
                 Header: 'Method',
-                width: 120,
-                Cell: ({ value }) => value || 'N/A'
+                Cell: ({ value }) => value || 'N/A',
+                filterMethod: (filter, row) => {
+                    return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
+                }
             },
             {
                 accessor: 'userWalletAddress',
                 Header: 'Wallet Address',
-                width: 250,
                 Cell: ({ value }) => {
                     if (value) {
                         // Show first 6 and last 6 characters for long addresses
@@ -182,23 +187,26 @@ class PendingWithdrawals extends React.Component {
                         return value;
                     }
                     return 'N/A';
-                }
+                },
+                filterable: false
             },
             {
                 accessor: 'KYCStatus',
                 Header: 'KYC Status',
-                width: 100,
                 Cell: ({ value }) => value ? (
                     <span className={`kyc-status ${value === 'verified' ? 'verified' : 'pending'}`}>
                         {value}
                     </span>
-                ) : 'N/A'
+                ) : 'N/A',
+                filterMethod: (filter, row) => {
+                    return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
+                }
             },
             {
                 accessor: 'requestedAt',
                 Header: 'Request Date',
-                width: 150,
-                Cell: ({ value }) => value ? new Date(value).toLocaleDateString() : 'N/A'
+                Cell: ({ value }) => value ? new Date(value).toLocaleDateString() : 'N/A',
+                filterable: false
             },
             {
                 Cell: item => (
@@ -208,7 +216,6 @@ class PendingWithdrawals extends React.Component {
                     </div>
                 ),
                 Header: 'Actions',
-                width: 180,
                 filterable: false
             },
         ];
@@ -216,7 +223,7 @@ class PendingWithdrawals extends React.Component {
         return (
             <div className='content'>
                 <div className="main-container pending-withdrawals">
-                    <div className='main-container-head mb-3 d-flex justify-content-between align-items-center'>
+                    <div className='main-container-head mb-3'>
                         <p className="main-container-heading">PENDING WITHDRAWALS</p>
                         <button className="balance-btn" onClick={this.openBalanceModal}>
                             Balance
@@ -226,7 +233,7 @@ class PendingWithdrawals extends React.Component {
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
-                                className="table withdrawals-table"
+                                className="table"
                                 columns={columns}
                                 filterable={true}
                                 data={pendingWithdrawalsData}

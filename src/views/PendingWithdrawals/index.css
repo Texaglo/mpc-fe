@@ -5,77 +5,10 @@
 }
 
 .pending-withdrawals .main-container-heading {
-    color: #fa6634;
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.withdrawals-table {
-    background-color: #27293d !important;
-}
-
-.withdrawals-table .rt-thead.-header {
-    background-color: #1e1e2e;
-    border-bottom: 2px solid #fa6634;
-}
-
-.withdrawals-table .rt-th {
-    color: #fa6634 !important;
-    font-weight: bold;
-    text-align: center;
-    padding: 15px 10px;
-    border-right: 1px solid #3a3b4d;
-}
-
-.withdrawals-table .rt-tbody .rt-tr {
-    background-color: #27293d;
-    border-bottom: 1px solid #3a3b4d;
-}
-
-.withdrawals-table .rt-tbody .rt-tr:hover {
-    background-color: #32344a;
-}
-
-.withdrawals-table .rt-td {
-    color: #fff;
-    text-align: center;
-    padding: 12px 10px;
-    border-right: 1px solid #3a3b4d;
-}
-
-.withdrawals-table .-pagination {
-    background-color: #1e1e2e;
-    color: #fff;
-    padding: 15px;
-    border-top: 2px solid #fa6634;
-}
-
-.withdrawals-table .-pagination .-btn {
-    background-color: #fa6634;
-    color: #fff;
-    border: none;
-    padding: 8px 15px;
-    margin: 0 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.withdrawals-table .-pagination .-btn:hover {
-    background-color: #ff7c4d;
-}
-
-.withdrawals-table .-pagination .-btn:disabled {
-    background-color: #3a3b4d;
-    cursor: not-allowed;
-}
-
-.withdrawals-table .rt-noData {
-    background-color: #27293d;
-    color: #fff;
-    padding: 30px;
-    text-align: center;
+    color: #d0a535 !important;
+    font-size: 18px;
+    font-weight: 550;
+    margin-top: 10px;
 }
 
 .action-buttons {
@@ -155,28 +88,6 @@
     color: white;
 }
 
-.withdrawals-table input {
-    background-color: #1e1e2e;
-    color: #fff;
-    border: 1px solid #fa6634;
-    padding: 5px 10px;
-    border-radius: 5px;
-    width: 100%;
-}
-
-.withdrawals-table input:focus {
-    outline: none;
-    border-color: #ff7c4d;
-    box-shadow: 0 0 5px rgba(250, 102, 52, 0.3);
-}
-
-.withdrawals-table select {
-    background-color: #1e1e2e;
-    color: #fff;
-    border: 1px solid #fa6634;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
 
 /* Modal Styles */
 .reward-modal .modal-content {
@@ -274,60 +185,74 @@
 
 /* Balance Button */
 .balance-btn {
-    background-color: #fa6634;
-    color: white;
-    padding: 10px 24px;
+    background-color: #d0a535;
+    color: #000;
+    padding: 8px 20px;
     border: none;
     border-radius: 5px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    text-transform: uppercase;
     font-size: 14px;
+    margin-top: 10px;
 }
 
 .balance-btn:hover {
-    background-color: #ff7c4d;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(250, 102, 52, 0.3);
+    background-color: #e0b545;
+    opacity: 0.9;
 }
 
 /* Balance Modal */
+.balance-modal {
+    overflow-y: auto !important;
+}
+
 .balance-modal .modal-dialog {
     max-width: 900px;
     width: 90%;
+    margin: 30px auto;
+    transform: none !important;
 }
 
 .balance-modal .modal-content {
-    background-color: #27293d;
-    border: 2px solid #fa6634;
-    max-height: 90vh;
-    overflow-y: auto;
+    background-color: #191e23;
+    border: 2px solid #d0a535;
+    position: relative;
+    overflow-x: hidden;
 }
 
 .balance-modal .modal-header {
-    background-color: #1e1e2e;
-    border-bottom: 2px solid #fa6634;
+    background-color: #191e23;
+    border-bottom: 2px solid #d0a535;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .balance-modal .modal-body {
-    background-color: #27293d;
-    max-height: calc(90vh - 100px);
+    background-color: #191e23;
+    max-height: calc(90vh - 150px);
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Wallet Card */
 .wallet-card {
-    background-color: #1e1e2e;
+    background-color: rgba(111, 114, 119, .25098039215686274);
     padding: 20px;
     border-radius: 10px;
-    border: 1px solid #3a3b4d;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .wallet-card:hover {
-    border-color: #fa6634;
-    box-shadow: 0 4px 12px rgba(250, 102, 52, 0.2);
+    border-color: #d0a535;
+    box-shadow: 0 4px 12px rgba(208, 165, 53, 0.3);
+}
+
+.wallet-card h5 {
+    word-break: break-word;
 }
 
 .wallet-info p {
@@ -335,12 +260,15 @@
     margin: 10px 0;
     font-size: 14px;
     line-height: 1.6;
+    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .wallet-label {
-    color: #fa6634;
+    color: #d0a535;
     font-weight: bold;
     margin-right: 8px;
+    display: inline-block;
 }
 
 /* Wallet Status Badge */
@@ -392,7 +320,7 @@
 
 /* Refill Instructions */
 .refill-instructions {
-    background-color: #1e1e2e;
+    background-color: rgba(111, 114, 119, .25098039215686274);
     padding: 20px;
     border-radius: 10px;
     border: 2px solid #ff9800;
