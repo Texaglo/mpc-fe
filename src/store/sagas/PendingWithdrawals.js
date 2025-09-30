@@ -1,6 +1,6 @@
 import axios from 'axios';
 import EventBus from 'eventing-bus';
-import { setPendingWithdrawals } from "../actions/PendingWithdrawals";
+import { setPendingWithdrawals, setWalletBalance } from "../actions/PendingWithdrawals";
 import { setLoader } from "../actions/Auth"
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 
@@ -36,7 +36,7 @@ function* approveWithdrawal({ payload }) {
 /************************** REJECT WITHDRAWAL *****************************/
 function* rejectWithdrawal({ payload }) {
     yield put(setLoader(true));
-    const { error, response } = yield call(postCall, { 
+    const { error, response } = yield call(postCall, {
         path: `/wallet/withdrawals/reject`,
         payload: {
             withdrawalId: payload.withdrawalId,
@@ -53,10 +53,24 @@ function* rejectWithdrawal({ payload }) {
     }
 };
 
+/************************** GET WALLET BALANCE *****************************/
+function* getWalletBalance() {
+    yield put(setLoader(true));
+    const { error, response } = yield call(getCall, '/wallet/admin/wallets/balance');
+    if (error) {
+        EventBus.publish("error", error['response']['data']['message']);
+        yield put(setLoader(false));
+    } else if (response) {
+        yield put(setWalletBalance(response['data']['body']));
+        yield put(setLoader(false));
+    }
+};
+
 function* actionWatcher() {
     yield takeEvery('GET_PENDING_WITHDRAWALS', getPendingWithdrawals);
     yield takeEvery('APPROVE_WITHDRAWAL', approveWithdrawal);
     yield takeEvery('REJECT_WITHDRAWAL', rejectWithdrawal);
+    yield takeEvery('GET_WALLET_BALANCE', getWalletBalance);
 };
 
 export default function* rootSaga() {

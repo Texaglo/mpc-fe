@@ -21,3 +21,12 @@ export const updateWithdrawalStatus = (data) => ({
     type: 'UPDATE_WITHDRAWAL_STATUS',
     payload: data
 });
+
+export const getWalletBalance = () => ({
+    type: 'GET_WALLET_BALANCE',
+});
+
+export const setWalletBalance = (data) => ({
+    type: 'SET_WALLET_BALANCE',
+    payload: data
+});

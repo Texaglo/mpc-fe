@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
-import { getPendingWithdrawals, approveWithdrawal, rejectWithdrawal } from "../../store/actions/PendingWithdrawals"
+import { getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, getWalletBalance } from "../../store/actions/PendingWithdrawals"
 import { setLoader, toggleModal } from "../../store/actions/Auth";
 import EventBus from 'eventing-bus';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -40,7 +40,8 @@ class PendingWithdrawals extends React.Component {
             pendingWithdrawalsData: [],
             selectedWithdrawal: null,
             adminNotes: '',
-            modalAction: '' // 'approve' or 'reject'
+            modalAction: '', // 'approve' or 'reject'
+            isBalanceModalOpen: false
         };
         props.getPendingWithdrawals();
     }
@@ -83,7 +84,7 @@ class PendingWithdrawals extends React.Component {
 
     submitAction = async () => {
         const { selectedWithdrawal, adminNotes, modalAction } = this.state;
-        
+
         if (!adminNotes.trim()) {
             EventBus.publish("error", `Please provide ${modalAction === 'approve' ? 'approval' : 'rejection'} notes`);
             return;
@@ -92,24 +93,37 @@ class PendingWithdrawals extends React.Component {
         // Close modal and clear state
         this.props.toggleModal(false);
         this.setState({ selectedWithdrawal: null, adminNotes: '', modalAction: '' });
-        
+
         // Dispatch the action - saga will handle loader and refresh
         if (modalAction === 'approve') {
-            this.props.approveWithdrawal({ 
+            this.props.approveWithdrawal({
                 withdrawalId: selectedWithdrawal.withdrawalId,
-                adminNotes: adminNotes 
+                adminNotes: adminNotes
             });
         } else {
-            this.props.rejectWithdrawal({ 
+            this.props.rejectWithdrawal({
                 withdrawalId: selectedWithdrawal.withdrawalId,
-                adminNotes: adminNotes 
+                adminNotes: adminNotes
             });
         }
     }
 
+    openBalanceModal = () => {
+        this.setState({ isBalanceModalOpen: true });
+        this.props.getWalletBalance();
+        // Prevent background scroll
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeBalanceModal = () => {
+        this.setState({ isBalanceModalOpen: false });
+        // Restore background scroll
+        document.body.style.overflow = 'unset';
+    }
+
     render() {
-        let { pendingWithdrawalsData, selectedWithdrawal, adminNotes, modalAction } = this.state;
-        const { isModal } = this.props;
+        let { pendingWithdrawalsData, selectedWithdrawal, adminNotes, modalAction, isBalanceModalOpen } = this.state;
+        const { isModal, walletBalance } = this.props;
 
         const columns = [
             {
@@ -128,19 +142,26 @@ class PendingWithdrawals extends React.Component {
                 Cell: ({ value }) => value || 'N/A'
             },
             {
-                accessor: 'email',
-                Header: 'Email',
-                width: 200,
-                filterMethod: (filter, row) => {
-                    return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
-                },
-                Cell: ({ value }) => value || 'N/A'
+                accessor: 'paidAmount',
+                Header: 'Paid Amount',
+                width: 150,
+                Cell: ({ original }) => {
+                    if (original.paidAmount && original.paidCoinType) {
+                        return `${original.paidAmount} ${original.paidCoinType.toUpperCase()}`;
+                    }
+                    return 'N/A';
+                }
             },
             {
-                accessor: 'requestedAmount',
-                Header: 'Amount',
-                width: 100,
-                Cell: ({ value }) => value ? `$${value.toFixed(2)}` : 'N/A'
+                accessor: 'receivedAmount',
+                Header: 'Received Amount',
+                width: 180,
+                Cell: ({ original }) => {
+                    if (original.receivedAmount && original.receivedCoinType) {
+                        return `${original.receivedAmount} ${original.receivedCoinType.toUpperCase()}`;
+                    }
+                    return 'N/A';
+                }
             },
             {
                 accessor: 'withdrawalMethod',
@@ -149,18 +170,16 @@ class PendingWithdrawals extends React.Component {
                 Cell: ({ value }) => value || 'N/A'
             },
             {
-                accessor: 'bankDetails',
-                Header: 'Bank Details',
-                width: 200,
+                accessor: 'userWalletAddress',
+                Header: 'Wallet Address',
+                width: 250,
                 Cell: ({ value }) => {
-                    if (value && value.accountNumber) {
-                        return (
-                            <div className="bank-details">
-                                <div>Bank: {value.bankName || 'N/A'}</div>
-                                <div>Account: {value.accountNumber.length > 4 ? `****${value.accountNumber.slice(-4)}` : value.accountNumber}</div>
-                                <div>Routing: {value.routingNumber || 'N/A'}</div>
-                            </div>
-                        );
+                    if (value) {
+                        // Show first 6 and last 6 characters for long addresses
+                        if (value.length > 20) {
+                            return `${value.substring(0, 6)}...${value.substring(value.length - 6)}`;
+                        }
+                        return value;
                     }
                     return 'N/A';
                 }
@@ -174,23 +193,6 @@ class PendingWithdrawals extends React.Component {
                         {value}
                     </span>
                 ) : 'N/A'
-            },
-            {
-                Header: 'Balances',
-                width: 150,
-                Cell: ({ original }) => {
-                    if (original && original.currentBalances) {
-                        return (
-                            <div className="balances">
-                                <div>SC: {original.currentBalances.sweepCoins || 0}</div>
-                                <div>GC: {original.currentBalances.goldCoins || 0}</div>
-                                <div>TC: {original.currentBalances.timeCoins || 0}</div>
-                                <div>MPC: {original.currentBalances.mpcToken || 0}</div>
-                            </div>
-                        );
-                    }
-                    return 'N/A';
-                }
             },
             {
                 accessor: 'requestedAt',
@@ -214,8 +216,11 @@ class PendingWithdrawals extends React.Component {
         return (
             <div className='content'>
                 <div className="main-container pending-withdrawals">
-                    <div className='main-container-head mb-3'>
+                    <div className='main-container-head mb-3 d-flex justify-content-between align-items-center'>
                         <p className="main-container-heading">PENDING WITHDRAWALS</p>
+                        <button className="balance-btn" onClick={this.openBalanceModal}>
+                            Balance
+                        </button>
                     </div>
                     <Fragment>
                         <div className='main-container-head mb-3'>
@@ -246,22 +251,17 @@ class PendingWithdrawals extends React.Component {
                                     <div className="withdrawal-details">
                                         <h5 style={{ color: '#fa6634' }}>Withdrawal Details:</h5>
                                         <p style={{ color: '#fff' }}>User: {selectedWithdrawal.username || 'N/A'}</p>
-                                        <p style={{ color: '#fff' }}>Email: {selectedWithdrawal.email || 'N/A'}</p>
-                                        <p style={{ color: '#fff' }}>Amount: ${selectedWithdrawal.requestedAmount || 0}</p>
-                                        <p style={{ color: '#fff' }}>Method: {selectedWithdrawal.withdrawalMethod || 'N/A'}</p>
                                         <p style={{ color: '#fff' }}>KYC Status: {selectedWithdrawal.KYCStatus || 'N/A'}</p>
-                                        {selectedWithdrawal.bankDetails && (
-                                            <>
-                                                <p style={{ color: '#fff' }}>Bank: {selectedWithdrawal.bankDetails.bankName || 'N/A'}</p>
-                                                <p style={{ color: '#fff' }}>Account: ****{selectedWithdrawal.bankDetails.accountNumber ? selectedWithdrawal.bankDetails.accountNumber.slice(-4) : 'N/A'}</p>
-                                            </>
-                                        )}
+                                        <p style={{ color: '#fff' }}>Paid Amount: {selectedWithdrawal.paidAmount} {selectedWithdrawal.paidCoinType ? selectedWithdrawal.paidCoinType.toUpperCase() : ''}</p>
+                                        <p style={{ color: '#fff' }}>Received Amount: {selectedWithdrawal.receivedAmount} {selectedWithdrawal.receivedCoinType ? selectedWithdrawal.receivedCoinType.toUpperCase() : ''}</p>
+                                        <p style={{ color: '#fff' }}>Method: {selectedWithdrawal.withdrawalMethod || 'N/A'}</p>
+                                        <p style={{ color: '#fff' }}>Wallet Address: {selectedWithdrawal.userWalletAddress || 'N/A'}</p>
+                                        <p style={{ color: '#fff' }}>Requested At: {selectedWithdrawal.requestedAt ? new Date(selectedWithdrawal.requestedAt).toLocaleString() : 'N/A'}</p>
                                     </div>
                                     {modalAction === 'approve' && (
                                         <div className="approval-warning mt-3">
                                             <p style={{ color: '#ff9800', fontSize: '13px' }}>
-                                                ⚠️ Note: Approval will initiate ACH transfer to platform bank account. 
-                                                Manual transfer to user's bank will be required.
+                                                ⚠️ Note: Approval will initiate crypto transfer to user's wallet address.
                                             </p>
                                         </div>
                                     )}
@@ -304,19 +304,104 @@ class PendingWithdrawals extends React.Component {
                         )}
                     </ModalBody>
                 </Modal>
+
+                {/* ---------------BALANCE MODAL--------------- */}
+                <Modal isOpen={isBalanceModalOpen} toggle={this.closeBalanceModal} className="main-modal balance-modal" size="lg">
+                    <ModalHeader toggle={this.closeBalanceModal}>
+                        <div className="reward-modal-title">
+                            <p className=''>Wallet Balances</p>
+                        </div>
+                        <div className="reward-modal-line"><hr /></div>
+                    </ModalHeader>
+                    <ModalBody className="modal-body modal-height reward-modal-body">
+                        {walletBalance ? (
+                            <div className="row">
+                                {/* Warm Wallet */}
+                                <div className="col-12 mb-4">
+                                    <div className="wallet-card">
+                                        <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>Warm Wallet</h5>
+                                        <div className="wallet-info">
+                                            <p><span className="wallet-label">Address:</span> {walletBalance.warmWallet?.address || 'N/A'}</p>
+                                            <p><span className="wallet-label">Balance:</span> {walletBalance.warmWallet?.balanceSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label">Min Balance:</span> {walletBalance.warmWallet?.minBalance || 0} SOL</p>
+                                            <p><span className="wallet-label">Alert Threshold:</span> {walletBalance.warmWallet?.alertThreshold || 0} SOL</p>
+                                            <p>
+                                                <span className="wallet-label">Status:</span>
+                                                <span className={`wallet-status ${walletBalance.warmWallet?.status?.toLowerCase()}`}>
+                                                    {walletBalance.warmWallet?.status || 'N/A'}
+                                                </span>
+                                            </p>
+                                            {walletBalance.warmWallet?.needsRefill && (
+                                                <div className="refill-warning">
+                                                    ⚠️ Wallet needs refill
+                                                </div>
+                                            )}
+                                            {walletBalance.warmWallet?.criticalLow && (
+                                                <div className="critical-warning">
+                                                    🚨 Critical low balance!
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Cold Wallet */}
+                                <div className="col-12 mb-4">
+                                    <div className="wallet-card">
+                                        <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>Cold Wallet</h5>
+                                        <div className="wallet-info">
+                                            <p><span className="wallet-label">Address:</span> {walletBalance.coldWallet?.address || 'N/A'}</p>
+                                            <p><span className="wallet-label">Balance:</span> {walletBalance.coldWallet?.balanceSOL || 'N/A'}</p>
+                                            <p>
+                                                <span className="wallet-label">Configured:</span>
+                                                {walletBalance.coldWallet?.configured ? ' Yes' : ' No'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* MPC Admin Wallet */}
+                                <div className="col-12 mb-4">
+                                    <div className="wallet-card">
+                                        <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>MPC Admin Wallet</h5>
+                                        <div className="wallet-info">
+                                            <p><span className="wallet-label">Address:</span> {walletBalance.mpcAdminWallet?.address || 'N/A'}</p>
+                                            <p><span className="wallet-label">Balance:</span> {walletBalance.mpcAdminWallet?.balanceSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label">Purpose:</span> {walletBalance.mpcAdminWallet?.purpose || 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Refill Instructions */}
+                                {walletBalance.refillInstructions && (
+                                    <div className="col-12">
+                                        <div className="refill-instructions">
+                                            <h5 style={{ color: '#ff9800', marginBottom: '10px' }}>Refill Instructions</h5>
+                                            <p style={{ color: '#fff', fontSize: '14px' }}>{walletBalance.refillInstructions}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="text-center" style={{ color: '#fff', padding: '20px' }}>
+                                <p>Loading wallet balance information...</p>
+                            </div>
+                        )}
+                    </ModalBody>
+                </Modal>
             </div >
         );
     }
 }
 
 const mapDispatchToProps = {
-    getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, setLoader, toggleModal
+    getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, getWalletBalance, setLoader, toggleModal
 };
 
 const mapStateToProps = ({ PendingWithdrawals, Auth }) => {
-    let { pendingWithdrawals } = PendingWithdrawals;
+    let { pendingWithdrawals, walletBalance } = PendingWithdrawals;
     let { isModal } = Auth;
-    return { pendingWithdrawals, isModal };
+    return { pendingWithdrawals, walletBalance, isModal };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PendingWithdrawals);

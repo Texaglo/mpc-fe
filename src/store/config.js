@@ -13,7 +13,7 @@ const testing = 'https://dserver.modernpokerclub.com';
 
 let SocketUrl;
 let env = AppMode[0] || 'development', networkId = '', message = '', explorer = '';
-switch (AppMode[0]) {
+switch (AppMode[3]) {
   case 'development':
     networkId = 1;
     SocketUrl = development;

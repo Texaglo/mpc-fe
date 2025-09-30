@@ -1,5 +1,6 @@
 const INITIAL_STATE = {
     pendingWithdrawals: [],
+    walletBalance: null,
     loading: false,
     error: null
 };
@@ -44,6 +45,20 @@ export default (state = INITIAL_STATE, action) => {
                         ? { ...withdrawal, status: action.payload.status }
                         : withdrawal
                 )
+            };
+
+        case 'GET_WALLET_BALANCE':
+            return {
+                ...state,
+                loading: true
+            };
+
+        case 'SET_WALLET_BALANCE':
+            return {
+                ...state,
+                walletBalance: action.payload,
+                loading: false,
+                error: null
             };
 
         default:
