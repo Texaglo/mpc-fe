@@ -1,5 +1,6 @@
 const INITIAL_STATE = {
     pendingWithdrawals: [],
+    approvedWithdrawals: [],
     walletBalance: null,
     loading: false,
     error: null
@@ -57,6 +58,20 @@ export default (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 walletBalance: action.payload,
+                loading: false,
+                error: null
+            };
+
+        case 'GET_APPROVED_WITHDRAWALS':
+            return {
+                ...state,
+                loading: true
+            };
+
+        case 'SET_APPROVED_WITHDRAWALS':
+            return {
+                ...state,
+                approvedWithdrawals: action.payload || [],
                 loading: false,
                 error: null
             };

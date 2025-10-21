@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
-import { getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, getWalletBalance } from "../../store/actions/PendingWithdrawals"
+import { getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, getWalletBalance, getApprovedWithdrawals } from "../../store/actions/PendingWithdrawals"
 import { setLoader, toggleModal } from "../../store/actions/Auth";
 import EventBus from 'eventing-bus';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -38,17 +38,22 @@ class PendingWithdrawals extends React.Component {
         super(props);
         this.state = {
             pendingWithdrawalsData: [],
+            approvedWithdrawalsData: [],
             selectedWithdrawal: null,
             adminNotes: '',
             modalAction: '', // 'approve' or 'reject'
-            isBalanceModalOpen: false
+            isBalanceModalOpen: false,
+            activeTab: 'pending' // 'pending' or 'approved'
         };
         props.getPendingWithdrawals();
     }
 
-    componentWillReceiveProps({ pendingWithdrawals }) {
+    componentWillReceiveProps({ pendingWithdrawals, approvedWithdrawals }) {
         // Always update the data when props change, even if it's empty
-        this.setState({ pendingWithdrawalsData: pendingWithdrawals || [] })
+        this.setState({
+            pendingWithdrawalsData: pendingWithdrawals || [],
+            approvedWithdrawalsData: approvedWithdrawals || []
+        })
     }
 
     openApproveModal = (withdrawal) => {
@@ -126,11 +131,19 @@ class PendingWithdrawals extends React.Component {
         document.body.style.overflow = 'unset';
     }
 
+    switchTab = (tabName) => {
+        this.setState({ activeTab: tabName });
+        if (tabName === 'approved') {
+            this.props.getApprovedWithdrawals();
+        }
+    }
+
     render() {
-        let { pendingWithdrawalsData, selectedWithdrawal, adminNotes, modalAction, isBalanceModalOpen } = this.state;
+        let { pendingWithdrawalsData, approvedWithdrawalsData, selectedWithdrawal, adminNotes, modalAction, isBalanceModalOpen, activeTab } = this.state;
         const { isModal, walletBalance } = this.props;
 
-        const columns = [
+        // Pending withdrawals columns with Actions
+        const pendingColumns = [
             {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
@@ -220,23 +233,135 @@ class PendingWithdrawals extends React.Component {
             },
         ];
 
+        // Approved withdrawals columns (no Actions, add Processed By and Processed At)
+        const approvedColumns = [
+            {
+                Header: '#',
+                Cell: ({ index }) => index + 1,
+                width: 100,
+                filterable: false
+            },
+            {
+                accessor: 'username',
+                Header: 'Username',
+                filterMethod: (filter, row) => {
+                    return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
+                },
+                Cell: ({ value }) => value || 'N/A'
+            },
+            {
+                accessor: 'paidAmount',
+                Header: 'Paid Amount',
+                Cell: ({ original }) => {
+                    if (original.paidAmount && original.paidCoinType) {
+                        return `${original.paidAmount} ${original.paidCoinType.toUpperCase()}`;
+                    }
+                    return 'N/A';
+                },
+                filterable: false
+            },
+            {
+                accessor: 'receivedAmount',
+                Header: 'Received Amount',
+                Cell: ({ original }) => {
+                    if (original.receivedAmount && original.receivedCoinType) {
+                        return `${original.receivedAmount} ${original.receivedCoinType.toUpperCase()}`;
+                    }
+                    return 'N/A';
+                },
+                filterable: false
+            },
+            {
+                accessor: 'withdrawalMethod',
+                Header: 'Method',
+                Cell: ({ value }) => value || 'N/A',
+                filterMethod: (filter, row) => {
+                    return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
+                }
+            },
+            {
+                accessor: 'userWalletAddress',
+                Header: 'Wallet Address',
+                Cell: ({ value }) => {
+                    if (value) {
+                        // Show first 6 and last 6 characters for long addresses
+                        if (value.length > 20) {
+                            return `${value.substring(0, 6)}...${value.substring(value.length - 6)}`;
+                        }
+                        return value;
+                    }
+                    return 'N/A';
+                },
+                filterable: false
+            },
+            {
+                accessor: 'KYCStatus',
+                Header: 'KYC Status',
+                Cell: ({ value }) => value ? (
+                    <span className={`kyc-status ${value === 'verified' ? 'verified' : 'pending'}`}>
+                        {value}
+                    </span>
+                ) : 'N/A',
+                filterMethod: (filter, row) => {
+                    return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
+                }
+            },
+            {
+                accessor: 'requestedAt',
+                Header: 'Request Date',
+                Cell: ({ value }) => value ? new Date(value).toLocaleDateString() : 'N/A',
+                filterable: false
+            },
+            {
+                accessor: 'processedBy',
+                Header: 'Processed By',
+                Cell: ({ value }) => value || 'N/A',
+                filterable: false
+            },
+            {
+                accessor: 'processedAt',
+                Header: 'Processed At',
+                Cell: ({ value }) => value ? new Date(value).toLocaleString() : 'N/A',
+                filterable: false
+            },
+        ];
+
         return (
             <div className='content'>
                 <div className="main-container pending-withdrawals">
                     <div className='main-container-head mb-3'>
-                        <p className="main-container-heading">PENDING WITHDRAWALS</p>
+                        <p className="main-container-heading">
+                            {activeTab === 'pending' ? 'PENDING WITHDRAWALS' : 'APPROVED WITHDRAWALS'}
+                        </p>
                         <button className="balance-btn" onClick={this.openBalanceModal}>
                             Balance
                         </button>
                     </div>
+
+                    {/* Tabs */}
+                    <div className="tabs-container">
+                        <button
+                            className={`tab-button ${activeTab === 'pending' ? 'active' : ''}`}
+                            onClick={() => this.switchTab('pending')}
+                        >
+                            Pending
+                        </button>
+                        <button
+                            className={`tab-button ${activeTab === 'approved' ? 'active' : ''}`}
+                            onClick={() => this.switchTab('approved')}
+                        >
+                            Approved
+                        </button>
+                    </div>
+
                     <Fragment>
                         <div className='main-container-head mb-3'>
                             <ReactTable
                                 minRows={20}
                                 className="table"
-                                columns={columns}
+                                columns={activeTab === 'pending' ? pendingColumns : approvedColumns}
                                 filterable={true}
-                                data={pendingWithdrawalsData}
+                                data={activeTab === 'pending' ? pendingWithdrawalsData : approvedWithdrawalsData}
                                 resolveData={data => data.map(item => item)}
                             />
                         </div>
@@ -402,13 +527,13 @@ class PendingWithdrawals extends React.Component {
 }
 
 const mapDispatchToProps = {
-    getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, getWalletBalance, setLoader, toggleModal
+    getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, getWalletBalance, getApprovedWithdrawals, setLoader, toggleModal
 };
 
 const mapStateToProps = ({ PendingWithdrawals, Auth }) => {
-    let { pendingWithdrawals, walletBalance } = PendingWithdrawals;
+    let { pendingWithdrawals, approvedWithdrawals, walletBalance } = PendingWithdrawals;
     let { isModal } = Auth;
-    return { pendingWithdrawals, walletBalance, isModal };
+    return { pendingWithdrawals, approvedWithdrawals, walletBalance, isModal };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PendingWithdrawals);

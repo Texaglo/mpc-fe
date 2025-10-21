@@ -1,6 +1,6 @@
 import axios from 'axios';
 import EventBus from 'eventing-bus';
-import { setPendingWithdrawals, setWalletBalance } from "../actions/PendingWithdrawals";
+import { setPendingWithdrawals, setWalletBalance, setApprovedWithdrawals } from "../actions/PendingWithdrawals";
 import { setLoader } from "../actions/Auth"
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 
@@ -53,6 +53,14 @@ function* rejectWithdrawal({ payload }) {
     }
 };
 
+/************************** GET APPROVED WITHDRAWALS *****************************/
+function* getApprovedWithdrawals() {
+    const { error, response } = yield call(getCall, '/wallet/withdrawals/approved');
+    if (error) EventBus.publish("error", error['response']['data']['message']);
+    else if (response) yield put(setApprovedWithdrawals(response['data']['body']));
+    yield put(setLoader(false));
+};
+
 /************************** GET WALLET BALANCE *****************************/
 function* getWalletBalance() {
     yield put(setLoader(true));
@@ -68,6 +76,7 @@ function* getWalletBalance() {
 
 function* actionWatcher() {
     yield takeEvery('GET_PENDING_WITHDRAWALS', getPendingWithdrawals);
+    yield takeEvery('GET_APPROVED_WITHDRAWALS', getApprovedWithdrawals);
     yield takeEvery('APPROVE_WITHDRAWAL', approveWithdrawal);
     yield takeEvery('REJECT_WITHDRAWAL', rejectWithdrawal);
     yield takeEvery('GET_WALLET_BALANCE', getWalletBalance);

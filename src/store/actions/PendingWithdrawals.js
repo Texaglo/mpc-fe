@@ -30,3 +30,12 @@ export const setWalletBalance = (data) => ({
     type: 'SET_WALLET_BALANCE',
     payload: data
 });
+
+export const getApprovedWithdrawals = () => ({
+    type: 'GET_APPROVED_WITHDRAWALS',
+});
+
+export const setApprovedWithdrawals = (data) => ({
+    type: 'SET_APPROVED_WITHDRAWALS',
+    payload: data
+});
