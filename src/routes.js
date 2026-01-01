@@ -11,6 +11,7 @@ import ConversionRate from "./views/ConversionRate";
 import Swap from "./views/Swap";
 import gameStore from "./views/Game Store";
 import PendingWithdrawals from "./views/PendingWithdrawals";
+import Users from "./views/Users";
 
 var routes = [
   {
@@ -102,6 +103,13 @@ var routes = [
     name: "Pending Withdrawals",
     component: PendingWithdrawals,
     icon: "tim-icons icon-credit-card",
+  },
+  {
+    layout: "/home",
+    path: "/users",
+    name: "Users",
+    component: Users,
+    icon: "tim-icons icon-single-02",
   },
 ];
 
