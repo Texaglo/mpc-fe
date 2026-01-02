@@ -11,6 +11,34 @@
     margin-top: 10px;
 }
 
+/* Stats Summary */
+.withdrawals-stats {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    background-color: rgba(111, 114, 119, 0.25);
+    border-radius: 8px;
+    border-left: 4px solid #d0a535;
+}
+
+.withdrawals-stats .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.withdrawals-stats .stat-label {
+    color: #888;
+    font-size: 14px;
+}
+
+.withdrawals-stats .stat-value {
+    color: #d0a535;
+    font-weight: 700;
+    font-size: 16px;
+}
+
 /* Tab Styles */
 .tabs-container {
     display: flex;

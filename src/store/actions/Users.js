@@ -17,3 +17,18 @@ export const updateUserFreezeStatus = (data) => ({
     type: 'UPDATE_USER_FREEZE_STATUS',
     payload: data
 });
+
+export const getUserTransactions = (userId) => ({
+    type: 'GET_USER_TRANSACTIONS',
+    payload: userId
+});
+
+export const setUserTransactions = (data) => ({
+    type: 'SET_USER_TRANSACTIONS',
+    payload: data
+});
+
+export const adjustUserBalance = (data) => ({
+    type: 'ADJUST_USER_BALANCE',
+    payload: data
+});

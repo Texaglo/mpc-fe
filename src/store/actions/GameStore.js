@@ -16,3 +16,8 @@ export const createGameStore = (data) => ({
     type: 'CREATE_GAME_STORE',
     payload: data
 });
+
+export const toggleStoreItem = (data) => ({
+    type: 'TOGGLE_STORE_ITEM',
+    payload: data
+});

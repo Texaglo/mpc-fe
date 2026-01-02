@@ -1,5 +1,6 @@
-export const getPlayersLeaderboard = () => ({
+export const getPlayersLeaderboard = (params) => ({
     type: 'GET_PLAYERS_LEADERBOARD',
+    payload: params
 });
 
 export const setPlayersLeaderboard = (data) => ({
@@ -7,8 +8,9 @@ export const setPlayersLeaderboard = (data) => ({
     payload: data,
 });
 
-export const getFactionalLeaderboard = () => ({
+export const getFactionalLeaderboard = (params) => ({
     type: 'GET_FACTIONAL_LEADERBOARD',
+    payload: params
 })
 
 export const setFactionalLeaderboard = (data) => ({

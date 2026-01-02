@@ -6,7 +6,8 @@ import { withStyles } from '@material-ui/core/styles';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
-import { createGameStore, updateGameStore, getGameStores } from "../../store/actions/GameStore";
+import { createGameStore, updateGameStore, getGameStores, toggleStoreItem } from "../../store/actions/GameStore";
+import './index.css';
 
 const CustomTextField = withStyles({
     root: {
@@ -80,6 +81,13 @@ const GameStore = () => {
         dispatch(toggleModal(false));
     };
 
+    const handleToggleStatus = (item) => {
+        dispatch(toggleStoreItem({
+            itemId: item._id,
+            isActive: item.isActive === false ? true : false
+        }));
+    };
+
     const columns = [
         {
             Header: '#',
@@ -97,6 +105,27 @@ const GameStore = () => {
         {
             accessor: 'price',
             Header: 'Amount',
+        },
+        {
+            accessor: 'isActive',
+            Header: 'Status',
+            Cell: ({ original }) => (
+                <div className="toggle-container">
+                    <label className="toggle-switch">
+                        <input
+                            type="checkbox"
+                            checked={original.isActive !== false}
+                            onChange={() => handleToggleStatus(original)}
+                        />
+                        <span className="toggle-slider"></span>
+                    </label>
+                    <span className={`status-text ${original.isActive !== false ? 'active' : 'inactive'}`}>
+                        {original.isActive !== false ? 'Active' : 'Inactive'}
+                    </span>
+                </div>
+            ),
+            filterable: false,
+            width: 150
         },
         {
             Cell: row => (

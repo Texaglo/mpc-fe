@@ -1,3 +1,42 @@
+/* Period Filter */
+.period-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.period-filter label {
+  color: #888;
+  font-size: 14px;
+}
+
+.period-filter select {
+  background-color: #27293d;
+  color: #fff;
+  border: 1px solid #3a3b4d;
+  border-radius: 5px;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px;
+}
+
+.period-filter select:focus {
+  outline: none;
+  border-color: #d0a535;
+  box-shadow: 0 0 8px rgba(208, 165, 53, 0.3);
+}
+
+.period-filter select:hover {
+  border-color: #d0a535;
+}
+
+.period-filter select option {
+  background-color: #27293d;
+  color: #fff;
+}
+
 .user-view-btn {
   display: flex;
   justify-content: center;

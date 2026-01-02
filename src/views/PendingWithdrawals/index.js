@@ -338,6 +338,22 @@ class PendingWithdrawals extends React.Component {
                         </button>
                     </div>
 
+                    {/* Stats Summary */}
+                    {activeTab === 'pending' && pendingWithdrawalsData.length > 0 && (
+                        <div className="withdrawals-stats">
+                            <div className="stat-item">
+                                <span className="stat-label">Total Pending:</span>
+                                <span className="stat-value">
+                                    {pendingWithdrawalsData.reduce((sum, w) => sum + (parseFloat(w.receivedAmount) || 0), 0).toFixed(6)} SOL
+                                </span>
+                            </div>
+                            <div className="stat-item">
+                                <span className="stat-label">Count:</span>
+                                <span className="stat-value">{pendingWithdrawalsData.length}</span>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Tabs */}
                     <div className="tabs-container">
                         <button

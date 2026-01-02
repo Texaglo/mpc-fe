@@ -10,6 +10,7 @@ import WithdrawSwap from "./WithdrawSwap";
 import GameStore from "./GameStore";
 import PendingWithdrawals from "./PendingWithdrawals";
 import Users from "./Users";
+import Dashboard from "./Dashboard";
 
 export default combineReducers(
   {
@@ -23,5 +24,6 @@ export default combineReducers(
     WithdrawSwap: WithdrawSwap,
     GameStore: GameStore,
     PendingWithdrawals: PendingWithdrawals,
-    Users: Users
+    Users: Users,
+    Dashboard: Dashboard
   });

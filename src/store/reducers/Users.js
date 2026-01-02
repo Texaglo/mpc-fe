@@ -6,6 +6,7 @@ const INITIAL_STATE = {
         totalUsers: 0,
         limit: 20
     },
+    userTransactions: [],
     loading: false,
     error: null
 };
@@ -33,6 +34,23 @@ export default (state = INITIAL_STATE, action) => {
                 users: state.users.map(user =>
                     user._id === action.payload.userId
                         ? { ...user, isFrozen: action.payload.isFrozen }
+                        : user
+                )
+            };
+
+        case 'SET_USER_TRANSACTIONS':
+            return {
+                ...state,
+                userTransactions: action.payload || [],
+                loading: false
+            };
+
+        case 'UPDATE_USER_BALANCE':
+            return {
+                ...state,
+                users: state.users.map(user =>
+                    user._id === action.payload.userId
+                        ? { ...user, mpceCredit: action.payload.newBalance }
                         : user
                 )
             };

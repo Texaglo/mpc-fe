@@ -7,7 +7,7 @@ import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 /************************** GET ALL GAME ITEMS *****************************/
 function* getGameStores() {
-    const { error, response } = yield call(getCall, '/items/getAllItems');
+    const { error, response } = yield call(getCall, '/store/admin/items');
     if (error) EventBus.publish("error", error['response']['data']);
     else if (response) yield put(setGameStore(response['data']['body']));
     yield put(setLoader(false));
@@ -38,10 +38,27 @@ function* createGameStore({ payload }) {
     }
   }
 
+/************************** TOGGLE STORE ITEM STATUS *****************************/
+function* toggleStoreItem({ payload }) {
+    yield put(setLoader(true));
+    const { error, response } = yield call(putCall, {
+        path: `/store/toggleItem/${payload.itemId}`,
+        payload: { isActive: payload.isActive }
+    });
+    if (error) {
+        EventBus.publish("error", error['response']['data']['message']);
+        yield put(setLoader(false));
+    } else if (response) {
+        yield put({ type: "GET_GAME_STORES" });
+        EventBus.publish("success", response['data']['message'] || "Item status updated");
+    }
+}
+
 function* actionWatcher() {
     yield takeEvery('GET_GAME_STORES', getGameStores);
     yield takeEvery('UPDATE_GAME_STORE', updateGameStore);
     yield takeEvery('CREATE_GAME_STORE', createGameStore);
+    yield takeEvery('TOGGLE_STORE_ITEM', toggleStoreItem);
 };
 
 export default function* rootSaga() {

@@ -16,11 +16,12 @@ class Leaderboard extends React.Component {
     state = {
         selectedFaction: null,
         expanded: null,
+        selectedPeriod: 'all'
     };
 
     constructor(props) {
         super(props);
-        props.getFactionalLeaderboard();
+        props.getFactionalLeaderboard({ period: 'all' });
         props.setLoader(true);
     }
 
@@ -41,10 +42,17 @@ class Leaderboard extends React.Component {
         this.setState({ selectedFaction: faction });
     };
 
+    handlePeriodChange = (e) => {
+        const period = e.target.value;
+        this.setState({ selectedPeriod: period });
+        this.props.setLoader(true);
+        this.props.getFactionalLeaderboard({ period });
+    };
+
     render() {
         const { isModal, factionalLeaderboard } = this.props;
         const leaderboardArray = Object.values(factionalLeaderboard);
-        const { selectedFaction } = this.state;
+        const { selectedFaction, selectedPeriod } = this.state;
 
         const columns = [
             {
@@ -94,6 +102,14 @@ class Leaderboard extends React.Component {
                 <div className="main-container player-scores">
                     <div className='main-container-head mb-3'>
                         <p className="main-container-heading">Factional Leaderboard</p>
+                        <div className="period-filter">
+                            <label>Period:</label>
+                            <select value={selectedPeriod} onChange={this.handlePeriodChange}>
+                                <option value="all">All Time</option>
+                                <option value="month">This Month</option>
+                                <option value="week">This Week</option>
+                            </select>
+                        </div>
                     </div>
                     <Fragment>
                         <div className='main-container-head mb-3'>

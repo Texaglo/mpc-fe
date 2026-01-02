@@ -10,6 +10,7 @@ import WithdrawSwap from './WithdrawSwap';
 import GameStore from './GameStore';
 import PendingWithdrawals from './PendingWithdrawals';
 import Users from './Users';
+import Dashboard from './Dashboard';
 
 export default function* rootSaga() {
   yield all([
@@ -23,7 +24,8 @@ export default function* rootSaga() {
     WithdrawSwap(),
     GameStore(),
     PendingWithdrawals(),
-    Users()
+    Users(),
+    Dashboard()
   ]);
 }
 

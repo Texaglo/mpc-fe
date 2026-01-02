@@ -16,9 +16,10 @@ import Users from "./views/Users";
 var routes = [
   {
     layout: "/home",
-    path: "/",
+    path: "/dashboard",
+    name: "Dashboard",
     component: AdminHomePage,
-    hidden: true,
+    icon: "tim-icons icon-chart-pie-36",
   },
   {
     layout: "/home",

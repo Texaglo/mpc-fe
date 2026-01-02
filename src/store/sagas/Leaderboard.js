@@ -7,8 +7,9 @@ import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 /************************** GET PLAYERS LEADERBOARD *****************************/
 
-function* getPlayersLeaderboard() {
-    const { error, response } = yield call(getCall, '/users/leaderboard');
+function* getPlayersLeaderboard({ payload }) {
+    const period = payload?.period || 'all';
+    const { error, response } = yield call(getCall, `/users/leaderboard?period=${period}`);
     if (error) EventBus.publish("error", error['response']['data']['message']);
     else if (response) yield put(setPlayersLeaderboard(response['data']['body']));
     yield put(setLoader(false));
@@ -17,8 +18,9 @@ function* getPlayersLeaderboard() {
 
 /************************** GET FACTIONAL LEADERBOARD *****************************/
 
-function* getFactionalLeaderboard() {
-    const { error, response } = yield call(getCall, '/users/factionalLeaderboard');
+function* getFactionalLeaderboard({ payload }) {
+    const period = payload?.period || 'all';
+    const { error, response } = yield call(getCall, `/users/factionalLeaderboard?period=${period}`);
     if (error) EventBus.publish("error", error['response']['data']['message']);
     else if (response) yield put(setFactionalLeaderboard(response['data']['body']));
     yield put(setLoader(false));
