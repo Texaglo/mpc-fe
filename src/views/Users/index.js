@@ -109,8 +109,8 @@ class Users extends React.Component {
                 filterable: false
             },
             {
-                accessor: 'mpcToken',
-                Header: 'MPC',
+                accessor: 'mpceCredit',
+                Header: 'MPCE',
                 Cell: ({ value }) => value?.toLocaleString() || '0',
                 filterable: false,
                 width: 100
