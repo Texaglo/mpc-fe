@@ -1,7 +1,7 @@
 import axios from 'axios';
 import EventBus from 'eventing-bus';
 import { setGameStore } from "../actions/GameStore";
-import { setLoader, toggleModal } from "../actions/Auth"
+import { setLoader } from "../actions/Auth"
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 

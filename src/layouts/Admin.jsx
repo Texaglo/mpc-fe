@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import PerfectScrollbar from "perfect-scrollbar";
-import { HashRouter as Router, Route, Switch } from "react-router-dom";
+import { HashRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 
 // core components
 import routes from "../routes.js";
@@ -59,22 +59,25 @@ class Admin extends React.Component {
   };
 
   getRoutes = routes => {
-    return routes.map((prop, key) => {
-      if (prop.layout === "/home") {
-        return (
-          <Router>
-            <Switch>
-              <Route
-                exact={true}
-                path={prop['layout'] + prop['path']}
-                component={prop['component']}
-                key={key}
-              />
-            </Switch>
-          </Router>
-        );
-      } else return null;
-    });
+    return (
+      <Router>
+        <Switch>
+          {routes.map((prop, key) => {
+            if (prop.layout === "/home") {
+              return (
+                <Route
+                  exact={true}
+                  path={prop['layout'] + prop['path']}
+                  component={prop['component']}
+                  key={key}
+                />
+              );
+            } else return null;
+          })}
+          <Redirect exact from="/home" to="/home/dashboard" />
+        </Switch>
+      </Router>
+    );
   };
 
   selectTab = (activeTab) => this.setState({ activeTab });
