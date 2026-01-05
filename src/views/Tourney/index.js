@@ -279,7 +279,7 @@ class Tournament extends React.Component {
                                             />
                                         </Grid>
 
-                                        {/* Type Field */}
+                                        {/* Type Field - commented out
                                         <Grid className="input-fields" item xs={6}>
                                             <label>Type</label>
                                             <select
@@ -299,6 +299,7 @@ class Tournament extends React.Component {
                                                 <option value="paid">Paid</option>
                                             </select>
                                         </Grid>
+                                        */}
                                     </Grid>
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields time-piker" item xs={6}>

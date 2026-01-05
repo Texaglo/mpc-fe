@@ -369,6 +369,7 @@ class Ring extends React.Component {
                                                 </div>
                                             </Grid>
 
+                                            {/* Type field commented out
                                             <Grid className="input-fields" item xs={6} style={{ display: 'flex', flexDirection: 'column' }}>
                                                 <div style={{ flex: '0 0 auto' }}>
                                                     <label>Type</label>
@@ -389,7 +390,6 @@ class Ring extends React.Component {
                                                         <option value="paid">Paid</option>
                                                     </select>
                                                 </div>
-                                                {/* Invisible spacer to match height */}
                                                 <div style={{
                                                     flex: '0 0 auto',
                                                     height: gameSize ? '24px' : '0',
@@ -398,6 +398,7 @@ class Ring extends React.Component {
                                                     &nbsp;
                                                 </div>
                                             </Grid>
+                                            */}
                                         </Grid>
 
 

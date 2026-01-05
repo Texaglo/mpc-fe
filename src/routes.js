@@ -31,13 +31,13 @@ var routes = [
     component: Leaderboards,
     icon: "tim-icons icon-planet",
   },
-  {
-    layout: "/home",
-    path: "/conversion-rate",
-    name: "Conversion Rate",
-    component: ConversionRate,
-    icon: "tim-icons icon-money-coins",
-  },
+  // {
+  //   layout: "/home",
+  //   path: "/conversion-rate",
+  //   name: "Conversion Rate",
+  //   component: ConversionRate,
+  //   icon: "tim-icons icon-money-coins",
+  // },
   // {
   //   layout: "/home",
   //   path: "/swap",

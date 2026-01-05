@@ -353,6 +353,7 @@ class SitnGo extends React.Component {
                                             {/* <option value="Fixed Limit">Fixed Limit (FL)</option> */}
                                         </select>
                                     </Grid>
+                                    {/* Type field commented out
                                     <Grid className="input-fields" item xs={6}>
                                         <label>Type</label>
                                         <select
@@ -372,6 +373,7 @@ class SitnGo extends React.Component {
                                             <option value="paid">Paid</option>
                                         </select>
                                     </Grid>
+                                    */}
 
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={6}>
