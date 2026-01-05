@@ -38,8 +38,16 @@ function* getDashboardCharts({ payload }) {
 
 /************************** GET AUDIT LOGS *****************************/
 function* getAuditLogs({ payload }) {
-    const { page = 1, limit = 10 } = payload || {};
-    const queryParams = new URLSearchParams({ page, limit }).toString();
+    const { page = 1, limit = 10, period, startDate, endDate } = payload || {};
+    const params = { page, limit };
+    if (period) {
+        params.period = period;
+        if (period === 'custom' && startDate && endDate) {
+            params.startDate = startDate;
+            params.endDate = endDate;
+        }
+    }
+    const queryParams = new URLSearchParams(params).toString();
     const { error, response } = yield call(getCall, `/admin/logs?${queryParams}`);
     if (error) {
         // Silently fail for audit logs - don't show error toast

@@ -53,6 +53,7 @@ const AdminHomePage = () => {
         }
         dispatch(getDashboardStats(params));
         dispatch(getDashboardCharts(params));
+        dispatch(getAuditLogs({ page: 1, limit: 10, ...params }));
     };
 
     const handlePeriodChange = (e) => {
