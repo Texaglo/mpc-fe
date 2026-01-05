@@ -5,17 +5,33 @@ import { setLoader } from "../actions/Auth";
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 /************************** GET DASHBOARD STATS *****************************/
-function* getDashboardStats() {
+function* getDashboardStats({ payload }) {
     yield put(setLoader(true));
-    const { error, response } = yield call(getCall, '/admin/dashboard');
+    const { period, startDate, endDate } = payload || {};
+    let queryParams = '';
+    if (period) {
+        queryParams = `?period=${period}`;
+        if (period === 'custom' && startDate && endDate) {
+            queryParams += `&startDate=${startDate}&endDate=${endDate}`;
+        }
+    }
+    const { error, response } = yield call(getCall, `/admin/dashboard${queryParams}`);
     if (error) EventBus.publish("error", error['response']['data']['message']);
     else if (response) yield put(setDashboardStats(response['data']['body']));
     yield put(setLoader(false));
 }
 
 /************************** GET DASHBOARD CHARTS *****************************/
-function* getDashboardCharts() {
-    const { error, response } = yield call(getCall, '/admin/dashboard/charts');
+function* getDashboardCharts({ payload }) {
+    const { period, startDate, endDate } = payload || {};
+    let queryParams = '';
+    if (period) {
+        queryParams = `?period=${period}`;
+        if (period === 'custom' && startDate && endDate) {
+            queryParams += `&startDate=${startDate}&endDate=${endDate}`;
+        }
+    }
+    const { error, response } = yield call(getCall, `/admin/dashboard/charts${queryParams}`);
     if (error) EventBus.publish("error", error['response']['data']['message']);
     else if (response) yield put(setDashboardCharts(response['data']['body']));
 }

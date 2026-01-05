@@ -1,5 +1,6 @@
-export const getDashboardStats = () => ({
+export const getDashboardStats = (params) => ({
     type: 'GET_DASHBOARD_STATS',
+    payload: params
 });
 
 export const setDashboardStats = (data) => ({
@@ -7,8 +8,9 @@ export const setDashboardStats = (data) => ({
     payload: data
 });
 
-export const getDashboardCharts = () => ({
+export const getDashboardCharts = (params) => ({
     type: 'GET_DASHBOARD_CHARTS',
+    payload: params
 });
 
 export const setDashboardCharts = (data) => ({

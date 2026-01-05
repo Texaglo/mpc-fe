@@ -1,0 +1,126 @@
+/* Leaderboards Page Styles */
+.leaderboards-page {
+    background-color: #1e1e2e;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+/* Leaderboards Tab Styles */
+.leaderboards-tabs-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.leaderboards-tab-button {
+    padding: 10px 30px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 14px;
+    background-color: #27293d;
+    color: #fff;
+}
+
+.leaderboards-tab-button:hover {
+    background-color: #3a3b4d;
+    transform: translateY(-2px);
+}
+
+.leaderboards-tab-button.active {
+    background-color: #d0a535;
+    color: #000;
+    box-shadow: 0 4px 8px rgba(208, 165, 53, 0.4);
+}
+
+.leaderboards-tab-button.active:hover {
+    background-color: #e0b545;
+}
+
+/* Override child component wrappers when embedded in Leaderboards page */
+.leaderboards-content .content {
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.leaderboards-content .main-container {
+    background-color: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+}
+
+.leaderboards-content .player-scores,
+.leaderboards-content .leaderboard-container {
+    background-color: transparent !important;
+}
+
+/* Fix table background colors inside Leaderboards */
+.leaderboards-content .rt-tbody .rt-td {
+    background-color: #191e23 !important;
+    color: white !important;
+}
+
+.leaderboards-content .ReactTable .rt-tbody .rt-tr-group .rt-tr.-even .rt-td {
+    background-color: rgba(111, 114, 119, 0.25) !important;
+}
+
+.leaderboards-content .rt-th .rt-resizable-header-content {
+    background-color: #191e23 !important;
+    color: #fff !important;
+}
+
+.leaderboards-content .pagination-bottom {
+    background-color: #191e23 !important;
+}
+
+.leaderboards-content .ReactTable {
+    background: transparent !important;
+}
+
+.leaderboards-content .ReactTable .rt-table {
+    background: transparent !important;
+}
+
+.leaderboards-content .ReactTable .rt-thead {
+    background: transparent !important;
+}
+
+.leaderboards-content .ReactTable .rt-thead.-header {
+    background: transparent !important;
+}
+
+.leaderboards-content .ReactTable .rt-tbody {
+    background: transparent !important;
+}
+
+.leaderboards-content .ReactTable .rt-tr-group {
+    background: transparent !important;
+}
+
+.leaderboards-content .ReactTable .rt-tr {
+    background: transparent !important;
+}
+
+/* Fix filter inputs */
+.leaderboards-content .ReactTable .rt-thead.-filters input,
+.leaderboards-content .ReactTable .rt-thead.-filters select {
+    background: rgba(111, 114, 119, 0.25) !important;
+    color: #fff !important;
+}
+
+/* Fix pagination */
+.leaderboards-content .ReactTable .-pagination {
+    background-color: #191e23 !important;
+}
+
+.leaderboards-content .ReactTable .-pagination .-btn {
+    background-color: #27293d !important;
+    color: #fff !important;
+}
+
+.leaderboards-content .ReactTable .-pagination .-pageInfo {
+    color: #fff !important;
+}

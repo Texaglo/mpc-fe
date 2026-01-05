@@ -4,6 +4,11 @@
 
 .dashboard-header {
     margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .dashboard-title {
@@ -11,6 +16,120 @@
     font-size: 24px;
     font-weight: 600;
     margin: 0;
+}
+
+/* Period Filter Styles */
+.period-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.period-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.period-filter label {
+    color: #888;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.period-filter select {
+    background-color: #191e23;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.period-filter select:hover {
+    border-color: #d0a535;
+}
+
+.period-filter select:focus {
+    border-color: #d0a535;
+    box-shadow: 0 0 0 2px rgba(208, 165, 53, 0.2);
+}
+
+/* Custom Date Picker */
+.custom-date-picker {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    padding: 10px 15px;
+    background-color: rgba(111, 114, 119, 0.25);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.date-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-input-group label {
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.date-input-group input[type="date"] {
+    background-color: #191e23;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.date-input-group input[type="date"]:hover {
+    border-color: #d0a535;
+}
+
+.date-input-group input[type="date"]:focus {
+    border-color: #d0a535;
+    box-shadow: 0 0 0 2px rgba(208, 165, 53, 0.2);
+}
+
+.date-input-group input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+.apply-btn {
+    background-color: #d0a535;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.apply-btn:hover:not(:disabled) {
+    background-color: #e0b545;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(208, 165, 53, 0.4);
+}
+
+.apply-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Stats Grid */

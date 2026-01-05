@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './index.css';
 import { useDispatch, useSelector } from "react-redux";
 import { getDashboardStats, getDashboardCharts, getAuditLogs } from '../../store/actions/Dashboard';
@@ -35,11 +35,45 @@ const AdminHomePage = () => {
     const dispatch = useDispatch();
     const { stats, charts, auditLogs } = useSelector(state => state.Dashboard);
 
+    const [selectedPeriod, setSelectedPeriod] = useState('all');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [showCustomDates, setShowCustomDates] = useState(false);
+
     useEffect(() => {
-        dispatch(getDashboardStats());
-        dispatch(getDashboardCharts());
+        fetchDashboardData();
         dispatch(getAuditLogs({ page: 1, limit: 10 }));
-    }, [dispatch]);
+    }, []);
+
+    const fetchDashboardData = (period = 'all', start = '', end = '') => {
+        const params = { period };
+        if (period === 'custom' && start && end) {
+            params.startDate = start;
+            params.endDate = end;
+        }
+        dispatch(getDashboardStats(params));
+        dispatch(getDashboardCharts(params));
+    };
+
+    const handlePeriodChange = (e) => {
+        const period = e.target.value;
+        setSelectedPeriod(period);
+
+        if (period === 'custom') {
+            setShowCustomDates(true);
+        } else {
+            setShowCustomDates(false);
+            setStartDate('');
+            setEndDate('');
+            fetchDashboardData(period);
+        }
+    };
+
+    const handleCustomDateApply = () => {
+        if (startDate && endDate) {
+            fetchDashboardData('custom', startDate, endDate);
+        }
+    };
 
     // Default chart data if API data not available
     const defaultDailyUsers = {
@@ -199,6 +233,44 @@ const AdminHomePage = () => {
             <div className="main-container dashboard-container">
                 <div className="dashboard-header">
                     <h2 className="dashboard-title">Dashboard</h2>
+                    <div className="period-filter-container">
+                        <div className="period-filter">
+                            <label>Period:</label>
+                            <select value={selectedPeriod} onChange={handlePeriodChange}>
+                                <option value="all">All Time</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        {showCustomDates && (
+                            <div className="custom-date-picker">
+                                <div className="date-input-group">
+                                    <label>From:</label>
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="date-input-group">
+                                    <label>To:</label>
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                    />
+                                </div>
+                                <button
+                                    className="apply-btn"
+                                    onClick={handleCustomDateApply}
+                                    disabled={!startDate || !endDate}
+                                >
+                                    Apply
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="stats-grid">
