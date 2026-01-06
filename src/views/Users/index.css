@@ -157,12 +157,11 @@
 /* Modal Styles */
 .freeze-modal .modal-content {
     background-color: #27293d;
-    border: 2px solid #d0a535;
+    border: 2px solid #fa6634;
 }
 
 .freeze-modal .modal-header {
-    background-color: #1e1e2e;
-    border-bottom: 2px solid #d0a535;
+    border-bottom: 2px solid #fa6634;
 }
 
 .freeze-modal .modal-title p {
@@ -315,12 +314,12 @@
 /* History Modal */
 .history-modal .modal-content {
     background-color: #27293d;
-    border: 2px solid #d0a535;
-    max-width: 800px;
+    border: 2px solid #fa6634;
+    width: 800px;
 }
 
 .history-modal .modal-header {
-    background-color: #1e1e2e;
+    /* background-color: #1e1e2e; */
     border-bottom: 2px solid #d0a535;
 }
 
@@ -431,12 +430,12 @@
 /* Adjust Balance Modal */
 .adjust-modal .modal-content {
     background-color: #27293d;
-    border: 2px solid #d0a535;
+    border: 2px solid #fa6634;
 }
 
 .adjust-modal .modal-header {
-    background-color: #1e1e2e;
-    border-bottom: 2px solid #d0a535;
+    /* background-color: #1e1e2e; */
+    border-bottom: 2px solid #fa6634;
 }
 
 .adjust-modal .modal-title p {
