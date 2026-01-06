@@ -414,9 +414,9 @@ class Users extends React.Component {
                                 </div>
 
                                 <div className="col-12 mt-4 d-flex justify-content-around">
-                                    <button className="cancel-btn col-4" type='button' onClick={this.cancelModal}>Cancel</button>
+                                    <button className="delete-btn add-btn col-4" type='button' onClick={this.cancelModal}>Cancel</button>
                                     <button
-                                        className={`confirm-btn col-4 ${freezeAction ? 'freeze' : 'unfreeze'}`}
+                                        className="add-btn "
                                         type='button'
                                         onClick={this.submitFreezeAction}
                                     >
@@ -492,7 +492,7 @@ class Users extends React.Component {
                                     </div>
                                 </div>
                                 <div className="col-12 mt-4 d-flex justify-content-center">
-                                    <button className="cancel-btn col-4" type='button' onClick={this.closeHistoryModal}>Close</button>
+                                    <button className="delete-btn add-btn col-4" type='button' onClick={this.closeHistoryModal}>Close</button>
                                 </div>
                             </div>
                         )}
@@ -560,9 +560,9 @@ class Users extends React.Component {
                                 </div>
 
                                 <div className="col-12 mt-4 d-flex justify-content-around">
-                                    <button className="cancel-btn col-4" type='button' onClick={this.closeAdjustModal}>Cancel</button>
+                                    <button className="delete-btn add-btn col-4" type='button' onClick={this.closeAdjustModal}>Cancel</button>
                                     <button
-                                        className={`confirm-btn col-4 ${adjustType === 'credit' ? 'credit' : 'debit'}`}
+                                        className="add-btn col-4"
                                         type='button'
                                         onClick={this.handleAdjustSubmit}
                                         disabled={!adjustAmount || parseFloat(adjustAmount) <= 0}
