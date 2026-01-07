@@ -8,6 +8,7 @@ import Swap from "./views/Swap";
 import gameStore from "./views/Game Store";
 import PendingWithdrawals from "./views/PendingWithdrawals";
 import Users from "./views/Users";
+import Settings from "./views/Settings";
 
 var routes = [
   {
@@ -79,6 +80,13 @@ var routes = [
     name: "Users",
     component: Users,
     icon: "tim-icons icon-single-02",
+  },
+  {
+    layout: "/home",
+    path: "/settings",
+    name: "Settings",
+    component: Settings,
+    icon: "tim-icons icon-settings-gear-63",
   },
 ];
 

@@ -11,6 +11,7 @@ import GameStore from './GameStore';
 import PendingWithdrawals from './PendingWithdrawals';
 import Users from './Users';
 import Dashboard from './Dashboard';
+import Settings from './Settings';
 
 export default function* rootSaga() {
   yield all([
@@ -25,7 +26,8 @@ export default function* rootSaga() {
     GameStore(),
     PendingWithdrawals(),
     Users(),
-    Dashboard()
+    Dashboard(),
+    Settings()
   ]);
 }
 

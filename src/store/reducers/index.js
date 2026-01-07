@@ -11,6 +11,7 @@ import GameStore from "./GameStore";
 import PendingWithdrawals from "./PendingWithdrawals";
 import Users from "./Users";
 import Dashboard from "./Dashboard";
+import Settings from "./Settings";
 
 export default combineReducers(
   {
@@ -25,5 +26,6 @@ export default combineReducers(
     GameStore: GameStore,
     PendingWithdrawals: PendingWithdrawals,
     Users: Users,
-    Dashboard: Dashboard
+    Dashboard: Dashboard,
+    Settings: Settings
   });
