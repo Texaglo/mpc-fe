@@ -12,6 +12,7 @@ import PendingWithdrawals from './PendingWithdrawals';
 import Users from './Users';
 import Dashboard from './Dashboard';
 import Settings from './Settings';
+import Marketplace from './Marketplace';
 
 export default function* rootSaga() {
   yield all([
@@ -27,7 +28,8 @@ export default function* rootSaga() {
     PendingWithdrawals(),
     Users(),
     Dashboard(),
-    Settings()
+    Settings(),
+    Marketplace()
   ]);
 }
 

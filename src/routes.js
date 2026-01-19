@@ -9,6 +9,7 @@ import gameStore from "./views/Game Store";
 import PendingWithdrawals from "./views/PendingWithdrawals";
 import Users from "./views/Users";
 import Settings from "./views/Settings";
+import Marketplace from "./views/Marketplace";
 
 var routes = [
   {
@@ -52,6 +53,13 @@ var routes = [
     name: "Game Store",
     component: gameStore,
     icon: "tim-icons icon-bag-16",
+  },
+  {
+    layout: "/home",
+    path: "/marketplace",
+    name: "Marketplace",
+    component: Marketplace,
+    icon: "tim-icons icon-cart",
   },
   {
     layout: "/home",

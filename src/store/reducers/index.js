@@ -12,6 +12,7 @@ import PendingWithdrawals from "./PendingWithdrawals";
 import Users from "./Users";
 import Dashboard from "./Dashboard";
 import Settings from "./Settings";
+import Marketplace from "./Marketplace";
 
 export default combineReducers(
   {
@@ -27,5 +28,6 @@ export default combineReducers(
     PendingWithdrawals: PendingWithdrawals,
     Users: Users,
     Dashboard: Dashboard,
-    Settings: Settings
+    Settings: Settings,
+    Marketplace: Marketplace
   });

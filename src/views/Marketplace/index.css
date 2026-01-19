@@ -1,0 +1,201 @@
+/* Toggle Switch */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #3a3b4d;
+    transition: 0.3s;
+    border-radius: 26px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #fff;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: #4caf50;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.toggle-switch input:focus + .toggle-slider {
+    box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
+}
+
+/* Status Text */
+.status-text {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-text.active {
+    color: #4caf50;
+}
+
+.status-text.inactive {
+    color: #888;
+}
+
+/* Filter Dropdowns */
+.filters-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+}
+
+.filter-group label {
+    margin-right: 8px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.filter-select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    min-width: 150px;
+    background-color: #2a2b3d;
+    color: #fff;
+    border: 1px solid #3a3b4d;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.filter-select:hover {
+    border-color: #fa6634;
+}
+
+.filter-select:focus {
+    border-color: #fa6634;
+    box-shadow: 0 0 4px rgba(250, 102, 52, 0.3);
+}
+
+.filter-select option {
+    background-color: #2a2b3d;
+    color: #fff;
+    padding: 8px;
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pagination-container span {
+    color: #fff;
+    font-size: 14px;
+}
+
+.pagination-container button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Rarity Badges */
+.rarity-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.rarity-common {
+    background-color: #6b7280;
+    color: #fff;
+}
+
+.rarity-uncommon {
+    background-color: #22c55e;
+    color: #fff;
+}
+
+.rarity-rare {
+    background-color: #3b82f6;
+    color: #fff;
+}
+
+.rarity-epic {
+    background-color: #a855f7;
+    color: #fff;
+}
+
+.rarity-legendary {
+    background-color: #f59e0b;
+    color: #fff;
+}
+
+/* Modal Form Select */
+.form-select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 4px;
+    background-color: #2a2b3d !important;
+    color: #fff !important;
+    border: 1px solid #3a3b4d !important;
+}
+
+.form-select option {
+    background-color: #2a2b3d;
+    color: #fff;
+}
+
+.marketplace-modal .modal-dialog {
+    max-width: 600px;
+}
+
+.marketplace-modal .input-fields {
+    margin-bottom: 8px;
+}
+
+.marketplace-modal .input-fields label {
+    color: #fff;
+    font-size: 13px;
+    margin-bottom: 4px;
+    display: block;
+}
