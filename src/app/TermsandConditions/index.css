@@ -1,0 +1,56 @@
+.trems-inner {
+    position: relative;
+    background-position: top center;
+    background-size: 100% 100%;
+    padding: 0 36px 40px;
+    border: 4px solid #72602c;
+    border-radius: 13px;
+}
+
+.trems-box {
+    width: 79%;
+    margin: 0 auto;
+}
+
+.bridge-modals.trems-page {
+    background-attachment: fixed;
+}
+
+.bridge-modals .bridge-content-area .top-area.style-two {
+    padding-top: 7px;
+}
+
+
+.trems-box .trems-inner {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.trems-box .trems-inner h3 {
+    font-size: 21px;
+    margin: 35px 0 15px;
+}
+
+.trems-box .trems-inner p,
+.trems-box .trems-inner ul li,
+.trems-box .trems-inner ol li {
+    margin-bottom: 0;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    color: #b9b5b5;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.trems-box .trems-inner ul, 
+.trems-box .trems-inner ol {
+    margin-left: 15px;
+    margin-top: 8px;
+}
+
+.trems-box .trems-inner ul li ul {
+    margin: 12px 24px;
+}
+
+.trems-page .top-area .sec-title h2 img {
+    width: 400px !important;
+}

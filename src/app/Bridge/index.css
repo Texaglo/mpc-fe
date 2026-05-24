@@ -1,0 +1,769 @@
+.bridge-modals {
+    margin: 0 auto;
+    min-height: 100vh;
+    background-image: url('../../static/images/bridge-modal.jpg');
+    background-size: cover !important;
+    background-position: top center !important;
+    text-align: left !important;
+    background-repeat: no-repeat;
+}
+
+.bridge-modals .bridge-content-area {
+    position: relative;
+}
+
+.bridge-modals .bridge-content-area .top-area {
+    padding-top: 142px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bridge-modals .bridge-content-area .top-area .logo-area {
+    display: none;
+}
+
+.bridge-modals .bridge-content-area .top-area .logo-area img {
+    width: 177px;
+}
+
+.bridge-modals .bridge-content-area .history-sec {
+    position: relative;
+    margin: 38px auto 0;
+}
+
+.bridge-modals .bridge-content-area .history-sec h2 {
+    text-align: center;
+    margin-bottom: 26px;
+    color: #d0a535;
+    font-size: 24px;
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area {
+    position: relative;
+}
+
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table thead tr th {
+    border: none;
+    color: #fff;
+    font-family: 'Big John Regular';
+    font-weight: 400;
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody {
+    border: 4px solid #72602c;
+    border-radius: 13px;
+}
+
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr th,
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr td {
+    border: none;
+    border-radius: 12px;
+    vertical-align: middle;
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr th .nft-box {
+    width: 105px;
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr th .nft-box img {
+    border-radius: 11px;
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr th .nft-box .name {
+    display: block;
+    width: 100%;
+    background-color: #182b3b;
+    border-radius: 7px;
+    margin-top: 9px;
+    color: #fff;
+    font-size: 10px;
+    padding: 3px 10px;
+    text-align: center;
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr td .text-box {
+    position: relative;
+    background-color: #182b3b;
+    text-align: center;
+    color: #ffffff90;
+    border-radius: 10px;
+    width: auto;
+    display: inline-block;
+    padding: 7px 15px;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr td .text-box i {
+    position: relative;
+    top: -2px;
+    margin-right: 13px;
+}
+
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr td .text-box .overlabox {
+    position: absolute;
+    top: 50%;
+    width: 176px;
+    background-color: #182b3b;
+    padding: 10px 15px;
+    word-break: break-all;
+    right: -190px;
+    transform: translateY(-50%);
+    border-radius: 7px;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 3;
+    font-size: 13px;
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr td .text-box .overlabox:before {
+    position: absolute;
+    width: 0;
+      height: 0;
+      border-style: solid;
+    border-width: 10px 10px 10px 0px;
+    border-color: transparent #182b3b transparent transparent;
+    transform: rotate(0deg);
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    content: "";
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr td .text-box:hover .overlabox {
+    opacity: 1;
+    visibility: visible;
+}
+
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr td .text-box .overlabox a{
+    color: #ffffff90;
+}
+.bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr td .text-box .icon-arow svg {
+    width: 10px;
+    height: 10px;
+  }
+  .bridge-modals .bridge-content-area .history-sec .bottom-data-area .table-responsive .table tbody tr td .text-box .icon-arow {
+    display: inline-block;
+    top: 0;
+    margin-right: 0;
+    margin-left: 13px;
+  }
+
+.bridge-modals .bridge-content-area .bridge-section {
+    position: relative;
+    background-color: #182b3b;
+    box-shadow: 13px 0 29px #00000035;
+    border-radius: 35px;
+    padding: 50px;
+    backdrop-filter: blur(10px);
+    -o-backdrop-filter: blur(10px);
+    -ms-backdrop-filter: blur(10px);
+    -moz-backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    width: 89%;
+    margin: 0 auto;
+    border: 3px solid #182b3b;
+    zoom: 0.7;
+}
+
+.bridge-modals .bridge-content-area .top-area .sec-title h2 img {
+    width: 100%;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .nft-selection-area .btn-area {
+    position: relative;
+    margin-top: 25px;
+    text-align: center;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .nft-selection-area .btn-area .btn-style-two {
+    height: 40px;
+    line-height: 22px;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .top-area {
+    justify-content: center;
+    margin-top: -86px;
+    margin-bottom: 20px;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .top-area h2 {
+    background-color: #25292f;
+    padding: 8px 85px;
+    border-radius: 34px;
+    border: 1px solid #d0a535;
+    color: #f6c642;
+    font-size: 34px;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .wallet-area {
+    position: relative;
+    padding: 10px 0 20px;
+    width: 70%;
+    margin: 0 auto;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .wallet-area .group-from {
+    position: relative;
+    display: block;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .wallet-area .group-from label {
+    display: block;
+    width: 100%;
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .wallet-area .group-from input {
+    background-color: #0d161e;
+    border: 1px solid #d0a535;
+    width: 100%;
+    border-radius: 8px;
+    padding: 7px 15px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .nft-selection-area {
+    position: relative;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .nft-selection-area h4 {
+    background-color: #fff;
+    width: auto;
+    display: inline-block;
+    font-size: 15px;
+    padding: 10px;
+    border-radius: 30px;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .nft-selection-area .nft-inner-area {
+    display: flex;
+    align-items: center;
+    margin-top: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.wallet-to-sec .wallet-left .wallet-inner .wallet-connect-btn,
+.wallet-to-sec .wallet-left .wallet-inner input {
+    position: relative;
+    text-align: center;
+    background-color: #182b3b;
+    padding: 11px 23px;
+    border-radius: 38px;
+    color: #ffffff38;
+    border: none;
+    transition: all 0.3s ease-in-out;
+    width: 400px;
+}
+
+.wallet-to-sec .wallet-left .wallet-inner .wallet-connect-btn {
+    cursor: pointer;
+}
+
+.wallet-to-sec .wallet-left .wallet-inner .solana-connect-btn {
+    display: block;
+    margin-top: 10px;
+    color: #d0a535;
+    border: 1px solid #d0a535;
+}
+
+.wallet-to-sec .wallet-left .wallet-inner .wallet-logo {
+    position: relative;
+    background-color: #223141;
+    padding: 7px 15px;
+    color: #fff;
+    font-family: 'Big John Regular';
+    font-size: 18px;
+    border-radius: 7px;
+    width: 181px;
+    margin: 0 auto 15px;
+}
+
+.wallet-to-sec .wallet-left .wallet-inner .wallet-logo i {
+    margin-right: 11px;
+    position: relative;
+    top: -2px;
+}
+
+.bridge-test-panel {
+    margin: 24px auto 0;
+    padding: 18px;
+    width: 100%;
+    border: 1px solid #d0a53570;
+    border-radius: 8px;
+    background-color: #10202d;
+}
+
+.bridge-test-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    align-items: stretch;
+}
+
+.bridge-test-item,
+.bridge-test-btn {
+    min-height: 62px;
+    border-radius: 8px;
+    background-color: #182b3b;
+    border: 1px solid #ffffff12;
+    color: #fff;
+    padding: 10px 12px;
+}
+
+.bridge-test-item span {
+    display: block;
+    color: #ffffff70;
+    font-size: 12px;
+    line-height: 1.3;
+    margin-bottom: 5px;
+}
+
+.bridge-test-item strong {
+    display: block;
+    color: #d0a535;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.bridge-test-btn {
+    cursor: pointer;
+    color: #764503;
+    font-family: 'Big John Regular';
+    background-image: url('../../static/images/new-landing/btn-bg.png');
+    background-size: 100% 100%;
+    background-position: center;
+    border: none;
+}
+
+.bridge-test-error {
+    margin: 12px 0 0;
+    color: #ffb3b3;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.bridge-test-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.bridge-test-result {
+    border-radius: 8px;
+    background-color: #182b3b;
+    padding: 14px;
+    border: 1px solid #ffffff12;
+}
+
+.bridge-test-result h4 {
+    margin: 0 0 10px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Big John Regular';
+}
+
+.bridge-test-result p {
+    margin: 0;
+    color: #ffffff70;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.bridge-token-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid #ffffff12;
+    color: #ffffff90;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.bridge-token-row:first-of-type {
+    border-top: none;
+}
+
+.bridge-token-row span,
+.bridge-token-row strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.bridge-token-row strong {
+    color: #d0a535;
+}
+
+.bridge-token-link,
+.bridge-token-link:hover {
+    color: #ffffff90;
+    text-decoration: none;
+}
+
+.bridge-core-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-top: 1px solid #ffffff12;
+    color: #ffffff90;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.bridge-core-row:first-of-type {
+    border-top: none;
+}
+
+.bridge-core-thumb {
+    position: relative;
+    z-index: 1;
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex: 0 0 42px;
+    background-color: #0d161e;
+}
+
+.bridge-core-thumb-wrap {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #0d161e;
+}
+
+.bridge-core-thumb-wrap img {
+    grid-area: 1 / 1;
+}
+
+.bridge-core-copy {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bridge-core-name {
+    color: #fff;
+    font-weight: 700;
+}
+
+.bridge-core-copy small {
+    color: #ffffff70;
+    font-size: 11px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.bridge-core-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.bridge-core-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 3px;
+}
+
+.bridge-core-traits em {
+    display: inline-block;
+    color: #d0a535;
+    background-color: #0d161e;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-style: normal;
+    font-size: 10px;
+    line-height: 1.25;
+}
+
+.bridge-core-row strong {
+    color: #d0a535;
+    flex: 0 0 auto;
+}
+
+.nft-inner-area .nft-box {
+    position: relative;
+    background-image: url('../../static/images/new-landing/bridge-nft-bg.png');
+    background-size: 100% 100%;
+    background-position: top center;
+    padding: 15px;
+    width: 18%;
+}
+
+.nft-inner-area .nft-box img {
+    border-radius: 15px;
+}
+
+.bridge-nft-image-wrap {
+    position: relative;
+    display: block;
+    aspect-ratio: 1 / 1;
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: #0d161e;
+}
+
+.bridge-nft-image-wrap img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nft-inner-area .nft-box .burn-area {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 13px;
+}
+
+.nft-inner-area .nft-box .burn-area .burn-text {
+    background-color: #131b22;
+    display: block;
+    font-family: 'Big John Regular';
+    padding: 5px 8px;
+    border-radius: 11px;
+    color: #d0a535;
+}
+
+.nft-inner-area .nft-box .burn-area .number-id {
+    color: #fff;
+    padding: 5px 8px;
+    background-color: #294157;
+    width: 45px;
+    text-align: center;
+    font-weight: 500;
+    border-radius: 10px;
+}
+
+.nft-inner-area .nft-box .id-copy-here {
+    display: flex;
+    align-items: center;
+    background-color: #182b3b;
+    margin: 0 15px;
+    justify-content: space-around;
+    padding: 5px 8px;
+    border-radius: 10px;
+}
+
+.nft-inner-area .nft-box .id-copy-here p {
+    margin-bottom: 0;
+    color: #ffffff50;
+}
+
+.nft-inner-area .nft-box .id-copy-here .copy-btn {
+    background-color: transparent;
+    border: none;
+    position: relative;
+    top: -3px;
+}
+
+.nft-inner-area .nft-box input[type="checkbox"][id^="myCheckbox"] {
+    display: none;
+}
+
+.nft-inner-area .nft-box label {
+    border: 1px solid #d0a535;
+    padding: 0;
+    display: block;
+    position: relative;
+    margin: 0 10px;
+    cursor: pointer;
+    border-radius: 12px;
+}
+
+.nft-inner-area .nft-box label:before {
+    background-color: #fff;
+    color: #44aa54;
+    content: " ";
+    display: block;
+    border-radius: 50%;
+    border: 1px solid #44aa54;
+    position: absolute;
+    top: -10px;
+    right: -5px;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+    line-height: 23px;
+    transition-duration: 0.4s;
+    transform: scale(0);
+    font-size: 19px;
+}
+
+.nft-inner-area .nft-box label img {
+    height: 100%;
+    width: 100%;
+    transition-duration: 0.2s;
+    transform-origin: 50% 50%;
+    border-radius: 12px;
+}
+
+.nft-inner-area .nft-box :checked+label {
+    border-color: #d0a535;
+}
+
+.nft-inner-area .nft-box :checked+label:before {
+    content: "✓";
+    background-color: #fff;
+    transform: scale(1);
+}
+
+.nft-inner-area .nft-box :checked+label img {
+    /* box-shadow: 0 0 5px #333; */
+    z-index: -1;
+}
+
+
+.nft-inner-area .nft-box .burn-area .burn-btn {
+    font-family: 'Big John Regular';
+    background-color: transparent !important;
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    border-radius: 6px;
+    height: 100%;
+    font-size: 16px;
+    padding: 7px 25px 10px;
+    color: #764503;
+    border: none;
+    background-image: url('../../static/images/new-landing/btn-bg.png');
+}
+
+.nft-inner-area .nft-box .burn-area .burn-btn span {
+    background-color: #764503;
+    color: transparent;
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
+    -webkit-background-clip: text;
+    -moz-background-clip: text;
+    background-clip: text;
+}
+
+.nft-inner-area .nft-box .burn-area .burn-btn:hover {
+    background-image: url('../../static/images/new-landing/btn-bg-hover.png');
+}
+
+.nft-inner-area .nft-box .burn-area .burn-btn:disabled {
+    cursor: not-allowed;
+    filter: grayscale(1);
+    opacity: 0.55;
+}
+
+.nft-inner-area .nft-box .burn-area .burn-btn:disabled:hover {
+    background-image: url('../../static/images/new-landing/btn-bg.png');
+}
+
+@media(max-width: 1550px) {
+    .bridge-modals .bridge-content-area .top-area .logo-area img {
+        width: 127px;
+    }
+
+    .nft-inner-area .nft-box {
+        width: 22%;
+    }
+}
+
+@media(max-width: 1280px) {
+
+    .wallet-to-sec .wallet-left .wallet-inner .wallet-connect-btn,
+    .wallet-to-sec .wallet-left .wallet-inner input {
+        width: 337px;
+    }
+}
+
+@media(max-width: 1199px) {
+    .nft-inner-area .nft-box {
+        width: 29%;
+    }
+
+    .bridge-test-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media(max-width: 991px) {
+    .bridge-modals .bridge-content-area .top-area {
+        padding-top: 116px;
+    }
+
+    .wallet-to-sec {
+        flex-wrap: wrap;
+    }
+
+    .wallet-to-sec .wallet-left {
+        width: 100%;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .wallet-to-sec .to-btn {
+        margin-bottom: 17px;
+    }
+
+    .nft-inner-area .nft-box {
+        width: 41%;
+    }
+
+    .bridge-test-results {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width: 600px) {
+    .bridge-modals .bridge-content-area .top-area {
+        padding-top: 104px;
+    }
+
+    .bridge-modals .bridge-content-area .bridge-section {
+        width: 100%;
+        padding: 25px;
+    }
+
+    .wallet-to-sec {
+        margin: 0 3px 33px !important;
+    }
+
+    .wallet-to-sec .wallet-left .wallet-inner,
+    .wallet-to-sec .wallet-left .wallet-inner .wallet-connect-btn,
+    .wallet-to-sec .wallet-left .wallet-inner input {
+        width: 100%;
+    }
+
+    .nft-inner-area .nft-box {
+        width: 90%;
+    }
+
+    .bridge-test-grid {
+        grid-template-columns: 1fr;
+    }
+}
