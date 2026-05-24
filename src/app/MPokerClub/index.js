@@ -131,7 +131,7 @@ class MPokerClub extends Component {
                                     <p className="hero-copy">Deposit crypto, buy MPCE time, join a table, and withdraw your balance when you are done.</p>
 
                                     <div className="btn-group hero-actions">
-                                        <a className='banner-btn' target="_blank" rel="noopener noreferrer" href='https://webgl.modernpokerclub.com/'>
+                                        <a className='banner-btn' target="_blank" rel="noopener noreferrer" href='https://tony-update.d3fd413nat6wcy.amplifyapp.com/'>
                                             <i className="play-icon"><img src={require('../../static/images/new-landing/play-icon.png')} alt='' /></i>
                                             <span>Start Playing</span>
                                             <i className="poker-icon"><img src={require('../../static/images/new-landing/poker-icon.png')} alt='' /></i>
