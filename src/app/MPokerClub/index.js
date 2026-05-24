@@ -69,6 +69,33 @@ const marketplaceItems = [
     },
 ];
 
+const playerTypes = [
+    {
+        label: 'Whale',
+        copy: 'A rich poker player willing to splash and go wild',
+        topImage: require('../../static/images/new-landing/become-img-1.png'),
+        characterImage: require('../../static/images/new-landing/become-img-1-1.png'),
+    },
+    {
+        label: 'Shark',
+        copy: 'A professional poker player',
+        topImage: require('../../static/images/new-landing/become-img-2.png'),
+        characterImage: require('../../static/images/new-landing/become-img-2-1.png'),
+    },
+    {
+        label: 'Fish',
+        copy: 'A novice poker player',
+        topImage: require('../../static/images/new-landing/become-img-3.png'),
+        characterImage: require('../../static/images/new-landing/become-img-3-1.png'),
+    },
+    {
+        label: 'Donkey',
+        copy: 'Despite knowing the odds still makes bad decisions',
+        topImage: require('../../static/images/new-landing/become-img-4.png'),
+        characterImage: require('../../static/images/new-landing/become-img-4-1.png'),
+    },
+];
+
 class MPokerClub extends Component {
 
     constructor(props) {
@@ -185,8 +212,38 @@ class MPokerClub extends Component {
                     </div>
                 </section >
 
+                {/* Player Types Section */}
+                <section id="player-types" className="player-types-sec become-sec" style={{ backgroundImage: `url(${require("../../static/images/new-landing/become-bg.png")})` }}>
+                    <div className="auto-container">
+                        <div className="row">
+                            <div className="col-12">
+                                <div className="sec-title text-center">
+                                    <h2><img src={require('../../static/images/new-landing/become-title.png')} alt='Who will you become?' /></h2>
+                                </div>
+                                <div className="become-box-area">
+                                    <div className="become-area">
+                                        {playerTypes.map((type, index) => (
+                                            <div className={`become-box become-box-${index + 1}`} key={type.label}>
+                                                <div className="top-img-area">
+                                                    <img src={type.topImage} alt={type.label} />
+                                                </div>
+                                                <div className="bottom-img-area">
+                                                    <img src={type.characterImage} alt='' />
+                                                </div>
+                                                <div className="text-box">
+                                                    <p>{type.copy}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* How It Works Section */}
-                <section id="how-it-works" className="how-it-works-sec become-sec" style={{ backgroundImage: `url(${require("../../static/images/new-landing/become-bg.png")})` }}>
+                <section id="how-it-works" className="how-it-works-sec" style={{ backgroundImage: `url(${require("../../static/images/new-landing/become-bg.png")})` }}>
                     <div className="auto-container">
                         <div className="row">
                             <div className="col-12">

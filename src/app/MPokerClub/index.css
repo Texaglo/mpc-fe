@@ -3566,6 +3566,48 @@
     line-height: 1.72;
 }
 
+.mp-club-page .player-types-sec {
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow: hidden;
+    padding: 82px 0 88px;
+}
+
+.mp-club-page .player-types-sec .auto-container {
+    max-width: 1420px;
+}
+
+.mp-club-page .player-types-sec .sec-title h2 img {
+    max-width: 520px;
+    width: min(100%, 520px);
+}
+
+.mp-club-page .player-types-sec .become-box-area {
+    margin: 0;
+    transform: none;
+}
+
+.mp-club-page .player-types-sec .become-box-area .become-area {
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.mp-club-page .player-types-sec .become-box-area .become-area .become-box {
+    margin-bottom: 0;
+}
+
+.mp-club-page .player-types-sec .become-box-area .become-area .become-box .top-img-area img,
+.mp-club-page .player-types-sec .become-box-area .become-area .become-box .bottom-img-area img {
+    display: block;
+    height: auto;
+    max-width: 100%;
+}
+
+.mp-club-page .player-types-sec .become-box-area .become-area .become-box .text-box p {
+    text-transform: uppercase;
+}
+
 .mp-club-page .how-it-works-sec {
     background-position: center top;
     background-repeat: no-repeat;
@@ -3931,6 +3973,11 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .mp-club-page .player-types-sec .become-box-area .become-area .become-box .text-box p {
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
     .mp-club-page .market-grid,
     .mp-club-page .faq-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4023,6 +4070,18 @@
         margin-bottom: 0;
         max-width: 680px;
     }
+
+    .mp-club-page .player-types-sec {
+        padding: 64px 0 66px;
+    }
+
+    .mp-club-page .player-types-sec .become-box-area .become-area {
+        gap: 30px 0;
+    }
+
+    .mp-club-page .player-types-sec .become-box-area .become-area .become-box {
+        width: calc(50% - 30px);
+    }
 }
 
 @media(max-width: 767px) {
@@ -4079,6 +4138,21 @@
     .mp-club-page .market-grid,
     .mp-club-page .faq-grid {
         grid-template-columns: 1fr;
+    }
+
+    .mp-club-page .player-types-sec .sec-title h2 img {
+        width: min(100%, 360px);
+    }
+
+    .mp-club-page .player-types-sec .become-box-area .become-area .become-box {
+        margin-left: auto;
+        margin-right: auto;
+        width: min(100%, 285px);
+    }
+
+    .mp-club-page .player-types-sec .become-box-area .become-area .become-box .text-box p {
+        font-size: 12px;
+        line-height: 1.45;
     }
 
     .mp-club-page .migration-preview-sec,
@@ -4144,6 +4218,10 @@
 
     .mp-club-page .about-sec .about-text-area {
         padding: 54px 24px 66px;
+    }
+
+    .mp-club-page .player-types-sec {
+        padding: 54px 0 58px;
     }
 }
 
