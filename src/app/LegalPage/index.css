@@ -1,0 +1,43 @@
+@import '../TermsandConditions/index.css';
+
+.legal-page .legal-title h1 {
+  color: #f3d46c;
+  font-family: 'Big John', Arial, sans-serif;
+  font-size: 34px;
+  letter-spacing: 0;
+  line-height: 1.2;
+  margin: 0 auto 18px;
+  text-transform: uppercase;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+.legal-page .trems-inner {
+  padding-top: 8px;
+}
+
+.legal-page .trems-inner h3 {
+  color: #ffffff;
+  font-family: 'Big John', Arial, sans-serif;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.legal-page .trems-inner p + p,
+.legal-page .trems-inner ul + p,
+.legal-page .trems-inner p + ul {
+  margin-top: 12px;
+}
+
+@media only screen and (max-width: 767px) {
+  .legal-page .legal-title h1 {
+    font-size: 25px;
+  }
+
+  .legal-page .trems-box {
+    width: 94%;
+  }
+
+  .legal-page .trems-inner {
+    padding: 0 18px 30px;
+  }
+}

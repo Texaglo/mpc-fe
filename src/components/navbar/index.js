@@ -16,6 +16,7 @@ class Navbar extends Component {
       isOpen: false,
       error: null,
       showWalletDropdown: false,
+      showLegalDropdown: false,
     };
   }
 
@@ -142,6 +143,20 @@ class Navbar extends Component {
     }));
   };
 
+  toggleLegalDropdown = () => {
+    this.setState((prevState) => ({
+      showLegalDropdown: !prevState.showLegalDropdown
+    }));
+  };
+
+  closeMenus = () => {
+    this.setState({
+      isOpen: false,
+      showLegalDropdown: false,
+      showWalletDropdown: false
+    });
+  };
+
   render() {
     const { sticky, publicAddress } = this.props;
 
@@ -172,6 +187,23 @@ class Navbar extends Component {
                   </li>
                   <li className='nav-item'>
                     <HashLink className='nav-link' smooth to='/#faq'>FAQ</HashLink>
+                  </li>
+                  <li className={`nav-item nav-dropdown ${this.state.showLegalDropdown ? 'open' : ''}`}>
+                    <button className='nav-link legal-toggle' type='button' aria-expanded={this.state.showLegalDropdown} onClick={this.toggleLegalDropdown}>
+                      Legal
+                      <i className="icon">
+                        <svg fill="currentColor" viewBox="0 0 330 330" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M325.607 79.393c-5.857-5.857-15.355-5.858-21.213.001L165.004 218.787 25.607 79.393c-5.857-5.857-15.355-5.858-21.213.001-5.858 5.858-5.858 15.355 0 21.213l150.004 150c2.813 2.813 6.628 4.393 10.606 4.393s7.794-1.581 10.606-4.394l149.996-150c5.863-5.857 5.863-15.355.005-21.213z" />
+                        </svg>
+                      </i>
+                    </button>
+                    <ul className="legal-menu">
+                      <li><Link to="/terms-and-conditions" onClick={this.closeMenus}>Terms of Service</Link></li>
+                      <li><Link to="/privacy-policy" onClick={this.closeMenus}>Privacy Policy</Link></li>
+                      <li><Link to="/responsible-social-gameplay-policy" onClick={this.closeMenus}>Responsible Social Gameplay</Link></li>
+                      <li><Link to="/customer-acceptance-policy" onClick={this.closeMenus}>Customer Acceptance</Link></li>
+                      <li><Link to="/risk-disclaimer" onClick={this.closeMenus}>Risk Disclaimer</Link></li>
+                    </ul>
                   </li>
                 </ul>
 

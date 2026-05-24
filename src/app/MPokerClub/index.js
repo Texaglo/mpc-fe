@@ -316,7 +316,8 @@ class MPokerClub extends Component {
                             <div className="col-12">
                                 <div className="section-copy text-center">
                                     <h2>Risk Disclaimer</h2>
-                                    <p>Poker, crypto assets, NFTs, and blockchain transactions involve risk. Only participate with assets and time you can afford to use, and review the platform terms before playing.</p>
+                                    <p>MPC is a skill-based, time-access entertainment platform. Digital assets, cryptocurrencies, NFTs, and blockchain transactions involve financial and technical risk.</p>
+                                    <Link className="copy-cta" to="/risk-disclaimer">Read Risk Disclaimer</Link>
                                 </div>
                             </div>
                         </div>

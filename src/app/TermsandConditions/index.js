@@ -1,124 +1,142 @@
-import EventBus from "eventing-bus";
-import { connect } from 'react-redux';
-import React, { Component } from 'react';
+import React from 'react';
 
-import './index.css';
-import { web3 } from '../../store/web3';
-import Footer from '../../components/footer';
-import Navbar from '../../components/navbar';
-import Loader from '../../components/loader-bridge';
+import LegalPage from '../LegalPage';
 
+const TermsConditions = (props) => (
+  <LegalPage title="Terms & Conditions" sticky={props.sticky}>
+    <h3>Introduction</h3>
+    <p>These Terms and Conditions (“Terms”) form a legally binding agreement between you (“Player,” “you,” or “your”) and VaultEcho LLC d/b/a ModernPokerClub (“MPC,” “we,” “our,” or “us”).</p>
+    <p>By creating an account, connecting a wallet, purchasing MPCE Time, or participating in any activity on the MPC platform, you agree to be bound by these Terms and all associated rules, policies, and platform guidelines.</p>
+    <p>MPC is a time-based social gaming and entertainment platform that facilitates player-versus-player card gameplay. MPC does not charge rake on individual hands or directly participate in game outcomes.</p>
+    <p>MPC is intended for entertainment purposes only.</p>
 
+    <h3>Time-Based Access Model</h3>
+    <p>MPC operates on a time-based access system. Players purchase MPCE Time to access gameplay sessions and platform features.</p>
+    <p>Players compete directly against one another while their active session time runs. MPC charges for platform access time rather than taking rake from individual pots, hands, or game outcomes.</p>
+    <p>MPC reserves the right to modify pricing structures, gameplay systems, rewards, and access models at any time.</p>
 
-class TermsConditions extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isLoading: false
+    <h3>Player-Vs-Player Gameplay</h3>
+    <p>MPC facilitates player-versus-player gameplay only.</p>
+    <p>MPC does not:</p>
+    <ul>
+      <li>participate in hands,</li>
+      <li>manipulate outcomes,</li>
+      <li>guarantee winnings,</li>
+      <li>provide financial returns,</li>
+      <li>or act as a gambling operator on behalf of players.</li>
+    </ul>
+    <p>Players are solely responsible for their own gameplay decisions and activity.</p>
 
-        };
-    };
+    <h3>Digital Items, NFTs, And MPCE</h3>
+    <p>MPCE, NFTs, avatars, cosmetics, marketplace items, rankings, progression systems, and digital assets available through MPC are intended solely for entertainment and platform utility purposes.</p>
+    <p>These items:</p>
+    <ul>
+      <li>are not investments,</li>
+      <li>are not securities,</li>
+      <li>do not represent ownership in MPC,</li>
+      <li>and carry no guarantee of future value, appreciation, or liquidity.</li>
+    </ul>
+    <p>MPC reserves the right to modify, replace, rebalance, discontinue, or update any digital asset, cosmetic, progression system, faction system, ranking system, or virtual item at any time.</p>
 
-    render() {
-        let { sticky, } = this.props;
-        return (
-            <div className="mp-club-page" onWheel={this.onScroll}>
-                {this.state.isLoading && (<Loader />)}
-                <Navbar sticky={sticky} />
-                <div className="bridge-modals trems-page">
-                    <div className="auto-container">
-                        <div className="row">
-                            <div className="col-12">
-                                <div className='content-area bridge-content-area'>
-                                    <div className="top-area">
-                                        <div className="logo-area">
-                                        </div>
-                                        <div className="sec-title text-center">
-                                            <h2><img src={require('../../static/images/new-landing/trems-title.png')} alt='' /></h2>
-                                        </div>
-                                    </div>
-                                    <div className="trems-box">
-                                        <div className="trems-inner">
-                                            <h3>Introduction</h3>
-                                            <p>These Terms and Conditions (“Terms”) form a binding legal agreement between you (“Player,” “you,” or “your”) and VaultEcho LLC d/b/a ModernPokerClub (“MPC,” “we,” “our,” or “us”). By creating an account or participating in any games on the MPC platform MPC Platform are sponsored by VaultEcho LLC d/b/a ModernPokerClub, you agree to be bound by these Terms and all associated rules, policies, and sweepstakes conditions.</p>
-                                            <p>MPC is an online entertainment platform offering players the ability to participate in social games of skill using <b>Gold Coins</b> (for fun play) and Sweepstakes Coins (for sweepstakes entry), in accordance with applicable laws. <b>MPC does not offer real-money gambling.</b></p>
+    <h3>Eligibility</h3>
+    <p>By using MPC, you represent that:</p>
+    <ul>
+      <li>You are at least 21 years old.</li>
+      <li>You are legally permitted to use the Platform in your jurisdiction.</li>
+      <li>You are not located in a region where participation is prohibited by applicable law.</li>
+    </ul>
+    <p>MPC reserves the right to restrict or deny access to any jurisdiction, region, or user at its sole discretion.</p>
 
-                                            <h3>Gold Coins & Sweepstakes Coins</h3>
-                                            <ul>
-                                                <li><b>Gold Coins:</b> Free-play coins with no cash value. Gold Coins are provided for entertainment only and cannot be redeemed for cash or prizes.</li>
-                                                <li><b>Sweepstakes Coins:</b> Promotional tokens awarded in connection with purchases, promotions, or via free entry methods. Sweepstakes Coins may be used to enter games for the chance to win additional Sweepstakes Coins, which can be redeemed for prizes.</li>
-                                                <li><b>No Purchase Necessary:</b> A purchase or payment of any kind will not increase your chances of winning.</li>
-                                            </ul>
+    <h3>Account Rules</h3>
+    <ul>
+      <li>Only one account per natural person unless explicitly approved by MPC.</li>
+      <li>Accounts may not be sold, transferred, rented, or shared.</li>
+      <li>Users are responsible for maintaining the security of their accounts and wallets.</li>
+      <li>MPC reserves the right to suspend, restrict, investigate, or terminate accounts for violations of these Terms.</li>
+    </ul>
 
-                                            {/* <h3>Free Entry (Alternate Method of Entry – AMOE)</h3>
-                                            <p>Players may obtain Sweepstakes Coins without purchase by mailing a legibly handwritten request including:</p>
-                                            <ul>
-                                                <li>Full name</li>
-                                                <li>Mailing address</li>
-                                                <li>Email address associated with your MPC account <br />to: <b>ModernPokerClub Sweepstakes Entry</b> 5900 balcones dr ste 100, Austin, tx, 78731</li>
-                                            </ul>
-                                            <p>Limit: [1 entry per request / per day]. Requests that are mechanically reproduced, incomplete, or illegible will not be honored.</p>
-                                            <p>What To Do With AMOE</p>
-                                            <ul>
-                                                <li>Players may obtain Sweepstakes Coins for free via our Alternate Method of Entry (AMOE) as described in the Sweepstakes Rules.</li>
-                                            </ul> */}
+    <h3>Fair Play & Platform Integrity</h3>
+    <p>The following activities are strictly prohibited:</p>
+    <ul>
+      <li>Collusion</li>
+      <li>Chip dumping</li>
+      <li>Account sharing</li>
+      <li>Botting</li>
+      <li>Automation scripts</li>
+      <li>Real-time assistance (RTA)</li>
+      <li>Exploits or abuse of bugs</li>
+      <li>Fraudulent activity</li>
+      <li>Harassment or abusive behavior</li>
+      <li>Any attempt to manipulate rankings, rewards, matchmaking, or gameplay systems</li>
+    </ul>
+    <p>MPC reserves the right to investigate suspicious activity and may suspend, restrict, terminate, or permanently ban accounts at its sole discretion.</p>
 
-                                            {/* <h3>What To Do With AMOE</h3>
-                                            <ul>
-                                                <li>Players may obtain Sweepstakes Coins for free via our Alternate Method of Entry (AMOE) as described in the Sweepstakes Rules.</li>
-                                            </ul> */}
+    <h3>Responsible Gameplay</h3>
+    <p>MPC supports responsible gameplay and encourages moderation.</p>
+    <p>Players may have access to:</p>
+    <ul>
+      <li>gameplay reminders,</li>
+      <li>voluntary cooldowns,</li>
+      <li>session limits,</li>
+      <li>self-restrictions,</li>
+      <li>or self-exclusion tools.</li>
+    </ul>
+    <p>MPC reserves the right to restrict or suspend accounts displaying abusive, harmful, fraudulent, or excessive gameplay behavior.</p>
 
-                                            <h3>Eligibility</h3>
-                                            <ul>
-                                                <li>Must be <b>21 years or older</b> at the time of participation.</li>
-                                                <li>Must reside in the <b>United States or Canada (excluding Quebec).</b></li>
-                                                <li><b>Excluded States:</b> Residents of Connecticut, Delaware, Idaho, Louisiana, Michigan, Montana, Nevada, New Jersey, New York, and Washington are not eligible to participate.</li>
-                                                <li>Void where prohibited by law.</li>
-                                            </ul>
+    <h3>Privacy & Data Collection</h3>
+    <p>Your use of the Platform is subject to MPC’s Privacy Policy, which describes how information may be collected, stored, and used.</p>
+    <p>By using MPC, you consent to such collection and usage practices.</p>
 
-                                            <h3>Account Rules</h3>
-                                            <ul>
-                                                <li>Only one account per natural person.</li>
-                                                <li>Accounts may not be transferred, sold, or shared.</li>
-                                                <li>MPC reserves the right to suspend or terminate accounts for fraud, abuse, or violation of these Terms.</li>
-                                            </ul>
+    <h3>Platform Modifications</h3>
+    <p>MPC reserves the right to modify, suspend, discontinue, or update:</p>
+    <ul>
+      <li>gameplay systems,</li>
+      <li>rankings,</li>
+      <li>factions,</li>
+      <li>rewards,</li>
+      <li>cosmetics,</li>
+      <li>marketplace features,</li>
+      <li>NFTs,</li>
+      <li>digital assets,</li>
+      <li>UI/UX elements,</li>
+      <li>pricing structures,</li>
+      <li>or any other platform features at any time without prior notice.</li>
+    </ul>
 
-                                            <h3>Redemption of Sweepstakes Coins</h3>
-                                            <ul>
-                                                <li>Sweepstakes Coins may be redeemed for prizes once a minimum redemption threshold of <b>$5.00 USD </b>is reached.</li>
-                                                <li>Redemption requests may require identity verification (KYC) to confirm age and eligibility.</li>
-                                                {/* <li>Redemption requests may require identity verification (KYC).</li> */}
-                                            </ul>
+    <h3>Disclaimers</h3>
+    <p>MPC is provided “as is” and “as available” without warranties of any kind.</p>
+    <p>MPC does not guarantee:</p>
+    <ul>
+      <li>uninterrupted access,</li>
+      <li>platform availability,</li>
+      <li>financial gain,</li>
+      <li>competitive success,</li>
+      <li>digital asset value,</li>
+      <li>or error-free operation.</li>
+    </ul>
+    <p>Participation on the Platform is at your own risk.</p>
 
-                                            <h3>Responsible Gameplay</h3>
-                                            <p>MPC supports responsible social gameplay. We encourage all players to use moderation and will provide self-limiting tools (such as deposit caps or play-time reminders). MPC may suspend accounts showing excessive or harmful gameplay patterns.</p>
+    <h3>Limitation Of Liability</h3>
+    <p>To the maximum extent permitted by law, MPC and its affiliates shall not be liable for:</p>
+    <ul>
+      <li>indirect damages,</li>
+      <li>lost profits,</li>
+      <li>digital asset loss,</li>
+      <li>gameplay interruptions,</li>
+      <li>wallet issues,</li>
+      <li>or damages arising from use of the Platform.</li>
+    </ul>
 
-                                            <h3>Privacy & Data Collection</h3>
-                                            <p>Your use of the Platform is subject to our <b>Privacy Policy</b>, which describes how we collect, store, and use your information. By using the Platform, you consent to such collection and use.</p>
+    <h3>Dispute Resolution & Arbitration</h3>
+    <p>Any disputes arising from use of MPC shall be resolved through binding individual arbitration.</p>
+    <p>Users waive the right to participate in class-action lawsuits or collective claims.</p>
+    <p>These Terms shall be governed by the laws of the State of Texas.</p>
 
-                                            <h3>Dispute Resolution & Arbitration</h3>
-                                            <p>You agree that any disputes arising from your use of MPC will be resolved through <b>binding individual arbitration</b>. You waive the right to pursue class-action or group claims.</p>
+    <h3>General Terms</h3>
+    <p>MPC reserves the right to update these Terms at any time.</p>
+    <p>Continued use of the Platform constitutes acceptance of revised Terms.</p>
+    <p>If any provision of these Terms is determined to be unenforceable, the remaining provisions shall remain in full force and effect.</p>
+  </LegalPage>
+);
 
-                                            <h3>General Terms</h3>
-                                            <ul>
-                                                <li>MPC reserves the right to update these Terms at any time.</li>
-                                                <li>Continued use of the Platform constitutes acceptance of revised Terms.</li>
-                                                <li>These Terms are governed by the laws of Texas. Any disputes will be resolved through binding individual arbitration in Travis County, Texas.</li>
-                                                <li>MPC may modify, suspend, or terminate promotions or the platform at any time if necessary to comply with applicable laws or regulatory requirements.</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <Footer />
-            </div >
-        );
-    }
-}
-
-
-
-export default (TermsConditions);
+export default TermsConditions;

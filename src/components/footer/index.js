@@ -44,7 +44,8 @@ class Footer extends Component {
                                     <li><Link to="/terms-and-conditions">Terms of Service</Link></li>
                                     <li><Link to="/privacy-policy">Privacy Policy</Link></li>
                                     <li><Link to="/responsible-social-gameplay-policy">Responsible Play</Link></li>
-                                    <li><HashLink smooth to="/#risk-disclaimer">Risk Disclaimer</HashLink></li>
+                                    <li><Link to="/customer-acceptance-policy">Customer Acceptance</Link></li>
+                                    <li><Link to="/risk-disclaimer">Risk Disclaimer</Link></li>
                                 </ul>
                             </div>
                         </div>

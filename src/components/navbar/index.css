@@ -215,9 +215,11 @@ background-color: #543c90;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease-in-out;
+  z-index: 20;
 }
 
-.mp-club-nav .navbar-nav li:hover ul {
+.mp-club-nav .navbar-nav li:hover ul,
+.mp-club-nav .navbar-nav li.open ul {
   opacity: 1;
   visibility: visible;
 }
@@ -225,10 +227,48 @@ background-color: #543c90;
 .mp-club-nav .navbar-nav li ul li {
   min-width: auto;
 }
+
+.mp-club-nav .navbar-nav li.nav-dropdown {
+  position: relative;
+}
+
+.mp-club-nav .navbar-nav li .legal-toggle {
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 6px;
+}
+
+.mp-club-nav .navbar-nav li .legal-toggle,
+.mp-club-nav .navbar-nav li .legal-toggle:focus {
+  background: transparent;
+  outline: none;
+}
+
+.mp-club-nav .navbar-nav li .legal-menu {
+  min-width: 278px;
+  padding: 10px 0;
+}
+
+.mp-club-nav .navbar-nav li .legal-menu li {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.mp-club-nav .navbar-nav li .legal-menu li a {
+  display: block;
+  font-size: 17px;
+  line-height: 1.35;
+  padding: 10px 18px;
+  white-space: normal;
+}
+
 .mp-club-nav .navbar-nav li a .icon{
   margin-left: 10px;
 }
-.mp-club-nav .navbar-nav li a .icon svg {
+.mp-club-nav .navbar-nav li a .icon svg,
+.mp-club-nav .navbar-nav li .legal-toggle .icon svg {
     width: 13px;
     height: 13px;
 }
@@ -815,6 +855,34 @@ background-color: #543c90;
     margin: 5px 0;
     padding: 5px 10px;
     width: 100%;
+  }
+
+  .mp-club-nav .navbar-nav li.nav-dropdown .legal-menu {
+    background-color: rgba(9, 15, 21, 0.45);
+    border: 0;
+    border-radius: 0;
+    display: none;
+    min-width: 0;
+    opacity: 1;
+    padding: 5px 0 0;
+    position: static;
+    visibility: visible;
+    width: 100%;
+  }
+
+  .mp-club-nav .navbar-nav li.nav-dropdown.open .legal-menu {
+    display: block;
+  }
+
+  .mp-club-nav .navbar-nav li.nav-dropdown .legal-menu li {
+    border-bottom: 0;
+    margin: 0;
+    padding: 0 0 0 12px;
+  }
+
+  .mp-club-nav .navbar-nav li.nav-dropdown .legal-menu li a {
+    font-size: 14px;
+    padding: 8px 0;
   }
 
   .mp-club-nav .navbar-collapse.show .navbar-nav {

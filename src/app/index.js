@@ -12,8 +12,9 @@ import Bridge from './Bridge';
 import MPokerClub from './MPokerClub';
 import Loader from '../components/loader';
 import PrivacyPolicy from './PrivacyPolicy';
-import SweepstakesRules from './SweepstakesRules';
+import RiskDisclaimer from './RiskDisclaimer';
 import TermsandConditions from './TermsandConditions';
+import CustomerAcceptancePolicy from './CustomerAcceptancePolicy';
 import ResponsibleSocialGameplayPolicy from './ResponsibleSocialGameplayPolicy';
 
 import { logout, login } from '../store/actions/Auth';
@@ -61,9 +62,10 @@ class App extends Component {
             <Route exact path='/Bridge' component={props => <Bridge {...props} />} />
             <Route exact path='/MPokerClub' component={props => <MPokerClub {...props} />} />
             <Route exact path='/privacy-policy' component={props => <PrivacyPolicy {...props} />} />
-            <Route exact path='/sweeps-takes-rules' component={props => <SweepstakesRules {...props} />} />
             <Route exact path='/terms-and-conditions' component={props => <TermsandConditions {...props} />} />
             <Route exact path='/responsible-social-gameplay-policy' component={props => <ResponsibleSocialGameplayPolicy {...props} />} />
+            <Route exact path='/customer-acceptance-policy' component={props => <CustomerAcceptancePolicy {...props} />} />
+            <Route exact path='/risk-disclaimer' component={props => <RiskDisclaimer {...props} />} />
           </Switch>
         </Router>
 
