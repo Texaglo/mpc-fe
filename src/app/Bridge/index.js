@@ -8,7 +8,7 @@ import './index.css';
 import Navbar from '../../components/navbar';
 import Footer from '../../components/footer';
 import Loader from '../../components/loader-bridge';
-import { ApiUrl, explorer, solanaExplorer, solanaExplorerClusterQuery, isLocalBridgeTesting, localBridgeNftAddress, localBridgeRpcUrl, localEvmChain, localSolanaRpcUrl } from '../../store/config';
+import { ApiUrl, explorer, solanaExplorer, solanaExplorerClusterQuery, isLocalBridgeTesting, localBridgeNftAddress, localBridgeRpcUrl, localEvmChain, localSolanaRpcUrl, bridgeAllowedEthCollection } from '../../store/config';
 import { setBurnNftRecord, createBurnNftRecord, mintNewNft, setMintedNft, getBurnNftHistory, getWalletNft, setWalletNft, connectWalletSuccess } from '../../store/actions/Auth';
 import { getInjectedEthereumProvider, requestEthereumAccounts, switchToConfiguredEvmNetwork } from '../../store/walletNetworks';
 import BurnAbi from '../../store/contract/development/BurnABI.json'
@@ -27,6 +27,8 @@ class Bridge extends Component {
             solanaBalanceLoading: false,
             solanaAssetsLoading: false,
             coreAssetsLoading: false,
+            discoveredBurns: [],
+            discoveredBurnsLoading: false,
             phantomConnected: false,
             evmNetworkId: null,
             transactionHash: '',
@@ -89,6 +91,7 @@ class Bridge extends Component {
                 this.props.getBurnNftHistory(publicAddress);
             }, 0);
             await this.props.getWalletNft(publicAddress);
+            await this.refreshDiscoveredBurns(publicAddress);
         } catch (e) {
             console.error('Error loading user data:', e);
         }
@@ -186,6 +189,7 @@ class Bridge extends Component {
         const address = publicKey.toString();
         this.setState({ solanaWallet: address, phantomConnected: true }, () => {
             this.refreshSolanaTestingData(address);
+            this.refreshDiscoveredBurns();
         });
     };
 
@@ -232,6 +236,7 @@ class Bridge extends Component {
 
             this.setState({ solanaWallet: address, phantomConnected: true }, () => {
                 this.refreshSolanaTestingData(address);
+                this.refreshDiscoveredBurns();
             });
             EventBus.publish('info', 'Phantom wallet connected!');
         } catch (error) {
@@ -323,6 +328,33 @@ class Bridge extends Component {
         }
 
         return data?.body || [];
+    };
+
+    getBridgeContractAddress = () => localBridgeNftAddress || bridgeAllowedEthCollection;
+
+    refreshDiscoveredBurns = async (walletAddress = this.props.publicAddress) => {
+        if (!walletAddress) return;
+
+        const contractAddress = this.getBridgeContractAddress();
+        const query = contractAddress ? `?contractAddress=${encodeURIComponent(contractAddress)}` : '';
+        this.setState({ discoveredBurnsLoading: true });
+
+        try {
+            const response = await fetch(`${ApiUrl}/bridge/discoverBurned/${walletAddress}${query}`);
+            const data = await this.parseJsonResponse(response, 'Bridge burn discovery returned non-JSON');
+
+            if (!response.ok || data?.code >= 400) {
+                throw new Error(data?.message || 'Unable to discover burned NFTs.');
+            }
+
+            this.setState({
+                discoveredBurns: Array.isArray(data?.body) ? data.body : [],
+                discoveredBurnsLoading: false,
+            });
+        } catch (error) {
+            console.error('Burn discovery error:', error);
+            this.setState({ discoveredBurnsLoading: false });
+        }
     };
 
     refreshSolanaTestingData = async (walletAddress = this.state.solanaWallet) => {
@@ -505,6 +537,90 @@ class Bridge extends Component {
         });
     };
 
+    handleRecoverMint = async (burn) => {
+        const { publicAddress } = this.props;
+        const solanaWallet = this.state.solanaWallet || burn?.SolanaWallet || '';
+
+        if (!publicAddress) {
+            EventBus.publish('info', 'Please connect your Ethereum wallet first.');
+            return;
+        }
+
+        if (!solanaWallet) {
+            EventBus.publish('info', 'Please connect Phantom or paste a Solana wallet first.');
+            return;
+        }
+
+        const tokenId = this.getNormalizedTokenId(burn?.nftTokenId);
+        const contractAddress = burn?.nftContractAddress;
+        const transactionHashEtherum = burn?.transactionHashEtherum;
+        if (!tokenId || !contractAddress || !transactionHashEtherum) {
+            EventBus.publish('error', 'This burned NFT is missing recovery data.');
+            return;
+        }
+
+        this.setState({ isLoading: true });
+        try {
+            const authorization = await this.signBridgeAuthorization({
+                ethWallet: publicAddress,
+                solanaWallet,
+                contractAddress,
+                tokenId,
+            });
+
+            const response = await fetch(`${ApiUrl}/bridge/recoverBurnNftRecord`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nftContractAddress: contractAddress,
+                    nftTokenId: tokenId,
+                    EtherumWallet: publicAddress,
+                    SolanaWallet: solanaWallet,
+                    transactionHashEtherum,
+                    ...authorization,
+                }),
+            });
+            const data = await this.parseJsonResponse(response, 'Bridge recovery returned non-JSON');
+
+            if (!response.ok || data?.code >= 400) {
+                throw new Error(data?.message || 'Unable to recover burn record.');
+            }
+
+            EventBus.publish('success', data?.message || 'Burn record recovered. Retrying mint.');
+            this.props.mintNewNft({
+                tokenId,
+                contractAddress,
+                EtherumWallet: publicAddress,
+                transactionHashEtherum,
+                status: 'burned',
+            });
+            await this.refreshDiscoveredBurns(publicAddress);
+        } catch (error) {
+            console.error('Recover mint error:', error);
+            EventBus.publish('error', error?.message || 'Unable to recover burned NFT.');
+        } finally {
+            this.setState({ isLoading: false });
+        }
+    };
+
+    getRecoverableBurns = () => {
+        const { burnHistory } = this.props;
+        const burnHistoryList = Array.isArray(burnHistory) ? burnHistory : [];
+        const existingKeys = new Set(burnHistoryList.map((record) => {
+            const tx = String(record?.transactionHashEtherum || '').toLowerCase();
+            const tokenId = String(record?.nftTokenId || '');
+            return tx || `${String(record?.nftContractAddress || '').toLowerCase()}:${tokenId}`;
+        }));
+
+        return (this.state.discoveredBurns || []).filter((burn) => {
+            if (!burn || burn.status === 'minted') return false;
+            const tx = String(burn.transactionHashEtherum || '').toLowerCase();
+            const tokenId = String(burn.nftTokenId || '');
+            const key = tx || `${String(burn.nftContractAddress || '').toLowerCase()}:${tokenId}`;
+            return !existingKeys.has(key);
+        });
+    };
+
     renderLocalBridgeTestingPanel = () => {
         if (!isLocalBridgeTesting) return null;
 
@@ -640,6 +756,7 @@ class Bridge extends Component {
         let { sticky, publicAddress, burnHistory, nftMetadata } = this.props;
         const burnHistoryList = Array.isArray(burnHistory) ? burnHistory : [];
         const nftMetadataList = Array.isArray(nftMetadata) ? nftMetadata : [];
+        const recoverableBurns = this.getRecoverableBurns();
 
         return (
             <div className="mp-club-page" onWheel={this.onScroll}>
@@ -687,6 +804,43 @@ class Bridge extends Component {
                                         </div>
                                         {this.renderLocalBridgeTestingPanel()}
                                         <div className="nft-selection-area">
+                                            {(recoverableBurns.length > 0 || this.state.discoveredBurnsLoading) && (
+                                                <div className="recovery-burn-area">
+                                                    <h4>Burned NFTs ready to recover</h4>
+                                                    {this.state.discoveredBurnsLoading ? (
+                                                        <p className="recovery-burn-note">Checking Ethereum burn history</p>
+                                                    ) : (
+                                                        <div className="nft-inner-area recovery-inner-area">
+                                                            {recoverableBurns.map((burn) => (
+                                                                <div className="nft-box recovery-nft-box" key={`${burn.transactionHashEtherum}-${burn.nftTokenId}`}>
+                                                                    <span className="bridge-nft-image-wrap">
+                                                                        {burn.image && (
+                                                                            <img
+                                                                                src={this.getNftImageSrc(burn.image, burn.nftTokenId || burn.nftName)}
+                                                                                data-gateway-index="0"
+                                                                                onError={(event) => this.handleImageError(event, burn.image)}
+                                                                                alt={burn.nftName || ''}
+                                                                            />
+                                                                        )}
+                                                                    </span>
+                                                                    <div className="burn-area">
+                                                                        <span className="number-id">#{burn.nftTokenId}</span>
+                                                                        <button
+                                                                            onClick={() => this.handleRecoverMint(burn)}
+                                                                            className="burn-btn"
+                                                                            type="button"
+                                                                            disabled={burn.metadataReady === false}
+                                                                            title={burn.metadataReady === false ? 'Replacement metadata is not available for this token.' : ''}
+                                                                        >
+                                                                            <span>retry mint</span>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                             <div className="nft-inner-area">
                                                 {nftMetadataList.length === 0 ? (
                                                     <p>No NFT found in your wallet</p>

@@ -255,6 +255,33 @@
     overflow-y: auto;
 }
 
+.bridge-modals .bridge-content-area .bridge-section .nft-selection-area .recovery-burn-area {
+    margin: 0 auto 34px;
+    padding: 18px;
+    width: min(100%, 980px);
+    border: 1px solid rgba(208, 165, 53, 0.48);
+    border-radius: 8px;
+    background: rgba(16, 32, 45, 0.82);
+}
+
+.bridge-modals .bridge-content-area .bridge-section .nft-selection-area .recovery-burn-area h4 {
+    background: transparent;
+    color: #d0a535;
+    font-family: 'Big John Regular';
+    margin: 0;
+    padding: 0;
+    text-transform: uppercase;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .nft-selection-area .recovery-burn-note {
+    color: #d7dde5;
+    margin: 16px 0 0;
+}
+
+.bridge-modals .bridge-content-area .bridge-section .nft-selection-area .recovery-inner-area {
+    margin-top: 18px;
+}
+
 .wallet-to-sec .wallet-left .wallet-inner .wallet-connect-btn,
 .wallet-to-sec .wallet-left .wallet-inner input {
     position: relative;

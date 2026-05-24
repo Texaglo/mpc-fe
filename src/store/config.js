@@ -5,10 +5,11 @@ const AppTitle = 'FRONTEND MODERN POKER CLUB';
 const AppMode = ['production', 'development', 'testing', 'localhost']; 
 
 /* -- set API URLs -- */
-const testing = 'https://dserver.modernpokerclub.com';
-const production = process.env.REACT_APP_API_BASE_URL || 'https://pserver.modernpokerclub.com';
-const development = 'https://dserver.modernpokerclub.com';
-const localhost = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+const backendBaseUrl = process.env.REACT_APP_API_BASE_URL || 'https://mpc.texaglo.com';
+const testing = backendBaseUrl;
+const production = backendBaseUrl;
+const development = backendBaseUrl;
+const localhost = backendBaseUrl;
 
 let SocketUrl, opensea;
 const configuredEnv = process.env.REACT_APP_APP_MODE;
