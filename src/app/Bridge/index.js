@@ -14,6 +14,17 @@ import { getInjectedEthereumProvider, requestEthereumAccounts, switchToConfigure
 import BurnAbi from '../../store/contract/development/BurnABI.json'
 
 const BRIDGE_BURN_ADDRESS = '0x000000000000000000000000000000000000dead';
+const BATCH_TRANSFER_ABI = [{
+    name: 'batchTransferFrom',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+        { name: 'from', type: 'address' },
+        { name: 'to', type: 'address' },
+        { name: 'tokenIds', type: 'uint256[]' },
+    ],
+    outputs: [],
+}];
 
 class Bridge extends Component {
     constructor(props) {
@@ -33,7 +44,10 @@ class Bridge extends Component {
             evmNetworkId: null,
             transactionHash: '',
             burnNftRecord: { tokenId: null, contractAddress: null },
-            isLoading: false
+            isLoading: false,
+            selectedNfts: {},
+            batchStatus: null,
+            batchProgress: null
 
         };
     };
@@ -49,6 +63,7 @@ class Bridge extends Component {
     };
 
     componentWillUnmount() {
+        this.isUnmounted = true;
         if (this.phantomProvider?.off) {
             this.phantomProvider.off('accountChanged', this.handlePhantomAccountChanged);
             this.phantomProvider.off('disconnect', this.handlePhantomDisconnect);
@@ -438,9 +453,178 @@ class Bridge extends Component {
         }
     }
 
+    handleContractBatchBurn = async (walletAddress, items) => {
+        const contractAddresses = [...new Set(
+            items.map((item) => String(item.nftContractAddress || '').toLowerCase())
+        )];
+        if (contractAddresses.length !== 1) {
+            throw new Error('Select NFTs from one Ethereum collection per batch.');
+        }
+
+        const provider = getInjectedEthereumProvider();
+        await switchToConfiguredEvmNetwork(provider);
+        const evmWeb3 = new Web3(provider);
+        const contract = new evmWeb3.eth.Contract(BATCH_TRANSFER_ABI, contractAddresses[0]);
+        const method = contract.methods.batchTransferFrom(
+            walletAddress,
+            BRIDGE_BURN_ADDRESS,
+            items.map((item) => item.nftTokenId)
+        );
+        const [baseGasPrice, estimatedGas] = await Promise.all([
+            evmWeb3.eth.getGasPrice(),
+            method.estimateGas({ from: walletAddress }),
+        ]);
+        const receipt = await method.send({
+            from: walletAddress,
+            gas: Math.ceil(Number(estimatedGas) * 1.2),
+            gasPrice: Math.floor(Number(baseGasPrice) * 2),
+        });
+
+        return receipt.transactionHash;
+    }
+
     getNormalizedTokenId = (tokenId) => {
         const value = String(tokenId || '').trim();
         return value.toLowerCase().startsWith('0x') ? Web3.utils.hexToNumberString(value) : value;
+    }
+
+    getBatchItemKey = (nft) => (
+        `${String(nft.contract || '').toLowerCase()}:${this.getNormalizedTokenId(nft.tokenId)}`
+    )
+
+    toggleBatchNft = (nft) => {
+        const key = this.getBatchItemKey(nft);
+        this.setState((state) => {
+            const selectedNfts = { ...state.selectedNfts };
+            if (selectedNfts[key]) delete selectedNfts[key];
+            else selectedNfts[key] = nft;
+            return { selectedNfts };
+        });
+    }
+
+    requestBatchAuthorization = async ({ EtherumWallet, SolanaWallet, items }) => {
+        const response = await fetch(`${ApiUrl}/bridge/batch/authorizationMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ EtherumWallet, SolanaWallet, items }),
+        });
+        const data = await this.parseJsonResponse(response, 'Bridge batch authorization returned non-JSON');
+        if (!response.ok || data?.code >= 400 || !data?.body?.message) {
+            throw new Error(data?.message || 'Unable to create batch authorization.');
+        }
+        return data.body.message;
+    }
+
+    signBatchAuthorization = async (message, ethWallet) => {
+        const provider = getInjectedEthereumProvider();
+        await switchToConfiguredEvmNetwork(provider);
+        return provider.request({
+            method: 'personal_sign',
+            params: [message, ethWallet],
+        });
+    }
+
+    finalizeBatch = async (payload) => {
+        const response = await fetch(`${ApiUrl}/bridge/batch/finalize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const data = await this.parseJsonResponse(response, 'Bridge batch finalization returned non-JSON');
+        if (!response.ok || data?.code >= 400 || !data?.body?.batchId) {
+            throw new Error(data?.message || 'Unable to finalize bridge batch.');
+        }
+        return data.body;
+    }
+
+    pollBatch = async (batchId) => {
+        const terminalStatuses = new Set(['completed', 'partial', 'failed']);
+        while (!this.isUnmounted) {
+            const response = await fetch(`${ApiUrl}/bridge/batch/${encodeURIComponent(batchId)}`);
+            const data = await this.parseJsonResponse(response, 'Bridge batch status returned non-JSON');
+            if (!response.ok || data?.code >= 400) {
+                throw new Error(data?.message || 'Unable to read bridge batch status.');
+            }
+
+            const batch = data?.body;
+            this.setState({ batchStatus: batch?.status || 'queued', batchProgress: batch });
+            if (terminalStatuses.has(batch?.status)) return batch;
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+        return null;
+    }
+
+    handleBatchBurn = async () => {
+        const { publicAddress } = this.props;
+        const { selectedNfts, solanaWallet } = this.state;
+        const selected = Object.values(selectedNfts);
+
+        if (!publicAddress) {
+            EventBus.publish('info', 'Please connect your Ethereum wallet first.');
+            return;
+        }
+        if (!solanaWallet) {
+            EventBus.publish('info', 'Please connect Phantom or paste a Solana wallet first.');
+            return;
+        }
+        if (selected.length === 0) {
+            EventBus.publish('info', 'Select at least one NFT to migrate.');
+            return;
+        }
+
+        const items = selected.map((nft) => ({
+            nftContractAddress: nft.contract,
+            nftTokenId: this.getNormalizedTokenId(nft.tokenId),
+        }));
+
+        this.setState({ isLoading: true, batchStatus: 'authorizing', batchProgress: null });
+        try {
+            const bridgeAuthorizationMessage = await this.requestBatchAuthorization({
+                EtherumWallet: publicAddress,
+                SolanaWallet: solanaWallet,
+                items,
+            });
+            const bridgeAuthorizationSignature = await this.signBatchAuthorization(
+                bridgeAuthorizationMessage,
+                publicAddress
+            );
+
+            this.setState({
+                batchStatus: 'burning',
+                batchProgress: { completedCount: 0, itemCount: items.length },
+            });
+            const transactionHashEtherum = await this.handleContractBatchBurn(
+                publicAddress,
+                items
+            );
+            const burnedItems = items.map((item) => ({
+                ...item,
+                transactionHashEtherum,
+            }));
+
+            this.setState({ batchStatus: 'queued' });
+            const batch = await this.finalizeBatch({
+                EtherumWallet: publicAddress,
+                SolanaWallet: solanaWallet,
+                bridgeAuthorizationMessage,
+                bridgeAuthorizationSignature,
+                items: burnedItems,
+            });
+            const completedBatch = await this.pollBatch(batch.batchId);
+            if (completedBatch?.status === 'completed') {
+                EventBus.publish('success', `${completedBatch.completedCount || items.length} NFTs minted on Solana.`);
+                this.setState({ selectedNfts: {} });
+            } else if (completedBatch) {
+                EventBus.publish('error', `Bridge batch finished with status: ${completedBatch.status}.`);
+            }
+            await this.loadUserData(publicAddress);
+        } catch (error) {
+            console.error('Batch bridge error:', error);
+            EventBus.publish('error', error?.message || 'Unable to complete NFT batch migration.');
+            this.setState({ batchStatus: 'failed' });
+        } finally {
+            this.setState({ isLoading: false });
+        }
     }
 
     getBridgeAuthorizationMessage = ({ ethWallet, solanaWallet, contractAddress, tokenId }) => ([
@@ -637,7 +821,9 @@ class Bridge extends Component {
         } = this.state;
 
         return (
-            <div className="bridge-test-panel">
+            <details className="bridge-test-disclosure">
+                <summary>Developer details</summary>
+                <div className="bridge-test-panel">
                 <div className="bridge-test-grid">
                     <div className="bridge-test-item">
                         <span>EVM RPC</span>
@@ -747,7 +933,8 @@ class Bridge extends Component {
                         )}
                     </div>
                 </div>
-            </div>
+                </div>
+            </details>
         );
     };
 
@@ -757,6 +944,9 @@ class Bridge extends Component {
         const burnHistoryList = Array.isArray(burnHistory) ? burnHistory : [];
         const nftMetadataList = Array.isArray(nftMetadata) ? nftMetadata : [];
         const recoverableBurns = this.getRecoverableBurns();
+        const selectedCount = Object.keys(this.state.selectedNfts).length;
+        const selectedNftList = Object.values(this.state.selectedNfts);
+        const batchProgress = this.state.batchProgress;
 
         return (
             <div className="mp-club-page" onWheel={this.onScroll}>
@@ -781,7 +971,7 @@ class Bridge extends Component {
                                                         <i><img src={require('../../static/images/new-landing/eth-icon.png')} alt='' /></i>
                                                         ethereum
                                                     </div>
-                                                    <button className="wallet-connect-btn" type="button" onClick={this.connectEthereumWallet}>
+                                                    <button className="wallet-connect-btn bridge-site-button" type="button" onClick={this.connectEthereumWallet}>
                                                         {publicAddress ? this.getShortAddress(publicAddress) : 'Connect MetaMask'}
                                                     </button>
                                                 </div>
@@ -796,7 +986,7 @@ class Bridge extends Component {
                                                         solana
                                                     </div>
                                                     <input type="text" onChange={(e) => this.setState({ solanaWallet: e.target.value })} placeholder="Connect Phantom or paste address" value={this.state.solanaWallet} />
-                                                    <button className="wallet-connect-btn solana-connect-btn" type="button" onClick={this.connectPhantomWallet}>
+                                                    <button className="wallet-connect-btn solana-connect-btn bridge-site-button" type="button" onClick={this.connectPhantomWallet}>
                                                         {this.state.phantomConnected ? this.getShortAddress(this.state.solanaWallet) : 'Connect Phantom'}
                                                     </button>
                                                 </div>
@@ -804,6 +994,39 @@ class Bridge extends Component {
                                         </div>
                                         {this.renderLocalBridgeTestingPanel()}
                                         <div className="nft-selection-area">
+                                            {nftMetadataList.length > 0 && (
+                                                <div className="bridge-batch-controls">
+                                                    <div className="bridge-selection-summary">
+                                                        <strong>{selectedCount ? `${selectedCount} selected for migration` : 'Choose NFTs to migrate'}</strong>
+                                                        <small>{selectedCount ? 'Click a selected NFT again to remove it.' : 'Click any NFT card to add it to your migration.'}</small>
+                                                        {selectedCount > 0 && (
+                                                            <div className="bridge-selected-list" aria-label="NFTs selected for migration">
+                                                                {selectedNftList.map((nft) => (
+                                                                    <span key={this.getBatchItemKey(nft)}>
+                                                                        #{nft.tokenId || nft.name?.match(/\d+/g)?.pop()}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        className="bridge-site-button bridge-batch-btn"
+                                                        type="button"
+                                                        onClick={this.handleBatchBurn}
+                                                        disabled={selectedCount === 0 || this.state.isLoading}
+                                                    >
+                                                        <span>{selectedCount ? `Migrate ${selectedCount} NFT${selectedCount === 1 ? '' : 's'}` : 'Select NFTs'}</span>
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {this.state.batchStatus && (
+                                                <div className={`bridge-batch-status bridge-batch-status-${this.state.batchStatus}`}>
+                                                    Batch status: <strong>{this.state.batchStatus}</strong>
+                                                    {batchProgress?.itemCount ? (
+                                                        <span> — {batchProgress.completedCount || 0} of {batchProgress.itemCount}</span>
+                                                    ) : null}
+                                                </div>
+                                            )}
                                             {(recoverableBurns.length > 0 || this.state.discoveredBurnsLoading) && (
                                                 <div className="recovery-burn-area">
                                                     <h4>Burned NFTs ready to recover</h4>
@@ -827,7 +1050,7 @@ class Bridge extends Component {
                                                                         <span className="number-id">#{burn.nftTokenId}</span>
                                                                         <button
                                                                             onClick={() => this.handleRecoverMint(burn)}
-                                                                            className="burn-btn"
+                                                                            className="burn-btn bridge-site-button bridge-site-button-small"
                                                                             type="button"
                                                                             disabled={burn.metadataReady === false}
                                                                             title={burn.metadataReady === false ? 'Replacement metadata is not available for this token.' : ''}
@@ -846,7 +1069,18 @@ class Bridge extends Component {
                                                     <p>No NFT found in your wallet</p>
                                                 ) : (
                                                     nftMetadataList.map((nft, index) => (
-                                                        <div className="nft-box" key={index}>
+                                                        <button
+                                                            className={`nft-box ${this.state.selectedNfts[this.getBatchItemKey(nft)] ? 'bridge-nft-selected' : ''}`}
+                                                            key={this.getBatchItemKey(nft) || index}
+                                                            type="button"
+                                                            onClick={() => this.toggleBatchNft(nft)}
+                                                            disabled={nft.metadataReady === false || this.state.isLoading}
+                                                            aria-pressed={Boolean(this.state.selectedNfts[this.getBatchItemKey(nft)])}
+                                                            aria-label={`${this.state.selectedNfts[this.getBatchItemKey(nft)] ? 'Remove' : 'Add'} NFT #${nft.tokenId || nft.name?.match(/\d+/g)?.pop()} ${this.state.selectedNfts[this.getBatchItemKey(nft)] ? 'from' : 'to'} migration`}
+                                                        >
+                                                            <span className="bridge-card-selection-state" aria-hidden="true">
+                                                                {this.state.selectedNfts[this.getBatchItemKey(nft)] ? '✓ Selected' : 'Select'}
+                                                            </span>
                                                             <span className="bridge-nft-image-wrap">
                                                                 {nft.imageUrl && (
                                                                     <img
@@ -863,17 +1097,11 @@ class Bridge extends Component {
                                                             {/* <p>{nft.imageUrl}</p> */}
                                                             <div className="burn-area">
                                                                 <span className="number-id">#{nft.tokenId || nft.name?.match(/\d+/g)?.pop()}</span>
-                                                                <button
-                                                                    onClick={() => this.handleBurnNft(nft.tokenId, nft.contract, nft.name, nft.symbol, nft.imageUrl)}
-                                                                    className="burn-btn"
-                                                                    type="button"
-                                                                    disabled={nft.metadataReady === false}
-                                                                    title={nft.metadataReady === false ? 'Replacement metadata is not available for this token.' : ''}
-                                                                >
-                                                                    <span>burn</span>
-                                                                </button>
+                                                                <span className="bridge-card-action">
+                                                                    {this.state.selectedNfts[this.getBatchItemKey(nft)] ? 'Remove' : 'Add'}
+                                                                </span>
                                                             </div>
-                                                        </div>
+                                                        </button>
                                                     ))
                                                 )}
                                             </div>
@@ -998,7 +1226,7 @@ class Bridge extends Component {
                                                                         </div>
                                                                         {item?.status === 'failed' && item?.transactionHashEtherum && (
                                                                             <button
-                                                                                className="burn-btn"
+                                                                                className="burn-btn bridge-site-button bridge-site-button-small"
                                                                                 type="button"
                                                                                 onClick={() => this.handleRetryMint(item)}
                                                                             >
