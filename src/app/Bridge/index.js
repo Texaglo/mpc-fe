@@ -13,7 +13,7 @@ import { setBurnNftRecord, createBurnNftRecord, mintNewNft, setMintedNft, getBur
 import { getInjectedEthereumProvider, requestEthereumAccounts, switchToConfiguredEvmNetwork } from '../../store/walletNetworks';
 import BurnAbi from '../../store/contract/development/BurnABI.json'
 
-const BRIDGE_BURN_ADDRESS = '0x000000000000000000000000000000000000dEaD';
+const BRIDGE_BURN_ADDRESS = '0x000000000000000000000000000000000000dead';
 const ERC721_TRANSFER_ABI = [{
     name: 'safeTransferFrom',
     type: 'function',
@@ -332,8 +332,9 @@ class Bridge extends Component {
     };
 
     fetchCoreAssets = async (walletAddress) => {
-        const query = localBridgeNftAddress
-            ? `?contractAddress=${encodeURIComponent(localBridgeNftAddress)}`
+        const contractAddress = this.getBridgeContractAddress();
+        const query = contractAddress
+            ? `?contractAddress=${encodeURIComponent(contractAddress)}`
             : '';
         const response = await fetch(`${ApiUrl}/bridge/coreAssets/${walletAddress}${query}`);
         const data = await this.parseJsonResponse(response, 'Bridge API returned non-JSON');
@@ -345,7 +346,11 @@ class Bridge extends Component {
         return data?.body || [];
     };
 
-    getBridgeContractAddress = () => localBridgeNftAddress || bridgeAllowedEthCollection;
+    getBridgeContractAddress = () => (
+        isLocalBridgeTesting && localBridgeNftAddress
+            ? localBridgeNftAddress
+            : bridgeAllowedEthCollection
+    );
 
     refreshDiscoveredBurns = async (walletAddress = this.props.publicAddress) => {
         if (!walletAddress) return;
