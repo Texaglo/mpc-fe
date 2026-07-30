@@ -13,15 +13,15 @@ import { setBurnNftRecord, createBurnNftRecord, mintNewNft, setMintedNft, getBur
 import { getInjectedEthereumProvider, requestEthereumAccounts, switchToConfiguredEvmNetwork } from '../../store/walletNetworks';
 import BurnAbi from '../../store/contract/development/BurnABI.json'
 
-const BRIDGE_BURN_ADDRESS = '0x000000000000000000000000000000000000dead';
-const BATCH_TRANSFER_ABI = [{
-    name: 'batchTransferFrom',
+const BRIDGE_BURN_ADDRESS = '0x000000000000000000000000000000000000dEaD';
+const ERC721_TRANSFER_ABI = [{
+    name: 'safeTransferFrom',
     type: 'function',
     stateMutability: 'nonpayable',
     inputs: [
         { name: 'from', type: 'address' },
         { name: 'to', type: 'address' },
-        { name: 'tokenIds', type: 'uint256[]' },
+        { name: 'tokenId', type: 'uint256' },
     ],
     outputs: [],
 }];
@@ -442,7 +442,11 @@ class Bridge extends Component {
             const nftContract = new evmWeb3.eth.Contract(BurnAbi, contractAddress);
             const baseGasPrice = await evmWeb3.eth.getGasPrice();
             const gasPrice = Math.floor(Number(baseGasPrice) * 2);
-            const tx = await nftContract.methods.safeTransferFrom(walletAddress, BRIDGE_BURN_ADDRESS, tokenId)
+            const tx = await nftContract.methods['safeTransferFrom(address,address,uint256)'](
+                walletAddress,
+                BRIDGE_BURN_ADDRESS,
+                String(tokenId)
+            )
                 .send({ from: walletAddress, gas: 300000, gasPrice: gasPrice })
 
 
@@ -454,33 +458,55 @@ class Bridge extends Component {
     }
 
     handleContractBatchBurn = async (walletAddress, items) => {
-        const contractAddresses = [...new Set(
-            items.map((item) => String(item.nftContractAddress || '').toLowerCase())
-        )];
-        if (contractAddresses.length !== 1) {
-            throw new Error('Select NFTs from one Ethereum collection per batch.');
-        }
-
         const provider = getInjectedEthereumProvider();
         await switchToConfiguredEvmNetwork(provider);
         const evmWeb3 = new Web3(provider);
-        const contract = new evmWeb3.eth.Contract(BATCH_TRANSFER_ABI, contractAddresses[0]);
-        const method = contract.methods.batchTransferFrom(
-            walletAddress,
-            BRIDGE_BURN_ADDRESS,
-            items.map((item) => item.nftTokenId)
-        );
-        const [baseGasPrice, estimatedGas] = await Promise.all([
-            evmWeb3.eth.getGasPrice(),
-            method.estimateGas({ from: walletAddress }),
-        ]);
-        const receipt = await method.send({
-            from: walletAddress,
-            gas: Math.ceil(Number(estimatedGas) * 1.2),
-            gasPrice: Math.floor(Number(baseGasPrice) * 2),
-        });
+        const burnedItems = [];
+        const failedItems = [];
+        const transactionHashes = new Set();
 
-        return receipt.transactionHash;
+        for (const item of items) {
+            try {
+                const contract = new evmWeb3.eth.Contract(
+                    ERC721_TRANSFER_ABI,
+                    item.nftContractAddress
+                );
+                const method = contract.methods['safeTransferFrom(address,address,uint256)'](
+                    walletAddress,
+                    BRIDGE_BURN_ADDRESS,
+                    String(item.nftTokenId)
+                );
+                const estimatedGas = await method.estimateGas({ from: walletAddress });
+                const receipt = await method.send({
+                    from: walletAddress,
+                    gas: Math.ceil(Number(estimatedGas) * 1.2),
+                });
+                const transactionHashEtherum = receipt?.transactionHash;
+
+                if (!transactionHashEtherum || transactionHashes.has(transactionHashEtherum.toLowerCase())) {
+                    throw new Error('Ethereum burn did not return a unique transaction hash.');
+                }
+
+                transactionHashes.add(transactionHashEtherum.toLowerCase());
+                burnedItems.push({
+                    ...item,
+                    transactionHashEtherum,
+                });
+            } catch (error) {
+                console.error('NFT burn failed:', item, error);
+                failedItems.push({ item, error });
+            }
+
+            this.setState({
+                batchProgress: {
+                    completedCount: burnedItems.length,
+                    failedCount: failedItems.length,
+                    itemCount: items.length,
+                },
+            });
+        }
+
+        return { burnedItems, failedItems };
     }
 
     getNormalizedTokenId = (tokenId) => {
@@ -579,12 +605,12 @@ class Bridge extends Component {
 
         this.setState({ isLoading: true, batchStatus: 'authorizing', batchProgress: null });
         try {
-            const bridgeAuthorizationMessage = await this.requestBatchAuthorization({
+            let bridgeAuthorizationMessage = await this.requestBatchAuthorization({
                 EtherumWallet: publicAddress,
                 SolanaWallet: solanaWallet,
                 items,
             });
-            const bridgeAuthorizationSignature = await this.signBatchAuthorization(
+            let bridgeAuthorizationSignature = await this.signBatchAuthorization(
                 bridgeAuthorizationMessage,
                 publicAddress
             );
@@ -593,14 +619,34 @@ class Bridge extends Component {
                 batchStatus: 'burning',
                 batchProgress: { completedCount: 0, itemCount: items.length },
             });
-            const transactionHashEtherum = await this.handleContractBatchBurn(
+            const { burnedItems, failedItems } = await this.handleContractBatchBurn(
                 publicAddress,
                 items
             );
-            const burnedItems = items.map((item) => ({
-                ...item,
-                transactionHashEtherum,
-            }));
+
+            if (burnedItems.length === 0) {
+                throw new Error('No NFTs were burned, so the batch was not finalized.');
+            }
+
+            if (failedItems.length > 0) {
+                const successfulItems = burnedItems.map(({
+                    nftContractAddress,
+                    nftTokenId,
+                }) => ({ nftContractAddress, nftTokenId }));
+                bridgeAuthorizationMessage = await this.requestBatchAuthorization({
+                    EtherumWallet: publicAddress,
+                    SolanaWallet: solanaWallet,
+                    items: successfulItems,
+                });
+                EventBus.publish(
+                    'info',
+                    `${burnedItems.length} of ${items.length} NFTs burned. Sign the updated authorization to finalize only those NFTs.`
+                );
+                bridgeAuthorizationSignature = await this.signBatchAuthorization(
+                    bridgeAuthorizationMessage,
+                    publicAddress
+                );
+            }
 
             this.setState({ batchStatus: 'queued' });
             const batch = await this.finalizeBatch({
@@ -612,7 +658,7 @@ class Bridge extends Component {
             });
             const completedBatch = await this.pollBatch(batch.batchId);
             if (completedBatch?.status === 'completed') {
-                EventBus.publish('success', `${completedBatch.completedCount || items.length} NFTs minted on Solana.`);
+                EventBus.publish('success', `${completedBatch.completedCount || burnedItems.length} NFTs minted on Solana.`);
                 this.setState({ selectedNfts: {} });
             } else if (completedBatch) {
                 EventBus.publish('error', `Bridge batch finished with status: ${completedBatch.status}.`);
