@@ -9,13 +9,13 @@ import Button from '@material-ui/core/Button';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, DateTimePicker, } from '@material-ui/pickers';
 // import DateTimePicker from 'react-datetime-picker';
-import { Add, Remove } from '@mui/icons-material';
+import { Add, Remove } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import Countdown from 'react-countdown';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { addTournament } from "../../store/actions/Tournament"
 import { toggleModal, setLoader } from '../../store/actions/Auth';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { getAllTournaments, updateTournament, deleteTournament } from "../../store/actions/Tournament";
 import { getAllTemplates } from "../../store/actions/Template";
 

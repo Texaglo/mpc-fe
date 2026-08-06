@@ -7,7 +7,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { addRingGame } from "../../store/actions/Ring"
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { toggleModal, setLoader } from '../../store/actions/Auth';
-import { ValidatorForm, TextValidator, SelectValidator } from 'react-material-ui-form-validator';
+import { ValidatorForm, TextValidator, SelectValidator } from '../../components/FormValidator';
 import { getAllRingGames, updateRingGame, deleteRingGame } from "../../store/actions/Ring";
 import { getAllTemplates } from "../../store/actions/Template";
 

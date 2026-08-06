@@ -5,7 +5,7 @@ import { getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, getWalletBa
 import { setLoader, toggleModal } from "../../store/actions/Auth";
 import EventBus from 'eventing-bus';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { withStyles } from '@material-ui/core/styles';
 
 import './index.css';
@@ -324,6 +324,38 @@ class PendingWithdrawals extends React.Component {
                 Cell: ({ value }) => value ? new Date(value).toLocaleString() : 'N/A',
                 filterable: false
             },
+            {
+                accessor: 'treasuryFundingHash',
+                Header: 'Treasury to Hot',
+                Cell: ({ original, value }) => value ? (
+                    <a
+                        href={`https://solscan.io/tx/${value}${original.network === 'devnet' ? '?cluster=devnet' : ''}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="transaction-link"
+                        title={value}
+                    >
+                        {`${value.substring(0, 6)}...${value.substring(value.length - 6)}`}
+                    </a>
+                ) : 'N/A',
+                filterable: false
+            },
+            {
+                accessor: 'hotWalletPayoutHash',
+                Header: 'Hot to User',
+                Cell: ({ original, value }) => value ? (
+                    <a
+                        href={`https://solscan.io/tx/${value}${original.network === 'devnet' ? '?cluster=devnet' : ''}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="transaction-link"
+                        title={value}
+                    >
+                        {`${value.substring(0, 6)}...${value.substring(value.length - 6)}`}
+                    </a>
+                ) : 'N/A',
+                filterable: false
+            },
         ];
 
         return (
@@ -409,7 +441,7 @@ class PendingWithdrawals extends React.Component {
                                     {modalAction === 'approve' && (
                                         <div className="approval-warning mt-3">
                                             <p style={{ color: '#ff9800', fontSize: '13px' }}>
-                                                ⚠️ Note: Approval will initiate crypto transfer to user's wallet address.
+                                                Approval signs and submits this withdrawal. This action cannot be undone.
                                             </p>
                                         </div>
                                     )}
@@ -464,71 +496,41 @@ class PendingWithdrawals extends React.Component {
                     <ModalBody className="modal-body modal-height reward-modal-body">
                         {walletBalance ? (
                             <div className="row">
-                                {/* Warm Wallet */}
-                                <div className="col-12 mb-4">
+                                <div className="col-md-6 col-12 mb-4">
                                     <div className="wallet-card">
-                                        <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>Warm Wallet</h5>
+                                        <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>Treasury Wallet</h5>
                                         <div className="wallet-info">
-                                            <p><span className="wallet-label">Address:</span> {walletBalance.warmWallet?.address || 'N/A'}</p>
-                                            <p><span className="wallet-label">Balance:</span> {walletBalance.warmWallet?.balanceSOL || 'N/A'}</p>
-                                            <p><span className="wallet-label">Min Balance:</span> {walletBalance.warmWallet?.minBalance || 0} SOL</p>
-                                            <p><span className="wallet-label">Alert Threshold:</span> {walletBalance.warmWallet?.alertThreshold || 0} SOL</p>
+                                            <p><span className="wallet-label">Address:</span> {walletBalance.treasuryWallet?.address || 'N/A'}</p>
+                                            <p><span className="wallet-label">Native SOL:</span> {walletBalance.treasuryWallet?.balanceSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label">Wrapped SOL:</span> {walletBalance.treasuryWallet?.balanceWSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label">USDC:</span> {walletBalance.treasuryWallet?.balanceUSDC || 'N/A'}</p>
+                                            <p><span className="wallet-label">Purpose:</span> {walletBalance.treasuryWallet?.purpose || 'Deposit custody'}</p>
+                                            <p><span className="wallet-label">Direct user payouts:</span> No</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-6 col-12 mb-4">
+                                    <div className="wallet-card">
+                                        <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>Distribution Hot Wallet</h5>
+                                        <div className="wallet-info">
+                                            <p><span className="wallet-label">Address:</span> {walletBalance.hotWallet?.address || 'N/A'}</p>
+                                            <p><span className="wallet-label">Native SOL:</span> {walletBalance.hotWallet?.balanceSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label">Wrapped SOL:</span> {walletBalance.hotWallet?.balanceWSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label">USDC:</span> {walletBalance.hotWallet?.balanceUSDC || 'N/A'}</p>
+                                            <p><span className="wallet-label">Purpose:</span> {walletBalance.hotWallet?.purpose || 'Approved withdrawals'}</p>
+                                            <p><span className="wallet-label">Min Balance:</span> {walletBalance.hotWallet?.minBalance || 0} SOL</p>
+                                            <p><span className="wallet-label">Alert Threshold:</span> {walletBalance.hotWallet?.alertThreshold || 0} SOL</p>
                                             <p>
                                                 <span className="wallet-label">Status:</span>
-                                                <span className={`wallet-status ${walletBalance.warmWallet?.status?.toLowerCase()}`}>
-                                                    {walletBalance.warmWallet?.status || 'N/A'}
+                                                <span className={`wallet-status ${walletBalance.hotWallet?.status?.toLowerCase()}`}>
+                                                    {walletBalance.hotWallet?.status || 'N/A'}
                                                 </span>
                                             </p>
-                                            {walletBalance.warmWallet?.needsRefill && (
-                                                <div className="refill-warning">
-                                                    ⚠️ Wallet needs refill
-                                                </div>
-                                            )}
-                                            {walletBalance.warmWallet?.criticalLow && (
-                                                <div className="critical-warning">
-                                                    🚨 Critical low balance!
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Cold Wallet */}
-                                <div className="col-12 mb-4">
-                                    <div className="wallet-card">
-                                        <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>Cold Wallet</h5>
-                                        <div className="wallet-info">
-                                            <p><span className="wallet-label">Address:</span> {walletBalance.coldWallet?.address || 'N/A'}</p>
-                                            <p><span className="wallet-label">Balance:</span> {walletBalance.coldWallet?.balanceSOL || 'N/A'}</p>
-                                            <p>
-                                                <span className="wallet-label">Configured:</span>
-                                                {walletBalance.coldWallet?.configured ? ' Yes' : ' No'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* MPC Admin Wallet */}
-                                <div className="col-12 mb-4">
-                                    <div className="wallet-card">
-                                        <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>MPC Admin Wallet</h5>
-                                        <div className="wallet-info">
-                                            <p><span className="wallet-label">Address:</span> {walletBalance.mpcAdminWallet?.address || 'N/A'}</p>
-                                            <p><span className="wallet-label">Balance:</span> {walletBalance.mpcAdminWallet?.balanceSOL || 'N/A'}</p>
-                                            <p><span className="wallet-label">Purpose:</span> {walletBalance.mpcAdminWallet?.purpose || 'N/A'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Refill Instructions */}
-                                {walletBalance.refillInstructions && (
-                                    <div className="col-12">
-                                        <div className="refill-instructions">
-                                            <h5 style={{ color: '#ff9800', marginBottom: '10px' }}>Refill Instructions</h5>
-                                            <p style={{ color: '#fff', fontSize: '14px' }}>{walletBalance.refillInstructions}</p>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         ) : (
                             <div className="text-center" style={{ color: '#fff', padding: '20px' }}>

@@ -4,7 +4,7 @@ import ReactTable from 'react-table-6';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { getMarketplaceItems, createMarketplaceItem, updateMarketplaceItem, toggleMarketplaceItem } from "../../store/actions/Marketplace";
 import './index.css';

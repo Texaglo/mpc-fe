@@ -7,7 +7,7 @@ import { setLoader } from '../../store/actions/Auth';
 import { withStyles } from '@material-ui/core/styles';
 import { toggleModal } from '../../store/actions/Auth';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
-import { TextValidator } from 'react-material-ui-form-validator';
+import { TextValidator } from '../../components/FormValidator';
 import { getFactionalLeaderboard } from "../../store/actions/Leaderboard";
 
 import './index.css';

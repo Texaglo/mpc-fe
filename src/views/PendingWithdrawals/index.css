@@ -318,6 +318,16 @@
     word-break: break-word;
 }
 
+.transaction-link {
+    color: #d0a535;
+    font-family: monospace;
+}
+
+.transaction-link:hover {
+    color: #e0b545;
+}
+
+
 .wallet-info p {
     color: #fff;
     margin: 10px 0;

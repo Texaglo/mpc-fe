@@ -2,14 +2,13 @@ import { connect } from 'react-redux';
 import React from 'react';
 
 import './index.css';
-import { css } from "@emotion/react";
 import BounceLoader from "react-spinners/BounceLoader";
 
-const override = css`
-  display: block;
-  margin: 0 auto;
-  border-color: red;
-`;
+const override = {
+  display: "block",
+  margin: "0 auto",
+  borderColor: "red"
+};
 
 class Loader extends React.Component {
 

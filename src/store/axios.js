@@ -2,7 +2,7 @@ import axios from 'axios';
 import { ApiUrl } from './config';
 
 axios.defaults.baseURL = ApiUrl;
-axios.defaults.headers.common['Content-Type'] = `applicationl/json`;
+axios.defaults.headers.common['Content-Type'] = `application/json`;
 let token = localStorage.getItem('token');
 if (token) axios.defaults.headers.common['Authorization'] = `bearer ${token}`;
 

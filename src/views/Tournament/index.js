@@ -5,7 +5,7 @@ import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { updateWinners, getWinners } from '../../store/actions/Tournament';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import EventBus from 'eventing-bus';
 

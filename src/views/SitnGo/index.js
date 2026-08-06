@@ -3,12 +3,12 @@ import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { Add, Remove } from '@mui/icons-material';
+import { Add, Remove } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import { addSitnGoGame } from "../../store/actions/SitnGo";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { toggleModal, setLoader } from '../../store/actions/Auth';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { getAllSitnGoGames, updateSitnGoGame, deleteSitnGoGame } from "../../store/actions/SitnGo";
 import { getAllTemplates } from "../../store/actions/Template";
 

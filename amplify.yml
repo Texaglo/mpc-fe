@@ -1,0 +1,20 @@
+version: 1
+env:
+  variables:
+    GENERATE_SOURCEMAP: "false"
+    NODE_OPTIONS: "--max_old_space_size=4096"
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm install --force
+    build:
+      commands:
+        - CI=false npm run build
+  artifacts:
+    baseDirectory: build
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*

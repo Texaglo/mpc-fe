@@ -8,14 +8,14 @@ import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 import DateFnsUtils from '@date-io/date-fns';
 import Button from '@material-ui/core/Button';
-import { Add, Remove } from '@mui/icons-material';
+import { Add, Remove } from '@material-ui/icons';
 import { MuiPickersUtilsProvider, DateTimePicker, } from '@material-ui/pickers';
 // import DateTimePicker from 'react-datetime-picker';
 import { withStyles } from '@material-ui/core/styles';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { createTemplate } from "../../store/actions/Template"
 import { toggleModal, setLoader } from '../../store/actions/Auth';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { getAllTemplates, updateTemplate, deleteTemplate } from "../../store/actions/Template";
 
 import 'react-datetime-picker/dist/DateTimePicker.css';

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Button from '@material-ui/core/Button';
-import { ValidatorForm } from 'react-material-ui-form-validator';
+import { ValidatorForm } from '../../components/FormValidator';
 import logo from '../../assets/img/logo.png';
 import EventBus from 'eventing-bus';
 import { message } from "../../store/config";

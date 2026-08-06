@@ -3,16 +3,21 @@ const AppTitle = 'ADMIN MODERN POKER';
 
 /* -- set app mode -- */
 // const AppMode = [''];
-const AppMode = ['development'];
+// Contract artifacts currently live under `contract/development`, while the
+// second value selects the remote API/socket environment.
+const AppMode = ['development', process.env.REACT_APP_ADMIN_API_ENV || 'production'];
 
 /* -- set API URLs --*/
-const development = 'https://dserver.modernpokerclub.com';
-// const development = 'http://localhost:4000';
-const production = 'https://dserver.modernpokerclub.com';
-const testing = 'https://dserver.modernpokerclub.com';
+const development = process.env.REACT_APP_ADMIN_API_URL || 'http://localhost:4000';
+// const development = 'https://dserver.modernpokerclub.com';
+//const production = 'https://dserver.modernpokerclub.com';
+const production = process.env.REACT_APP_ADMIN_PRODUCTION_URL || 'https://mpc.texaglo.com';
+
+//const testing = 'https://dserver.modernpokerclub.com';
+const testing = process.env.REACT_APP_ADMIN_TESTING_URL || 'https://mpc.texaglo.com';
 
 let SocketUrl;
-let env = AppMode[0] || 'development', networkId = '', message = '', explorer = '';
+let env = AppMode[0] || 'production', networkId = '', message = '', explorer = '';
 switch (AppMode[1]) {
   case 'development':
     networkId = 1;
@@ -35,7 +40,8 @@ switch (AppMode[1]) {
   default:
     // networkId = 5;
     // SocketUrl = 'http://192.168.18.106:4000';
-    SocketUrl = 'http://localhost:4000';
+    // SocketUrl = 'http://localhost:4000';
+    SocketUrl = development;
   // explorer = 'https://goerli.etherscan.io/';
   // message = 'Please switch your network to Goerli testnet';
 }

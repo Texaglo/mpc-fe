@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { logger } from 'redux-logger';
 import { Provider } from 'react-redux';
 import createSagaMiddleware from 'redux-saga';
@@ -19,10 +19,10 @@ const sagaMiddleware = createSagaMiddleware();
 const store = createStore(rootReducer, applyMiddleware(sagaMiddleware, logger));
 
 sagaMiddleware.run(rootSaga);
-render(
+const root = createRoot(document.getElementById('root'));
+root.render(
   <Provider store={store}>
     <App />
-  </Provider>,
-  document.getElementById('root'),
+  </Provider>
 );
 if (module.hot) { module.hot.accept(App); }
