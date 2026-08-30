@@ -10,8 +10,8 @@ const DEFAULT_SETTINGS = {
     enabled: true,
     purchasesEnabled: false,
     signupBonus: 1000,
-    tokensPerUsd: 100,
-    minPurchaseUsd: 1,
+    tokensPerUsd: 1,
+    minPurchaseUsd: 10,
     maxPurchaseUsd: 1000,
     dailyBonuses: [],
 };

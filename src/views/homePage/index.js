@@ -376,8 +376,9 @@ const AdminHomePage = () => {
                     <button type="button" className="stat-card dashboard-link-card liabilities-card" onClick={() => history.push('/home/users')}>
                         <div className="stat-icon liabilities-icon"><i className="tim-icons icon-chart-pie-36" /></div>
                         <div className="stat-content">
-                            <span className="stat-value treasury-value">{formatUsd(stats?.liabilities?.cashUsd)}</span>
+                            <span className="stat-value treasury-value">{formatUsd(stats?.liabilities?.mainnetCashUsd ?? stats?.liabilities?.cashUsd)}</span>
                             <span className="stat-label">Player Liabilities</span>
+                            <span className="stat-detail">Mainnet liability · Devnet {formatUsd(stats?.liabilities?.devnetCashUsd)}</span>
                             <span className="stat-detail">{formatMpce(stats?.liabilities?.mpce)} MPCE · {formatMpce(stats?.liabilities?.fp)} FP</span>
                             <span className="stat-detail">{formatMinutes(stats?.liabilities?.timeMinutes)} projected minutes</span>
                         </div>

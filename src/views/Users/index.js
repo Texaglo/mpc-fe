@@ -35,6 +35,7 @@ class Users extends React.Component {
             adjustAmount: '',
             adjustType: 'credit',
             adjustAsset: 'CASH',
+            adjustNetwork: 'mainnet-beta',
             adjustReason: '',
             showLogoutModal: false,
             logoutUser: null,
@@ -183,6 +184,7 @@ class Users extends React.Component {
             adjustAmount: '',
             adjustType: 'credit',
             adjustAsset: 'CASH',
+            adjustNetwork: 'mainnet-beta',
             adjustReason: ''
         });
     }
@@ -194,12 +196,13 @@ class Users extends React.Component {
             adjustAmount: '',
             adjustType: 'credit',
             adjustAsset: 'CASH',
+            adjustNetwork: 'mainnet-beta',
             adjustReason: ''
         });
     }
 
     handleAdjustSubmit = () => {
-        const { adjustUser, adjustAmount, adjustType, adjustAsset, adjustReason } = this.state;
+        const { adjustUser, adjustAmount, adjustType, adjustAsset, adjustNetwork, adjustReason } = this.state;
 
         if (!adjustAmount || parseFloat(adjustAmount) <= 0 || !adjustReason.trim()) {
             return;
@@ -214,7 +217,8 @@ class Users extends React.Component {
             userId: adjustUser._id,
             amount: amount,
             reason: adjustReason.trim(),
-            asset: adjustAsset
+            asset: adjustAsset,
+            ...(adjustAsset === 'CASH' ? { network: adjustNetwork } : {})
         });
 
         this.closeAdjustModal();
@@ -368,7 +372,7 @@ class Users extends React.Component {
     }
 
     render() {
-        let { usersData, searchTerm, selectedUser, freezeAction, freezeReason, showHistoryModal, historyUser, historyTransactions, historyPagination, historyFilters, showProfileModal, profileUser, profileData, profileLoading, showAdjustModal, adjustUser, adjustAmount, adjustType, adjustAsset, adjustReason, showLogoutModal, logoutUser, logoutReason, showInventoryModal, inventoryUser, inventorySearch, inventoryStatus, inventoryPage, catalogSearch, grantItemId, grantQuantity, grantReason, revokeEntry, revokeReason, selectedUsers } = this.state;
+        let { usersData, searchTerm, selectedUser, freezeAction, freezeReason, showHistoryModal, historyUser, historyTransactions, historyPagination, historyFilters, showProfileModal, profileUser, profileData, profileLoading, showAdjustModal, adjustUser, adjustAmount, adjustType, adjustAsset, adjustNetwork, adjustReason, showLogoutModal, logoutUser, logoutReason, showInventoryModal, inventoryUser, inventorySearch, inventoryStatus, inventoryPage, catalogSearch, grantItemId, grantQuantity, grantReason, revokeEntry, revokeReason, selectedUsers } = this.state;
         const { isModal, pagination, userInventory, inventoryPagination, inventoryCatalog } = this.props;
 
         const columns = [
@@ -423,7 +427,7 @@ class Users extends React.Component {
             {
                 id: 'balances',
                 Header: 'Balances',
-                Cell: ({ original }) => <div className="user-balance-stack"><span>Cash <strong>${Number(original.cashBalance || 0).toLocaleString()}</strong></span><span>MPCE <strong>{Number(original.mpceCredit || 0).toLocaleString()}</strong></span><span>FP <strong>{Number(original.fpBalance || 0).toLocaleString()}</strong></span></div>,
+                Cell: ({ original }) => <div className="user-balance-stack"><span>Mainnet <strong>${Number(original.mainnetCashBalance ?? original.cashBalance ?? 0).toLocaleString()}</strong></span><span>Devnet <strong>${Number(original.devnetCashBalance || 0).toLocaleString()}</strong></span><span>MPCE <strong>{Number(original.mpceCredit || 0).toLocaleString()}</strong></span><span>FP <strong>{Number(original.fpBalance || 0).toLocaleString()}</strong></span></div>,
                 filterable: false,
                 width: 145
             },
@@ -627,7 +631,8 @@ class Users extends React.Component {
                                     <div className="profile-state"><span className={`status-badge ${player.isFrozen ? 'frozen' : 'active'}`}>{player.isFrozen ? 'Banned' : 'Active'}</span><small>Last login {player.lastLoginAt ? new Date(player.lastLoginAt).toLocaleString() : 'Never recorded'}</small></div>
                                 </section>
                                 <section className="profile-balance-grid">
-                                    <article><span>Cash liability</span><strong>${Number(player.cashBalance || 0).toLocaleString()}</strong></article>
+                                    <article><span>Mainnet Cash</span><strong>${Number(player.mainnetCashBalance ?? player.cashBalance ?? 0).toLocaleString()}</strong><small>Withdrawable production liability</small></article>
+                                    <article><span>Devnet Cash</span><strong>${Number(player.devnetCashBalance || 0).toLocaleString()}</strong><small>Test-only · not mainnet liability</small></article>
                                     <article><span>MPCE / Time</span><strong>{Number(player.mpceCredit || 0).toLocaleString()}</strong><small>{Number(player.timeBalanceMinutes || 0).toLocaleString()} minutes</small></article>
                                     <article><span>Free Play</span><strong>{Number(player.fpBalance || 0).toLocaleString()} FP</strong><small>Non-withdrawable</small></article>
                                     <article><span>Account</span><strong>{player.createdAt ? new Date(player.createdAt).toLocaleDateString() : '—'}</strong><small>Created · {player.authProvider || 'wallet'} auth</small></article>
@@ -737,11 +742,22 @@ class Users extends React.Component {
                                 <div className="col-12 mb-3">
                                     <div className="user-details">
                                         <p><span className="detail-label">Username:</span> {adjustUser.username || 'N/A'}</p>
-                                        <p><span className="detail-label">Cash:</span> ${Number(adjustUser.cashBalance || 0).toLocaleString()}</p>
+                                        <p><span className="detail-label">Mainnet Cash:</span> ${Number(adjustUser.mainnetCashBalance ?? adjustUser.cashBalance ?? 0).toLocaleString()}</p>
+                                        <p><span className="detail-label">Devnet Cash:</span> ${Number(adjustUser.devnetCashBalance || 0).toLocaleString()}</p>
                                         <p><span className="detail-label">MPCE:</span> {Number(adjustUser.mpceCredit || 0).toLocaleString()} <small>({Number(adjustUser.timeBalanceMinutes || 0).toLocaleString()} minutes)</small></p>
                                         <p><span className="detail-label">FP:</span> {Number(adjustUser.fpBalance || 0).toLocaleString()}</p>
                                     </div>
                                 </div>
+
+                                {adjustAsset === 'CASH' && <div className="col-12 mb-3">
+                                    <div className="form-group">
+                                        <label className="form-label">Cash network</label>
+                                        <select className="form-select" value={adjustNetwork} onChange={(e) => this.setState({ adjustNetwork: e.target.value })}>
+                                            <option value="mainnet-beta">Mainnet · production cash</option>
+                                            <option value="devnet">Devnet · test cash</option>
+                                        </select>
+                                    </div>
+                                </div>}
 
                                 <div className="col-12 mb-3">
                                     <div className="form-group">
