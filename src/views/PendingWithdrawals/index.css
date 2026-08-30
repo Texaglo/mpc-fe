@@ -182,18 +182,30 @@
 
 .withdrawal-details {
     background-color: #1e1e2e;
-    padding: 15px;
+    padding: 13px 15px;
     border-radius: 8px;
     border: 1px solid #3a3b4d;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
 }
 
 .withdrawal-details h5 {
-    margin-bottom: 15px;
+    grid-column: 1 / -1;
+    margin-bottom: 8px;
 }
 
 .withdrawal-details p {
-    margin: 8px 0;
-    font-size: 14px;
+    margin: 4px 0;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.withdrawal-details p:nth-of-type(6) { grid-column: 1 / -1; }
+
+.reward-modal .modal-body {
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
 }
 
 .text-field textarea {
@@ -246,6 +258,39 @@
     border-radius: 5px;
 }
 
+.approval-wallet-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: #171b22;
+}
+
+.approval-wallet-summary > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.approval-wallet-summary span {
+    color: #9297a4;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.approval-wallet-summary strong {
+    color: #fff;
+    font-size: 13px;
+}
+
+.approval-wallet-summary.covered { border-color: rgba(76, 175, 80, .55); }
+.approval-wallet-summary.shortfall { border-color: rgba(244, 67, 54, .65); }
+.approval-wallet-summary.covered > div:last-child strong { color: #66cf70; }
+.approval-wallet-summary.shortfall > div:last-child strong { color: #ff6b62; }
+
 /* Balance Button */
 .balance-btn {
     background-color: #d0a535;
@@ -270,9 +315,10 @@
     overflow-y: auto !important;
 }
 
+.balance-modal.modal-dialog,
 .balance-modal .modal-dialog {
-    max-width: 900px;
-    width: 90%;
+    max-width: 1080px !important;
+    width: 94% !important;
     margin: 30px auto;
     transform: none !important;
 }
@@ -406,4 +452,225 @@
 .refill-instructions p {
     word-break: break-word;
     line-height: 1.6;
+}
+
+.wallet-operations-grid {
+    margin: 0;
+}
+
+.refill-eyebrow {
+    display: block;
+    color: #d0a535;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.refill-required-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 18px 20px;
+    border: 1px solid rgba(244, 67, 54, .75);
+    border-radius: 10px;
+    background: linear-gradient(110deg, rgba(244, 67, 54, .16), rgba(244, 67, 54, .04));
+}
+
+.refill-required-banner h5,
+.refill-request-panel h5,
+.refill-queue-head h5 {
+    margin: 0 0 6px;
+    color: #fff;
+}
+
+.refill-required-banner p,
+.refill-request-panel p {
+    margin: 0;
+    color: #a8acb7;
+    font-size: 12px;
+}
+
+.refill-required-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
+    gap: 8px;
+    min-width: 52%;
+}
+
+.refill-required-metrics span {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    color: #9297a4;
+    background: rgba(16, 19, 24, .72);
+    border-radius: 7px;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+.refill-required-metrics strong {
+    color: #fff;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+.refill-request-panel,
+.refill-queue-panel {
+    padding: 18px 20px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 10px;
+    background: rgba(23, 27, 34, .82);
+}
+
+.refill-request-panel {
+    display: grid;
+    grid-template-columns: minmax(220px, .8fr) minmax(0, 1.7fr);
+    gap: 24px;
+    align-items: end;
+}
+
+.refill-form-grid {
+    display: grid;
+    grid-template-columns: minmax(150px, .55fr) minmax(240px, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.refill-form-grid label,
+.refill-notes-label {
+    color: #d0a535;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.refill-form-grid input,
+.refill-notes-label textarea {
+    display: block;
+    width: 100%;
+    margin-top: 7px;
+    padding: 10px 12px;
+    border: 1px solid #3d424d;
+    border-radius: 6px;
+    outline: none;
+    background: #11151b;
+    color: #fff;
+}
+
+.refill-form-grid input:focus,
+.refill-notes-label textarea:focus {
+    border-color: #d0a535;
+}
+
+.request-refill-btn {
+    height: 39px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 6px;
+    background: #d0a535;
+    color: #111;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.refill-queue-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.refill-count {
+    padding: 5px 10px;
+    border: 1px solid rgba(208, 165, 53, .4);
+    border-radius: 999px;
+    color: #d0a535;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.refill-row {
+    display: grid;
+    grid-template-columns: 180px minmax(220px, 1fr) auto;
+    gap: 18px;
+    align-items: center;
+    padding: 13px 0;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
+.refill-amount,
+.refill-reason {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.refill-amount strong,
+.refill-reason strong { color: #fff; font-size: 12px; }
+.refill-amount span,
+.refill-reason span { color: #858b98; font-size: 10px; }
+.refill-row-actions { display: flex; gap: 8px; }
+
+.empty-refill-queue {
+    padding: 24px 0 8px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    color: #858b98;
+    font-size: 12px;
+    text-align: center;
+}
+
+.refill-action-modal .modal-content { max-width: 620px; margin: 0 auto; }
+
+.refill-approval-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 22px;
+    border: 1px solid rgba(208, 165, 53, .35);
+    border-radius: 10px;
+    background: #171b22;
+    text-align: center;
+}
+
+.refill-approval-summary span { color: #9297a4; font-size: 11px; text-transform: uppercase; }
+.refill-approval-summary strong { color: #d0a535; font-size: 28px; margin: 6px 0; }
+.refill-approval-summary p { color: #fff; margin: 0 0 8px; }
+.refill-approval-summary small { color: #9297a4; }
+.refill-notes-label { display: block; margin-top: 18px; }
+
+.refill-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.refill-modal-actions button { min-width: 160px; }
+.bank-reference-field { color: #fa6634; display: grid; gap: 7px; margin-bottom: 14px; }
+.bank-reference-field input { background: #171b24; border: 1px solid #555b68; border-radius: 7px; color: #fff; padding: 10px; }
+.bank-reference-field small { color: #a9adb6; }
+
+@media (max-width: 920px) {
+    .refill-required-banner,
+    .refill-request-panel { grid-template-columns: 1fr; display: grid; }
+    .refill-required-metrics { min-width: 0; }
+    .refill-form-grid { grid-template-columns: 1fr; }
+    .refill-row { grid-template-columns: 1fr; }
+    .refill-row-actions { justify-content: flex-start; }
+}
+
+@media (max-width: 620px) {
+    .approval-wallet-summary,
+    .refill-required-metrics { grid-template-columns: 1fr; }
+    .refill-modal-actions { flex-direction: column; }
+    .refill-modal-actions button { width: 100%; }
+    .withdrawal-details { grid-template-columns: 1fr; }
+    .withdrawal-details p:nth-of-type(6) { grid-column: auto; }
 }

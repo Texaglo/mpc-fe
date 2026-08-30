@@ -22,8 +22,9 @@ export const updateWithdrawalStatus = (data) => ({
     payload: data
 });
 
-export const getWalletBalance = () => ({
+export const getWalletBalance = (params) => ({
     type: 'GET_WALLET_BALANCE',
+    payload: params,
 });
 
 export const setWalletBalance = (data) => ({
@@ -37,5 +38,34 @@ export const getApprovedWithdrawals = () => ({
 
 export const setApprovedWithdrawals = (data) => ({
     type: 'SET_APPROVED_WITHDRAWALS',
+    payload: data
+});
+
+export const getHotWalletRefills = () => ({
+    type: 'GET_HOT_WALLET_REFILLS',
+});
+
+export const setHotWalletRefills = (data) => ({
+    type: 'SET_HOT_WALLET_REFILLS',
+    payload: data
+});
+
+export const requestHotWalletRefill = (data) => ({
+    type: 'REQUEST_HOT_WALLET_REFILL',
+    payload: data
+});
+
+export const approveHotWalletRefill = (data) => ({
+    type: 'APPROVE_HOT_WALLET_REFILL',
+    payload: data
+});
+
+export const rejectHotWalletRefill = (data) => ({
+    type: 'REJECT_HOT_WALLET_REFILL',
+    payload: data
+});
+
+export const setRefillRequirement = (data) => ({
+    type: 'SET_REFILL_REQUIREMENT',
     payload: data
 });

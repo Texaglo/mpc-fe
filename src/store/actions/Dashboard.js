@@ -27,3 +27,13 @@ export const setAuditLogs = (data) => ({
     type: 'SET_AUDIT_LOGS',
     payload: data
 });
+
+export const getHouseMpceLedger = (params) => ({
+    type: 'GET_HOUSE_MPCE_LEDGER',
+    payload: params
+});
+
+export const setHouseMpceLedger = (data) => ({
+    type: 'SET_HOUSE_MPCE_LEDGER',
+    payload: data
+});

@@ -46,16 +46,15 @@ class Sidebar extends React.Component {
             </a>
           </div>
           <Nav>
-            {routes.map((prop, key) => {
+            {routes.map((prop) => {
               return (
-                <React.Fragment>
+                <React.Fragment key={`${prop.layout}${prop.path}`}>
                   {!prop['hidden'] &&
                     <li
                       className={
                         this.activeRoute(prop.path) +
                         (prop.pro ? "active-pro" : "")
                       }
-                      key={key}
                     >
                       <NavLink
                         to={prop.layout + prop.path}
@@ -64,7 +63,7 @@ class Sidebar extends React.Component {
                       // onClick={() => this.props.toggleSidebar(prop.name)}
                       >
                         <i className={prop.icon} />
-                        {rtlActive ? prop.rtlName : prop.name}
+                        {rtlActive ? prop.rtlName : (prop.sidebarName || prop.name)}
                       </NavLink>
                     </li>}
                 </React.Fragment>

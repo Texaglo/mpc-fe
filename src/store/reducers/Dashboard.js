@@ -7,6 +7,19 @@ const INITIAL_STATE = {
         totalPages: 1,
         totalLogs: 0
     },
+    auditLogActionTypes: [],
+    auditLogsLoading: false,
+    houseMpceLedger: {
+        summary: {},
+        entries: [],
+        pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalEntries: 0,
+            limit: 25
+        }
+    },
+    houseMpceLedgerLoading: false,
     loading: false,
     error: null
 };
@@ -37,7 +50,28 @@ export default (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 auditLogs: action.payload?.logs || [],
-                auditLogsPagination: action.payload?.pagination || state.auditLogsPagination
+                auditLogsPagination: action.payload?.pagination || state.auditLogsPagination,
+                auditLogActionTypes: action.payload?.actionTypes || state.auditLogActionTypes,
+                auditLogsLoading: false
+            };
+
+        case 'GET_AUDIT_LOGS':
+            return {
+                ...state,
+                auditLogsLoading: true
+            };
+
+        case 'GET_HOUSE_MPCE_LEDGER':
+            return {
+                ...state,
+                houseMpceLedgerLoading: true
+            };
+
+        case 'SET_HOUSE_MPCE_LEDGER':
+            return {
+                ...state,
+                houseMpceLedger: action.payload || INITIAL_STATE.houseMpceLedger,
+                houseMpceLedgerLoading: false
             };
 
         default:

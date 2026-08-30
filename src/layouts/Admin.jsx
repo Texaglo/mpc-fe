@@ -9,6 +9,7 @@ import Loader from "../components/Loader";
 import Footer from "../components/Footer/Footer.jsx";
 import Sidebar from "../components/Sidebar/Sidebar.jsx";
 import AdminNavbar from "../components/Navbars/AdminNavbar.jsx";
+import SectionTabs from "../components/SectionTabs/SectionTabs.jsx";
 
 
 var ps;
@@ -64,11 +65,17 @@ class Admin extends React.Component {
         <Switch>
           {routes.map((prop, key) => {
             if (prop.layout === "/home") {
+              const PageComponent = prop.component;
               return (
                 <Route
                   exact={true}
                   path={prop['layout'] + prop['path']}
-                  component={prop['component']}
+                  render={routeProps => (
+                    <>
+                      <SectionTabs pathname={routeProps.location.pathname} />
+                      <PageComponent {...routeProps} />
+                    </>
+                  )}
                   key={key}
                 />
               );
@@ -99,9 +106,12 @@ class Admin extends React.Component {
   render() {
     let { activeTab } = this.state;
     let { isLoader } = this.props;
+    const isLoaderVisible = typeof isLoader === "object"
+      ? Boolean(isLoader && isLoader.status)
+      : Boolean(isLoader);
     return (
       <div className="wrapper">
-        {isLoader && <Loader />}
+        {isLoaderVisible && <Loader />}
         <Sidebar
           {...this.props}
           routes={routes}

@@ -2,6 +2,8 @@ const INITIAL_STATE = {
     pendingWithdrawals: [],
     approvedWithdrawals: [],
     walletBalance: null,
+    hotWalletRefills: [],
+    refillRequirement: null,
     loading: false,
     error: null
 };
@@ -24,18 +26,12 @@ export default (state = INITIAL_STATE, action) => {
 
         case 'APPROVE_WITHDRAWAL':
             return {
-                ...state,
-                pendingWithdrawals: state.pendingWithdrawals.filter(
-                    withdrawal => withdrawal.withdrawalId !== action.payload.withdrawalId
-                )
+                ...state
             };
 
         case 'REJECT_WITHDRAWAL':
             return {
-                ...state,
-                pendingWithdrawals: state.pendingWithdrawals.filter(
-                    withdrawal => withdrawal.withdrawalId !== action.payload.withdrawalId
-                )
+                ...state
             };
 
         case 'UPDATE_WITHDRAWAL_STATUS':
@@ -74,6 +70,20 @@ export default (state = INITIAL_STATE, action) => {
                 approvedWithdrawals: action.payload || [],
                 loading: false,
                 error: null
+            };
+
+        case 'SET_HOT_WALLET_REFILLS':
+            return {
+                ...state,
+                hotWalletRefills: action.payload || [],
+                loading: false,
+                error: null
+            };
+
+        case 'SET_REFILL_REQUIREMENT':
+            return {
+                ...state,
+                refillRequirement: action.payload || null
             };
 
         default:

@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import './index.css';
 import { useDispatch, useSelector } from "react-redux";
 import { getDashboardStats, getDashboardCharts, getAuditLogs } from '../../store/actions/Dashboard';
+import { getWalletBalance } from '../../store/actions/PendingWithdrawals';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -33,28 +35,41 @@ ChartJS.register(
 
 const AdminHomePage = () => {
     const dispatch = useDispatch();
+    const history = useHistory();
     const { stats, charts, auditLogs } = useSelector(state => state.Dashboard);
+    const { walletBalance } = useSelector(state => state.PendingWithdrawals);
 
     const [selectedPeriod, setSelectedPeriod] = useState('all');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [showCustomDates, setShowCustomDates] = useState(false);
+    const activeDashboardQuery = useRef({ period: 'all' });
 
-    useEffect(() => {
-        fetchDashboardData();
-        dispatch(getAuditLogs({ page: 1, limit: 10 }));
-    }, []);
-
-    const fetchDashboardData = (period = 'all', start = '', end = '') => {
+    const fetchDashboardData = useCallback((period = 'all', start = '', end = '', options = {}) => {
         const params = { period };
         if (period === 'custom' && start && end) {
             params.startDate = start;
             params.endDate = end;
         }
-        dispatch(getDashboardStats(params));
-        dispatch(getDashboardCharts(params));
-        dispatch(getAuditLogs({ page: 1, limit: 10, ...params }));
-    };
+        activeDashboardQuery.current = params;
+        const requestParams = options.silent ? { ...params, silent: true } : params;
+        dispatch(getDashboardStats(requestParams));
+        dispatch(getDashboardCharts(requestParams));
+        dispatch(getAuditLogs({ page: 1, limit: 10, ...requestParams }));
+    }, [dispatch]);
+
+    useEffect(() => {
+        fetchDashboardData();
+        dispatch(getWalletBalance());
+
+        const refreshTimer = window.setInterval(() => {
+            const params = activeDashboardQuery.current;
+            fetchDashboardData(params.period, params.startDate, params.endDate, { silent: true });
+            dispatch(getWalletBalance({ silent: true }));
+        }, 30000);
+
+        return () => window.clearInterval(refreshTimer);
+    }, [dispatch, fetchDashboardData]);
 
     const handlePeriodChange = (e) => {
         const period = e.target.value;
@@ -75,6 +90,20 @@ const AdminHomePage = () => {
             fetchDashboardData('custom', startDate, endDate);
         }
     };
+
+    const formatMpce = (value) => Number(value || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 6,
+    });
+
+    const formatMinutes = (value) => Number(value || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
+    });
+
+    const formatUsd = (value) => Number(value || 0).toLocaleString(undefined, {
+        style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2,
+    });
 
     // Default chart data if API data not available
     const defaultDailyUsers = {
@@ -192,8 +221,8 @@ const AdminHomePage = () => {
 
     const formatActionType = (action) => {
         const actionMap = {
-            'FREEZE_USER': 'Froze User',
-            'UNFREEZE_USER': 'Unfroze User',
+            'FREEZE_USER': 'Banned User',
+            'UNFREEZE_USER': 'Unbanned User',
             'APPROVE_WITHDRAWAL': 'Approved Withdrawal',
             'REJECT_WITHDRAWAL': 'Rejected Withdrawal',
             'ADJUST_BALANCE': 'Adjusted Balance',
@@ -274,7 +303,55 @@ const AdminHomePage = () => {
                     </div>
                 </div>
 
+                <section className="system-status-bar" aria-label="System status">
+                    <div><strong>System status</strong><span>Live backend checks</span></div>
+                    {[
+                        ['API', stats?.system?.api?.status],
+                        ['Database', stats?.system?.database?.status],
+                        ['Sockets', stats?.system?.sockets?.status],
+                        ['Solana RPC', stats?.system?.solanaRpc?.status],
+                        ['Game engine', stats?.system?.gameEngine?.newGamesPaused ? 'PAUSED' : stats?.system?.gameEngine?.status],
+                        ['Cashier', stats?.system?.cashier?.status],
+                    ].map(([label, status]) => (
+                        <span className={`system-status-chip is-${String(status || 'checking').toLowerCase()}`} key={label}>
+                            <i />{label}: {status || 'Checking'}
+                        </span>
+                    ))}
+                </section>
+
                 <div className="stats-grid">
+                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/users')}>
+                        <div className="stat-icon online-icon"><i className="tim-icons icon-wifi" /></div>
+                        <div className="stat-content">
+                            <span className="stat-value">{stats?.live?.playersOnline?.toLocaleString() || '0'}</span>
+                            <span className="stat-label">Players Online</span>
+                            <span className="stat-detail">
+                                {stats?.live?.recentAuthenticatedPlayers ?? stats?.live?.httpActivePlayers ?? 0} authenticated session{(stats?.live?.recentAuthenticatedPlayers ?? stats?.live?.httpActivePlayers) === 1 ? '' : 's'} · {stats?.live?.socketConnections || 0} on this backend
+                            </span>
+                            <span className="stat-link-label">Open players →</span>
+                        </div>
+                    </button>
+
+                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/games')}>
+                        <div className="stat-icon active-tables-icon"><i className="tim-icons icon-controller" /></div>
+                        <div className="stat-content">
+                            <span className="stat-value">{stats?.live?.activeTables?.toLocaleString() || '0'}</span>
+                            <span className="stat-label">Active Tables</span>
+                            <span className="stat-detail">Ring, Sit'n'Go and tournaments</span>
+                            <span className="stat-link-label">Open games →</span>
+                        </div>
+                    </button>
+
+                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/games')}>
+                        <div className="stat-icon seated-icon"><i className="tim-icons icon-single-02" /></div>
+                        <div className="stat-content">
+                            <span className="stat-value">{stats?.live?.playersSeated?.toLocaleString() || '0'}</span>
+                            <span className="stat-label">Players Seated</span>
+                            <span className="stat-detail">{stats?.live?.connectedRingPlayers || 0} connected at ring tables</span>
+                            <span className="stat-link-label">View tables →</span>
+                        </div>
+                    </button>
+
                     {/* Total Users */}
                     <div className="stat-card">
                         <div className="stat-icon users-icon">
@@ -286,14 +363,54 @@ const AdminHomePage = () => {
                         </div>
                     </div>
 
-                    {/* Frozen Users */}
+                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/users')}>
+                        <div className="stat-icon new-accounts-icon"><i className="tim-icons icon-simple-add" /></div>
+                        <div className="stat-content">
+                            <span className="stat-value">{stats?.users?.newToday?.toLocaleString() || '0'}</span>
+                            <span className="stat-label">New Accounts Today</span>
+                            <span className="stat-detail">{stats?.users?.newInPeriod?.toLocaleString() || 0} in selected period</span>
+                            <span className="stat-link-label">Open players →</span>
+                        </div>
+                    </button>
+
+                    <button type="button" className="stat-card dashboard-link-card liabilities-card" onClick={() => history.push('/home/users')}>
+                        <div className="stat-icon liabilities-icon"><i className="tim-icons icon-chart-pie-36" /></div>
+                        <div className="stat-content">
+                            <span className="stat-value treasury-value">{formatUsd(stats?.liabilities?.cashUsd)}</span>
+                            <span className="stat-label">Player Liabilities</span>
+                            <span className="stat-detail">{formatMpce(stats?.liabilities?.mpce)} MPCE · {formatMpce(stats?.liabilities?.fp)} FP</span>
+                            <span className="stat-detail">{formatMinutes(stats?.liabilities?.timeMinutes)} projected minutes</span>
+                        </div>
+                    </button>
+
+                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/cashier')}>
+                        <div className="stat-icon time-purchased-icon"><i className="tim-icons icon-time-alarm" /></div>
+                        <div className="stat-content">
+                            <span className="stat-value">{formatMinutes(stats?.today?.timePurchases?.timeMinutes)}</span>
+                            <span className="stat-label">Time Purchased Today</span>
+                            <span className="stat-detail">{formatMpce(stats?.today?.timePurchases?.mpce)} MPCE · {formatUsd(stats?.today?.timePurchases?.cashUsd)}</span>
+                            <span className="stat-link-label">Open cashier →</span>
+                        </div>
+                    </button>
+
+                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/mpce-ledger')}>
+                        <div className="stat-icon revenue-today-icon"><i className="tim-icons icon-coins" /></div>
+                        <div className="stat-content">
+                            <span className="stat-value treasury-value">{formatUsd(stats?.revenueToday?.estimatedUsd)}</span>
+                            <span className="stat-label">Revenue Today</span>
+                            <span className="stat-detail">{formatMpce(stats?.revenueToday?.mpce)} MPCE burned · {formatMinutes(stats?.revenueToday?.timeMinutes)} minutes</span>
+                            <span className="stat-link-label">Open house ledger →</span>
+                        </div>
+                    </button>
+
+                    {/* Banned Users */}
                     <div className="stat-card">
                         <div className="stat-icon frozen-icon">
                             <i className="tim-icons icon-lock-circle"></i>
                         </div>
                         <div className="stat-content">
                             <span className="stat-value">{stats?.users?.frozen?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">Frozen Users</span>
+                            <span className="stat-label">Banned Users</span>
                         </div>
                     </div>
 
@@ -329,7 +446,117 @@ const AdminHomePage = () => {
                             <span className="stat-label">Today's Withdrawals</span>
                         </div>
                     </div>
+
+                    {/* House MPCE */}
+                    <button
+                        type="button"
+                        className="stat-card house-mpce-card dashboard-link-card"
+                        onClick={() => history.push('/home/mpce-ledger')}
+                        aria-label="Open House MPCE transaction ledger"
+                    >
+                        <div className="stat-icon house-mpce-icon">
+                            <i className="tim-icons icon-bank"></i>
+                        </div>
+                        <div className="stat-content">
+                            <span className="stat-value">{formatMpce(stats?.houseMpce?.availableBalance)}</span>
+                            <span className="stat-label">House MPCE Balance</span>
+                            <span className="stat-detail">
+                                +{formatMpce(stats?.houseMpce?.periodEarned)} in selected period
+                            </span>
+                            <span className="stat-link-label">View transactions →</span>
+                        </div>
+                    </button>
+
+                    {/* Treasury SOL */}
+                    <div className="stat-card">
+                        <div className="stat-icon treasury-icon">
+                            <i className="tim-icons icon-wallet-43"></i>
+                        </div>
+                        <div className="stat-content">
+                            <span className="stat-value treasury-value">
+                                {walletBalance?.treasuryWallet?.balanceSOL || 'Unavailable'}
+                            </span>
+                            <span className="stat-label">Treasury SOL</span>
+                            <span className="stat-detail">{walletBalance?.network || 'Network unavailable'}</span>
+                        </div>
+                    </div>
+
+                    {/* Treasury USDC */}
+                    <div className="stat-card">
+                        <div className="stat-icon treasury-usdc-icon">
+                            <i className="tim-icons icon-money-coins"></i>
+                        </div>
+                        <div className="stat-content">
+                            <span className="stat-value treasury-value">
+                                {walletBalance?.treasuryWallet?.balanceUSDC || 'Unavailable'}
+                            </span>
+                            <span className="stat-label">Treasury USDC</span>
+                            <span className="stat-detail">Deposit custody</span>
+                        </div>
+                    </div>
                 </div>
+
+                <section className="house-ledger-card">
+                    <div className="house-ledger-header">
+                        <div>
+                            <h3 className="chart-title">House MPCE Ledger</h3>
+                            <span className="chart-subtitle">Completed user-to-house table-time transfers</span>
+                        </div>
+                        <div className="house-ledger-summary">
+                            <span>{formatMpce(stats?.houseMpce?.totalEarned)} MPCE lifetime</span>
+                            <span>
+                                {stats?.houseMpce?.totalTimeTrackedCount > 0
+                                    ? `${formatMinutes(stats?.houseMpce?.totalTimeMinutes)} tracked account minutes removed`
+                                    : 'Minute detail begins with new burns'}
+                            </span>
+                            <button
+                                type="button"
+                                className="ledger-view-all-btn"
+                                onClick={() => history.push('/home/mpce-ledger')}
+                            >
+                                View all transactions →
+                            </button>
+                        </div>
+                    </div>
+
+                    {stats?.houseMpce?.recent?.length > 0 ? (
+                        <div className="house-ledger-table-wrap">
+                            <table className="house-ledger-table">
+                                <thead>
+                                    <tr>
+                                        <th>When</th>
+                                        <th>Player</th>
+                                        <th>Table / context</th>
+                                        <th>Account time</th>
+                                        <th>House earned</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {stats.houseMpce.recent.map((entry) => (
+                                        <tr key={entry.id}>
+                                            <td>{entry.createdAt ? new Date(entry.createdAt).toLocaleString() : 'N/A'}</td>
+                                            <td>
+                                                <span className="ledger-player-name">
+                                                    {entry.user?.username || entry.user?.email || 'Unknown player'}
+                                                </span>
+                                                {entry.user?.username && entry.user?.email && (
+                                                    <span className="ledger-player-email">{entry.user.email}</span>
+                                                )}
+                                            </td>
+                                            <td>{entry.tableName || 'Table time'}</td>
+                                            <td>{entry.timeMinutes === null ? 'Legacy — not recorded' : `${formatMinutes(entry.timeMinutes)} min`}</td>
+                                            <td className="ledger-amount">+{formatMpce(entry.amountMpce)} MPCE</td>
+                                            <td><span className="ledger-status">{entry.ledgerStatus || 'ACCRUED'}</span></td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="house-ledger-empty">No MPCE burns recorded for this period.</div>
+                    )}
+                </section>
 
                 {/* Charts Section */}
                 <div className="charts-section">
@@ -372,8 +599,13 @@ const AdminHomePage = () => {
                         {/* Audit Log */}
                         <div className="chart-card audit-log-card">
                             <div className="chart-header">
-                                <h3 className="chart-title">Recent Admin Activity</h3>
-                                <span className="chart-subtitle">Audit Log</span>
+                                <div>
+                                    <h3 className="chart-title">Recent Admin Activity</h3>
+                                    <span className="chart-subtitle">Audit Log</span>
+                                </div>
+                                <button type="button" className="audit-log-view-all" onClick={() => history.push('/home/audit-log')}>
+                                    View all →
+                                </button>
                             </div>
                             <div className="audit-log-body">
                                 {auditLogs && auditLogs.length > 0 ? (

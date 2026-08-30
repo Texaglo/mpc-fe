@@ -1,0 +1,309 @@
+.mpce-ledger-page {
+    padding: 30px !important;
+}
+
+.mpce-ledger-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.mpce-ledger-page-header h2 {
+    margin: 8px 0 4px;
+    color: #d0a535;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.mpce-ledger-page-header p {
+    margin: 0;
+    color: #94979f;
+    font-size: 13px;
+}
+
+.mpce-ledger-back {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #c5c7cc;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.mpce-ledger-back:hover,
+.mpce-ledger-back:focus-visible {
+    color: #d0a535;
+}
+
+.mpce-ledger-filters,
+.mpce-custom-dates {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mpce-ledger-filters label,
+.mpce-custom-dates label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #999ca4;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.mpce-ledger-filters select,
+.mpce-custom-dates input {
+    min-width: 150px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 7px;
+    outline: none;
+    background: #191e23;
+    color: #fff;
+    font-size: 13px;
+}
+
+.mpce-custom-dates button,
+.mpce-ledger-pagination button {
+    height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 7px;
+    background: #d0a535;
+    color: #171717;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.mpce-custom-dates button:disabled,
+.mpce-ledger-pagination button:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+}
+
+.mpce-ledger-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.mpce-ledger-summary-card {
+    min-height: 126px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(111, 114, 119, 0.25);
+}
+
+.mpce-ledger-summary-card.primary {
+    border-color: rgba(208, 165, 53, 0.55);
+    background: linear-gradient(145deg, rgba(208, 165, 53, 0.15), rgba(111, 114, 119, 0.22));
+}
+
+.mpce-ledger-summary-card span {
+    color: #92959d;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.mpce-ledger-summary-card strong {
+    color: #fff;
+    font-size: 25px;
+    line-height: 1.15;
+}
+
+.mpce-ledger-summary-card.primary strong {
+    color: #d0a535;
+}
+
+.mpce-ledger-summary-card small {
+    color: #82858d;
+    font-size: 11px;
+}
+
+.mpce-ledger-table-card {
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(111, 114, 119, 0.25);
+}
+
+.mpce-ledger-table-heading {
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mpce-ledger-table-heading h3 {
+    margin: 0 0 3px;
+    color: #fff;
+    font-size: 17px;
+}
+
+.mpce-ledger-table-heading span,
+.mpce-ledger-loading {
+    color: #8d9097;
+    font-size: 11px;
+}
+
+.mpce-ledger-table-scroll {
+    overflow-x: auto;
+}
+
+.mpce-ledger-full-table {
+    width: 100%;
+    min-width: 1120px;
+    border-collapse: collapse;
+    color: #d7d8dc;
+    font-size: 12px;
+}
+
+.mpce-ledger-full-table th,
+.mpce-ledger-full-table td {
+    padding: 13px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.mpce-ledger-full-table th {
+    color: #8e9198;
+    font-size: 10px;
+    letter-spacing: 0.45px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.mpce-ledger-full-table tbody tr:hover {
+    background: rgba(208, 165, 53, 0.07);
+}
+
+.mpce-ledger-full-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.mpce-ledger-player,
+.mpce-ledger-muted {
+    display: block;
+}
+
+.mpce-ledger-player {
+    color: #fff;
+    font-weight: 600;
+}
+
+.mpce-ledger-muted {
+    margin-top: 2px;
+    color: #7f828a;
+    font-size: 10px;
+}
+
+.mpce-ledger-nowrap,
+.mpce-ledger-earned {
+    white-space: nowrap;
+}
+
+.mpce-ledger-earned {
+    color: #d0a535;
+    font-weight: 700;
+}
+
+.mpce-ledger-status {
+    display: inline-flex;
+    padding: 4px 8px;
+    border: 1px solid rgba(76, 175, 80, 0.4);
+    border-radius: 999px;
+    color: #72d676;
+    background: rgba(76, 175, 80, 0.09);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
+
+.mpce-ledger-status.settled {
+    border-color: rgba(33, 150, 243, 0.45);
+    color: #67b7f7;
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.mpce-ledger-status.void {
+    border-color: rgba(244, 67, 54, 0.45);
+    color: #ef7770;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+.mpce-ledger-empty {
+    padding: 55px 20px;
+    color: #858890;
+    text-align: center;
+}
+
+.mpce-ledger-pagination {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mpce-ledger-pagination button {
+    height: 34px;
+    min-width: 95px;
+}
+
+.mpce-ledger-pagination span {
+    color: #a0a2a8;
+    font-size: 12px;
+}
+
+@media (max-width: 1100px) {
+    .mpce-ledger-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mpce-ledger-page-header {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 650px) {
+    .mpce-ledger-page {
+        padding: 18px !important;
+    }
+
+    .mpce-ledger-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mpce-ledger-filters,
+    .mpce-custom-dates {
+        width: 100%;
+    }
+
+    .mpce-ledger-filters label,
+    .mpce-custom-dates label {
+        flex: 1 1 140px;
+    }
+
+    .mpce-ledger-filters select,
+    .mpce-custom-dates input {
+        width: 100%;
+    }
+}

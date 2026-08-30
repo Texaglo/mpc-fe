@@ -48,12 +48,16 @@ const Marketplace = () => {
 
     const [selectedItemType, setSelectedItemType] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
+    const [catalogSearch, setCatalogSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         dispatch(setLoader(false));
-        dispatch(getMarketplaceItems({ page: currentPage, itemType: selectedItemType, isActive: selectedStatus }));
-    }, [dispatch, currentPage, selectedItemType, selectedStatus]);
+        const searchDelay = setTimeout(() => {
+            dispatch(getMarketplaceItems({ page: currentPage, itemType: selectedItemType, isActive: selectedStatus, search: catalogSearch }));
+        }, 250);
+        return () => clearTimeout(searchDelay);
+    }, [dispatch, currentPage, selectedItemType, selectedStatus, catalogSearch]);
 
     const handleItemTypeChange = (e) => {
         setSelectedItemType(e.target.value);
@@ -71,6 +75,7 @@ const Marketplace = () => {
 
     const initialFormData = {
         _id: "",
+        sku: "",
         name: "",
         description: "",
         price: 0,
@@ -114,6 +119,7 @@ const Marketplace = () => {
         setSelectedItem(item);
         setFormData({
             _id: item._id,
+            sku: item.sku || "",
             name: item.name || "",
             description: item.description || "",
             price: item.price || 0,
@@ -151,6 +157,13 @@ const Marketplace = () => {
             Header: 'Item Type',
             Cell: ({ value }) => value || '-',
             width: 120
+        },
+        {
+            accessor: 'sku',
+            Header: 'SKU',
+            Cell: ({ value }) => <span className="marketplace-sku">{value || '—'}</span>,
+            width: 170,
+            filterable: false
         },
         {
             accessor: 'name',
@@ -228,6 +241,10 @@ const Marketplace = () => {
                     }} className="add-btn">Create Item</button>
                 </div>
                 <div className='filters-container mb-3'>
+                    <div className='filter-group catalog-search-group'>
+                        <label>Item / SKU:</label>
+                        <input className="filter-input" value={catalogSearch} onChange={(event) => { setCatalogSearch(event.target.value); setCurrentPage(1); }} placeholder="Search name, SKU, or item ID" />
+                    </div>
                     <div className='filter-group'>
                         <label>Item Type:</label>
                         <select
@@ -301,7 +318,22 @@ const Marketplace = () => {
                         <div className="col-12">
                             <ValidatorForm className="row">
                                 <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                    <Grid className="input-fields" item xs={6}>
+                                    <Grid className="input-fields" item xs={4}>
+                                        <label>SKU {selectedItem ? '' : '(optional)'}</label>
+                                        <CustomTextField
+                                            fullWidth
+                                            className="text-field"
+                                            placeholder="Generated automatically if blank"
+                                            name="sku"
+                                            type="text"
+                                            value={formData.sku}
+                                            variant="outlined"
+                                            margin="dense"
+                                            onChange={handleFormChange}
+                                            disabled={Boolean(selectedItem)}
+                                        />
+                                    </Grid>
+                                    <Grid className="input-fields" item xs={4}>
                                         <label>Name *</label>
                                         <CustomTextField
                                             fullWidth
@@ -317,7 +349,7 @@ const Marketplace = () => {
                                             errorMessages={['Please add item name']}
                                         />
                                     </Grid>
-                                    <Grid className="input-fields" item xs={6}>
+                                    <Grid className="input-fields" item xs={4}>
                                         <label>Price *</label>
                                         <CustomTextField
                                             fullWidth

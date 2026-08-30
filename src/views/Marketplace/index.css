@@ -76,7 +76,22 @@
     gap: 15px;
     align-items: center;
     margin-bottom: 15px;
+    flex-wrap: wrap;
 }
+
+.filter-input {
+    background-color: #2a2b3d;
+    border: 1px solid #3a3b4d;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px;
+    min-width: 260px;
+    outline: none;
+    padding: 8px 12px;
+}
+
+.filter-input:focus { border-color: #fa6634; }
+.marketplace-sku { color: #d0a535; font-size: 11px; font-weight: 700; }
 
 .filter-group {
     display: flex;

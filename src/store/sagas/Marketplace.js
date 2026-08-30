@@ -6,10 +6,11 @@ import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 /************************** GET ALL MARKETPLACE ITEMS *****************************/
 function* getMarketplaceItems({ payload = {} }) {
-    const { page = 1, limit = 20, itemType, isActive } = payload;
+    const { page = 1, limit = 20, itemType, isActive, search } = payload;
     let queryParams = `?page=${page}&limit=${limit}`;
     if (itemType) queryParams += `&itemType=${itemType}`;
     if (isActive !== undefined && isActive !== '') queryParams += `&isActive=${isActive}`;
+    if (search) queryParams += `&search=${encodeURIComponent(search)}`;
 
     const { error, response } = yield call(getCall, `/marketplace/admin/items${queryParams}`);
     if (error) EventBus.publish("error", error?.response?.data?.message || 'Failed to fetch items');

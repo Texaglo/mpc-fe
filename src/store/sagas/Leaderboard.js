@@ -9,8 +9,16 @@ import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 function* getPlayersLeaderboard({ payload }) {
     const period = payload?.period || 'all';
-    const { error, response } = yield call(getCall, `/users/leaderboard?period=${period}`);
-    if (error) EventBus.publish("error", error['response']['data']['message']);
+    const params = new URLSearchParams({ period, limit: '100' });
+    if (payload?.economy) params.set('economy', payload.economy === 'all' ? 'ALL' : payload.economy);
+    if (payload?.metric) params.set('metric', payload.metric);
+    let { error, response } = yield call(getCall, `/admin/leaderboards?${params.toString()}`);
+    // The richer operator endpoint is additive. Older deployed backends can
+    // continue serving the existing leaderboard until they are upgraded.
+    if (error?.response?.status === 404) {
+        ({ error, response } = yield call(getCall, `/users/leaderboard?period=${encodeURIComponent(period)}`));
+    }
+    if (error) EventBus.publish("error", error?.response?.data?.message || 'Unable to load leaderboard');
     else if (response) yield put(setPlayersLeaderboard(response['data']['body']));
     yield put(setLoader(false));
     yield put(toggleLogin(false));

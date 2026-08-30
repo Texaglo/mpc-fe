@@ -1,6 +1,6 @@
 .settings-container {
     border-radius: 10px;
-    padding: 20px;
+    padding: 14px;
 }
 
 .settings-container .main-container-heading {
@@ -8,15 +8,65 @@
     font-size: 18px;
     font-weight: 550;
     margin-top: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 4px;
+}
+
+.settings-page-heading p {
+    margin: 0;
+    color: #8f93a4;
+    font-size: 13px;
+}
+
+.economy-panel {
+    margin-top: 14px;
+    padding: 16px;
+    background: #222437;
+    border: 1px solid #3a3b4d;
+    border-radius: 12px;
+}
+
+.economy-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.economy-metric {
+    display: flex;
+    min-height: 72px;
+    padding: 12px 14px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    background: #1e1e2e;
+    border: 1px solid #343647;
+    border-radius: 9px;
+}
+
+.economy-metric span {
+    color: #8f93a4;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.economy-metric strong {
+    color: #d0a535;
+    font-size: 19px;
+}
+
+.economy-formula {
+    margin: 10px 2px 0;
+    color: #a2a5b2;
+    font-size: 12px;
 }
 
 /* Settings Cards Container */
 .settings-cards-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
 }
 
 /* Setting Card - Row Layout */
@@ -28,8 +78,8 @@
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    padding: 20px;
-    gap: 20px;
+    padding: 12px;
+    gap: 12px;
 }
 
 .setting-card:hover {
@@ -39,9 +89,9 @@
 
 /* Icon */
 .setting-icon {
-    width: 50px;
-    height: 50px;
-    min-width: 50px;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
     background: linear-gradient(135deg, #d0a535 0%, #b8922e 100%);
     border-radius: 10px;
     display: flex;
@@ -50,7 +100,7 @@
 }
 
 .setting-icon i {
-    font-size: 20px;
+    font-size: 18px;
     color: #1e1e2e;
 }
 
@@ -62,63 +112,60 @@
 /* Card Body - Row layout */
 .setting-card-body {
     flex: 1;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 30px;
+    gap: 6px 12px;
     padding: 0;
 }
 
 .setting-info {
     flex: 1;
-    min-width: 200px;
+    min-width: 0;
 }
 
 .setting-title {
     color: #d0a535;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     margin: 0 0 5px 0;
 }
 
 .setting-description {
     color: #888;
-    font-size: 13px;
+    font-size: 11px;
     margin: 0;
     line-height: 1.4;
 }
 
 .setting-value-container {
     background-color: #1e1e2e;
-    padding: 12px 20px;
+    padding: 8px 12px;
     border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 15px;
-    min-width: 180px;
-}
-
-.setting-value-label {
-    color: #888;
-    font-size: 13px;
+    gap: 8px;
+    min-width: 145px;
 }
 
 .setting-value {
     color: #d0a535;
-    font-size: 24px;
+    font-size: 16px;
     font-weight: 700;
 }
 
 .setting-meta {
+    grid-column: 1 / -1;
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 180px;
+    flex-direction: row;
+    gap: 8px;
+    min-width: 0;
 }
 
 .setting-updated,
 .setting-updated-by {
     color: #666;
-    font-size: 11px;
+    font-size: 9px;
 }
 
 /* Card Footer - Now inline */
@@ -130,9 +177,12 @@
 }
 
 .setting-card-footer .add-btn {
-    padding: 10px 30px !important;
-    font-size: 13px;
+    padding: 8px 18px !important;
+    font-size: 11px;
 }
+
+.other-settings-section { margin-top: 18px; }
+.other-settings-section > h4 { margin: 0; color: #d0a535; font-size: 14px; text-transform: uppercase; }
 
 /* No Settings */
 .no-settings {
@@ -229,6 +279,9 @@
 
 /* Responsive */
 @media (max-width: 992px) {
+    .economy-summary-grid { grid-template-columns: 1fr; }
+    .settings-cards-container { grid-template-columns: 1fr; }
+
     .setting-card {
         flex-wrap: wrap;
     }
@@ -256,7 +309,10 @@
     .setting-card-body {
         flex-direction: column;
         width: 100%;
+        grid-template-columns: 1fr;
     }
+
+    .setting-meta { grid-column: 1; flex-direction: column; }
 
     .setting-value-container {
         width: 100%;

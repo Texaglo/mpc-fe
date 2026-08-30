@@ -1,13 +1,13 @@
 import axios from 'axios';
 import EventBus from 'eventing-bus';
-import { setDashboardStats, setDashboardCharts, setAuditLogs } from "../actions/Dashboard";
+import { setDashboardStats, setDashboardCharts, setAuditLogs, setHouseMpceLedger } from "../actions/Dashboard";
 import { setLoader } from "../actions/Auth";
 import { all, takeEvery, call, put } from 'redux-saga/effects';
 
 /************************** GET DASHBOARD STATS *****************************/
 function* getDashboardStats({ payload }) {
-    yield put(setLoader(true));
-    const { period, startDate, endDate } = payload || {};
+    const { period, startDate, endDate, silent = false } = payload || {};
+    if (!silent) yield put(setLoader(true));
     let queryParams = '';
     if (period) {
         queryParams = `?period=${period}`;
@@ -16,9 +16,9 @@ function* getDashboardStats({ payload }) {
         }
     }
     const { error, response } = yield call(getCall, `/admin/dashboard${queryParams}`);
-    if (error) EventBus.publish("error", error['response']['data']['message']);
+    if (error && !silent) EventBus.publish("error", error?.response?.data?.message || 'Unable to refresh dashboard stats');
     else if (response) yield put(setDashboardStats(response['data']['body']));
-    yield put(setLoader(false));
+    if (!silent) yield put(setLoader(false));
 }
 
 /************************** GET DASHBOARD CHARTS *****************************/
@@ -38,7 +38,7 @@ function* getDashboardCharts({ payload }) {
 
 /************************** GET AUDIT LOGS *****************************/
 function* getAuditLogs({ payload }) {
-    const { page = 1, limit = 10, period, startDate, endDate } = payload || {};
+    const { page = 1, limit = 10, period, startDate, endDate, action, search } = payload || {};
     const params = { page, limit };
     if (period) {
         params.period = period;
@@ -47,6 +47,8 @@ function* getAuditLogs({ payload }) {
             params.endDate = endDate;
         }
     }
+    if (action) params.action = action;
+    if (search) params.search = search;
     const queryParams = new URLSearchParams(params).toString();
     const { error, response } = yield call(getCall, `/admin/logs?${queryParams}`);
     if (error) {
@@ -59,10 +61,20 @@ function* getAuditLogs({ payload }) {
     }
 }
 
+/************************** GET HOUSE MPCE LEDGER *****************************/
+function* getHouseMpceLedger({ payload }) {
+    const params = payload || {};
+    const queryParams = new URLSearchParams(params).toString();
+    const { error, response } = yield call(getCall, `/admin/mpce-ledger${queryParams ? `?${queryParams}` : ''}`);
+    if (error) EventBus.publish("error", error?.response?.data?.message || 'Unable to load the house MPCE ledger');
+    else if (response) yield put(setHouseMpceLedger(response['data']['body']));
+}
+
 function* actionWatcher() {
     yield takeEvery('GET_DASHBOARD_STATS', getDashboardStats);
     yield takeEvery('GET_DASHBOARD_CHARTS', getDashboardCharts);
     yield takeEvery('GET_AUDIT_LOGS', getAuditLogs);
+    yield takeEvery('GET_HOUSE_MPCE_LEDGER', getHouseMpceLedger);
 }
 
 export default function* rootSaga() {

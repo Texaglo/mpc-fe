@@ -7,6 +7,14 @@ const INITIAL_STATE = {
         limit: 20
     },
     userTransactions: [],
+    userInventory: [],
+    inventoryPagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        limit: 25
+    },
+    inventoryCatalog: [],
     loading: false,
     error: null
 };
@@ -16,7 +24,7 @@ export default (state = INITIAL_STATE, action) => {
         case 'GET_USERS':
             return {
                 ...state,
-                loading: true
+                loading: action.payload?.silent ? state.loading : true
             };
 
         case 'SET_USERS':
@@ -43,6 +51,20 @@ export default (state = INITIAL_STATE, action) => {
                 ...state,
                 userTransactions: action.payload || [],
                 loading: false
+            };
+
+        case 'SET_USER_INVENTORY':
+            return {
+                ...state,
+                userInventory: action.payload?.inventory || [],
+                inventoryPagination: action.payload?.pagination || state.inventoryPagination,
+                loading: false
+            };
+
+        case 'SET_INVENTORY_CATALOG':
+            return {
+                ...state,
+                inventoryCatalog: action.payload?.items || []
             };
 
         case 'UPDATE_USER_BALANCE':

@@ -1,7 +1,17 @@
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
-import { getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, getWalletBalance, getApprovedWithdrawals } from "../../store/actions/PendingWithdrawals"
+import {
+    getPendingWithdrawals,
+    approveWithdrawal,
+    rejectWithdrawal,
+    getWalletBalance,
+    getApprovedWithdrawals,
+    getHotWalletRefills,
+    requestHotWalletRefill,
+    approveHotWalletRefill,
+    rejectHotWalletRefill,
+} from "../../store/actions/PendingWithdrawals"
 import { setLoader, toggleModal } from "../../store/actions/Auth";
 import EventBus from 'eventing-bus';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
@@ -41,25 +51,44 @@ class PendingWithdrawals extends React.Component {
             approvedWithdrawalsData: [],
             selectedWithdrawal: null,
             adminNotes: '',
+            payoutReferenceId: '',
             modalAction: '', // 'approve' or 'reject'
             isBalanceModalOpen: false,
-            activeTab: 'pending' // 'pending' or 'approved'
+            activeTab: 'pending', // 'pending' or 'approved'
+            refillAmount: '',
+            refillReason: '',
+            selectedRefill: null,
+            refillAction: '',
+            refillActionNotes: '',
+            isRefillActionModalOpen: false,
         };
         props.getPendingWithdrawals();
+        props.getWalletBalance();
+        props.getHotWalletRefills();
     }
 
-    componentWillReceiveProps({ pendingWithdrawals, approvedWithdrawals }) {
+    componentWillReceiveProps(nextProps) {
+        const { pendingWithdrawals, approvedWithdrawals, refillRequirement } = nextProps;
         // Always update the data when props change, even if it's empty
         this.setState({
             pendingWithdrawalsData: pendingWithdrawals || [],
             approvedWithdrawalsData: approvedWithdrawals || []
-        })
+        });
+
+        if (refillRequirement && refillRequirement !== this.props.refillRequirement) {
+            this.setState({
+                isBalanceModalOpen: true,
+            });
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     openApproveModal = (withdrawal) => {
+        this.props.getWalletBalance();
         this.setState({ 
             selectedWithdrawal: withdrawal, 
             adminNotes: '',
+            payoutReferenceId: '',
             modalAction: 'approve' 
         });
         this.props.toggleModal(true);
@@ -69,6 +98,7 @@ class PendingWithdrawals extends React.Component {
         this.setState({ 
             selectedWithdrawal: withdrawal, 
             adminNotes: '',
+            payoutReferenceId: '',
             modalAction: 'reject' 
         });
         this.props.toggleModal(true);
@@ -78,6 +108,7 @@ class PendingWithdrawals extends React.Component {
         this.setState({ 
             selectedWithdrawal: null, 
             adminNotes: '',
+            payoutReferenceId: '',
             modalAction: '' 
         });
         this.props.toggleModal(false);
@@ -88,22 +119,27 @@ class PendingWithdrawals extends React.Component {
     }
 
     submitAction = async () => {
-        const { selectedWithdrawal, adminNotes, modalAction } = this.state;
+        const { selectedWithdrawal, adminNotes, modalAction, payoutReferenceId } = this.state;
 
         if (!adminNotes.trim()) {
             EventBus.publish("error", `Please provide ${modalAction === 'approve' ? 'approval' : 'rejection'} notes`);
             return;
         }
+        if (modalAction === 'approve' && selectedWithdrawal.withdrawalMethod === 'bank' && payoutReferenceId.trim().length < 3) {
+            EventBus.publish('error', 'Enter the external bank payout reference');
+            return;
+        }
 
         // Close modal and clear state
         this.props.toggleModal(false);
-        this.setState({ selectedWithdrawal: null, adminNotes: '', modalAction: '' });
+        this.setState({ selectedWithdrawal: null, adminNotes: '', payoutReferenceId: '', modalAction: '' });
 
         // Dispatch the action - saga will handle loader and refresh
         if (modalAction === 'approve') {
             this.props.approveWithdrawal({
                 withdrawalId: selectedWithdrawal.withdrawalId,
-                adminNotes: adminNotes
+                adminNotes: adminNotes,
+                payoutReferenceId: payoutReferenceId.trim()
             });
         } else {
             this.props.rejectWithdrawal({
@@ -116,6 +152,7 @@ class PendingWithdrawals extends React.Component {
     openBalanceModal = () => {
         this.setState({ isBalanceModalOpen: true });
         this.props.getWalletBalance();
+        this.props.getHotWalletRefills();
         // Prevent background scroll
         document.body.style.overflow = 'hidden';
     }
@@ -124,6 +161,53 @@ class PendingWithdrawals extends React.Component {
         this.setState({ isBalanceModalOpen: false });
         // Restore background scroll
         document.body.style.overflow = 'unset';
+    }
+
+    handleRefillRequest = () => {
+        const amountSol = Number(this.state.refillAmount);
+        const reason = this.state.refillReason.trim();
+        if (!Number.isFinite(amountSol) || amountSol <= 0) {
+            EventBus.publish('error', 'Enter a valid SOL refill amount');
+            return;
+        }
+        if (reason.length < 5) {
+            EventBus.publish('error', 'Enter a reason for the refill request');
+            return;
+        }
+        this.props.requestHotWalletRefill({ amountSol, reason });
+        this.setState({ refillAmount: '', refillReason: '' });
+    }
+
+    openRefillActionModal = (refill, action) => {
+        this.setState({
+            selectedRefill: refill,
+            refillAction: action,
+            refillActionNotes: '',
+            isRefillActionModalOpen: true,
+            isBalanceModalOpen: false,
+        });
+    }
+
+    closeRefillActionModal = () => {
+        this.setState({
+            selectedRefill: null,
+            refillAction: '',
+            refillActionNotes: '',
+            isRefillActionModalOpen: false,
+        });
+        document.body.style.overflow = 'unset';
+    }
+
+    submitRefillAction = () => {
+        const { selectedRefill, refillAction, refillActionNotes } = this.state;
+        if (!selectedRefill || refillActionNotes.trim().length < 3) {
+            EventBus.publish('error', `${refillAction === 'approve' ? 'Approval notes' : 'A rejection reason'} are required`);
+            return;
+        }
+        const payload = { refillId: selectedRefill.refillId, notes: refillActionNotes.trim() };
+        if (refillAction === 'approve') this.props.approveHotWalletRefill(payload);
+        else this.props.rejectHotWalletRefill(payload);
+        this.closeRefillActionModal();
     }
 
     componentWillUnmount() {
@@ -139,8 +223,28 @@ class PendingWithdrawals extends React.Component {
     }
 
     render() {
-        let { pendingWithdrawalsData, approvedWithdrawalsData, selectedWithdrawal, adminNotes, modalAction, isBalanceModalOpen, activeTab } = this.state;
-        const { isModal, walletBalance } = this.props;
+        let {
+            pendingWithdrawalsData,
+            approvedWithdrawalsData,
+            selectedWithdrawal,
+            adminNotes,
+            payoutReferenceId,
+            modalAction,
+            isBalanceModalOpen,
+            activeTab,
+            refillAmount,
+            refillReason,
+            selectedRefill,
+            refillAction,
+            refillActionNotes,
+            isRefillActionModalOpen,
+        } = this.state;
+        const { isModal, walletBalance, hotWalletRefills, refillRequirement } = this.props;
+        const pendingRefills = (hotWalletRefills || []).filter(refill => refill.status === 'pending');
+        const hotWalletSol = Number(walletBalance?.hotWallet?.balance || 0);
+        const selectedPayoutSol = Number(selectedWithdrawal?.receivedAmount || 0);
+        const estimatedRequiredSol = selectedPayoutSol + 0.00001;
+        const hasEstimatedCoverage = hotWalletSol >= estimatedRequiredSol;
 
         // Pending withdrawals columns with Actions
         const pendingColumns = [
@@ -326,18 +430,8 @@ class PendingWithdrawals extends React.Component {
             },
             {
                 accessor: 'treasuryFundingHash',
-                Header: 'Treasury to Hot',
-                Cell: ({ original, value }) => value ? (
-                    <a
-                        href={`https://solscan.io/tx/${value}${original.network === 'devnet' ? '?cluster=devnet' : ''}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="transaction-link"
-                        title={value}
-                    >
-                        {`${value.substring(0, 6)}...${value.substring(value.length - 6)}`}
-                    </a>
-                ) : 'N/A',
+                Header: 'Payout Source',
+                Cell: ({ value }) => value ? 'Legacy two-hop' : 'Prefunded hot wallet',
                 filterable: false
             },
             {
@@ -366,7 +460,7 @@ class PendingWithdrawals extends React.Component {
                             {activeTab === 'pending' ? 'PENDING WITHDRAWALS' : 'APPROVED WITHDRAWALS'}
                         </p>
                         <button className="balance-btn" onClick={this.openBalanceModal}>
-                            Balance
+                            Wallet Operations {pendingRefills.length > 0 ? `(${pendingRefills.length})` : ''}
                         </button>
                     </div>
 
@@ -438,16 +532,33 @@ class PendingWithdrawals extends React.Component {
                                         <p style={{ color: '#fff' }}>Wallet Address: {selectedWithdrawal.userWalletAddress || 'N/A'}</p>
                                         <p style={{ color: '#fff' }}>Requested At: {selectedWithdrawal.requestedAt ? new Date(selectedWithdrawal.requestedAt).toLocaleString() : 'N/A'}</p>
                                     </div>
-                                    {modalAction === 'approve' && (
-                                        <div className="approval-warning mt-3">
-                                            <p style={{ color: '#ff9800', fontSize: '13px' }}>
-                                                Approval signs and submits this withdrawal. This action cannot be undone.
-                                            </p>
-                                        </div>
+                                    {modalAction === 'approve' && selectedWithdrawal.withdrawalMethod !== 'bank' && (
+                                        <React.Fragment>
+                                            <div className={`approval-wallet-summary mt-3 ${hasEstimatedCoverage ? 'covered' : 'shortfall'}`}>
+                                                <div>
+                                                    <span>Distribution wallet</span>
+                                                    <strong>{hotWalletSol.toFixed(9)} SOL</strong>
+                                                </div>
+                                                <div>
+                                                    <span>Payout</span>
+                                                    <strong>{selectedPayoutSol.toFixed(9)} SOL</strong>
+                                                </div>
+                                                <div>
+                                                    <span>Coverage</span>
+                                                    <strong>{hasEstimatedCoverage ? 'Available' : 'Refill required'}</strong>
+                                                </div>
+                                            </div>
+                                            <div className="approval-warning mt-3">
+                                                <p style={{ color: '#ff9800', fontSize: '13px' }}>
+                                                    Approval pays the user directly from the prefunded distribution wallet. It does not move funds from treasury. The backend rechecks the exact network fee before signing.
+                                                </p>
+                                            </div>
+                                        </React.Fragment>
                                     )}
                                 </div>
                                 
                                 <div className="col-12">
+                                    {modalAction === 'approve' && selectedWithdrawal.withdrawalMethod === 'bank' && <label className="bank-reference-field">External payout reference *<input value={payoutReferenceId} onChange={event => this.setState({ payoutReferenceId: event.target.value })} placeholder="Provider transfer or confirmation ID" /><small>Enter this after the external bank payout has completed.</small></label>}
                                     <ValidatorForm onSubmit={this.submitAction}>
                                         <label style={{ color: '#fa6634', marginBottom: '10px' }}>
                                             {modalAction === 'approve' ? 'Approval Notes *' : 'Rejection Notes *'}
@@ -477,7 +588,7 @@ class PendingWithdrawals extends React.Component {
                                         type='button' 
                                         onClick={this.submitAction}
                                     >
-                                        {modalAction === 'approve' ? 'Approve Withdrawal' : 'Reject Withdrawal'}
+                                        {modalAction === 'approve' ? (selectedWithdrawal.withdrawalMethod === 'bank' ? 'Mark bank payout complete' : 'Send from Hot Wallet') : 'Reject Withdrawal'}
                                     </button>
                                 </div>
                             </div>
@@ -489,13 +600,29 @@ class PendingWithdrawals extends React.Component {
                 <Modal isOpen={isBalanceModalOpen} toggle={this.closeBalanceModal} className="main-modal balance-modal" size="lg">
                     <ModalHeader toggle={this.closeBalanceModal}>
                         <div className="reward-modal-title">
-                            <p className=''>Wallet Balances</p>
+                            <p className=''>Distribution Wallet Operations</p>
                         </div>
                         <div className="reward-modal-line"><hr /></div>
                     </ModalHeader>
                     <ModalBody className="modal-body modal-height reward-modal-body">
                         {walletBalance ? (
-                            <div className="row">
+                            <div className="row wallet-operations-grid">
+                                {refillRequirement && (
+                                    <div className="col-12 mb-4">
+                                        <div className="refill-required-banner">
+                                            <div>
+                                                <span className="refill-eyebrow">Withdrawal paused</span>
+                                                <h5>Distribution wallet refill required</h5>
+                                                <p>The withdrawal remains pending and an audited refill request is now in the approval queue. No treasury funds moved and no user payout was signed.</p>
+                                            </div>
+                                            <div className="refill-required-metrics">
+                                                <span>Available <strong>{Number(refillRequirement.availableSol || 0).toFixed(9)} SOL</strong></span>
+                                                <span>Required + fee <strong>{Number(refillRequirement.requiredSol || 0).toFixed(9)} SOL</strong></span>
+                                                <span>Suggested refill <strong>{Number(refillRequirement.suggestedRefillSol || 0).toFixed(9)} SOL</strong></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="col-md-6 col-12 mb-4">
                                     <div className="wallet-card">
                                         <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>Treasury Wallet</h5>
@@ -521,6 +648,7 @@ class PendingWithdrawals extends React.Component {
                                             <p><span className="wallet-label">Purpose:</span> {walletBalance.hotWallet?.purpose || 'Approved withdrawals'}</p>
                                             <p><span className="wallet-label">Min Balance:</span> {walletBalance.hotWallet?.minBalance || 0} SOL</p>
                                             <p><span className="wallet-label">Alert Threshold:</span> {walletBalance.hotWallet?.alertThreshold || 0} SOL</p>
+                                            <p><span className="wallet-label">Operating Target:</span> {walletBalance.hotWallet?.targetBalance || 0} SOL</p>
                                             <p>
                                                 <span className="wallet-label">Status:</span>
                                                 <span className={`wallet-status ${walletBalance.hotWallet?.status?.toLowerCase()}`}>
@@ -531,10 +659,119 @@ class PendingWithdrawals extends React.Component {
                                     </div>
                                 </div>
 
+                                <div className="col-12 mb-4">
+                                    <div className="refill-request-panel">
+                                        <div className="refill-panel-copy">
+                                            <span className="refill-eyebrow">Treasury → distribution wallet</span>
+                                            <h5>Request a refill</h5>
+                                            <p>Creating a request does not move funds. A refill must be reviewed and approved separately.</p>
+                                        </div>
+                                        <div className="refill-form-grid">
+                                            <label>
+                                                Amount (SOL)
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.000000001"
+                                                    value={refillAmount}
+                                                    onChange={event => this.setState({ refillAmount: event.target.value })}
+                                                    placeholder="50"
+                                                />
+                                            </label>
+                                            <label>
+                                                Reason
+                                                <input
+                                                    type="text"
+                                                    value={refillReason}
+                                                    onChange={event => this.setState({ refillReason: event.target.value })}
+                                                    placeholder="Weekly distribution wallet funding"
+                                                />
+                                            </label>
+                                            <button type="button" className="request-refill-btn" onClick={this.handleRefillRequest}>
+                                                Request Refill
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-12">
+                                    <div className="refill-queue-panel">
+                                        <div className="refill-queue-head">
+                                            <div>
+                                                <span className="refill-eyebrow">Approval queue</span>
+                                                <h5>Hot wallet refill requests</h5>
+                                            </div>
+                                            <span className="refill-count">{pendingRefills.length} pending</span>
+                                        </div>
+                                        {pendingRefills.length ? pendingRefills.map(refill => (
+                                            <div className="refill-row" key={refill.refillId}>
+                                                <div className="refill-amount">
+                                                    <strong>{Number(refill.amountSol || 0).toFixed(9)} SOL</strong>
+                                                    <span>{refill.source === 'withdrawal_shortfall' ? 'Withdrawal shortfall' : 'Manual request'}</span>
+                                                </div>
+                                                <div className="refill-reason">
+                                                    <strong>{refill.reason}</strong>
+                                                    <span>{refill.requestedBy || 'Admin'} · {refill.requestedAt ? new Date(refill.requestedAt).toLocaleString() : 'Now'}</span>
+                                                </div>
+                                                <div className="refill-row-actions">
+                                                    <button type="button" className="approve-btn" onClick={() => this.openRefillActionModal(refill, 'approve')}>Review & Approve</button>
+                                                    <button type="button" className="reject-btn" onClick={() => this.openRefillActionModal(refill, 'reject')}>Reject</button>
+                                                </div>
+                                            </div>
+                                        )) : (
+                                            <div className="empty-refill-queue">No refill requests are awaiting approval.</div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         ) : (
                             <div className="text-center" style={{ color: '#fff', padding: '20px' }}>
                                 <p>Loading wallet balance information...</p>
+                            </div>
+                        )}
+                    </ModalBody>
+                </Modal>
+
+                {/* ---------------REFILL APPROVAL / REJECTION--------------- */}
+                <Modal isOpen={isRefillActionModalOpen} toggle={this.closeRefillActionModal} className="main-modal reward-modal refill-action-modal">
+                    <ModalHeader toggle={this.closeRefillActionModal}>
+                        <div className="reward-modal-title">
+                            <p>{refillAction === 'approve' ? 'Approve Hot Wallet Refill' : 'Reject Hot Wallet Refill'}</p>
+                        </div>
+                    </ModalHeader>
+                    <ModalBody className="modal-body reward-modal-body">
+                        {selectedRefill && (
+                            <div>
+                                <div className="refill-approval-summary">
+                                    <span>Requested transfer</span>
+                                    <strong>{Number(selectedRefill.amountSol || 0).toFixed(9)} SOL</strong>
+                                    <p>Treasury → distribution hot wallet</p>
+                                    <small>{selectedRefill.reason}</small>
+                                </div>
+                                {refillAction === 'approve' && (
+                                    <div className="approval-warning mt-3">
+                                        <p>Approval signs and submits the treasury transfer. This is separate from withdrawal approval and cannot be undone after submission.</p>
+                                    </div>
+                                )}
+                                <label className="refill-notes-label">
+                                    {refillAction === 'approve' ? 'Approval notes *' : 'Rejection reason *'}
+                                    <textarea
+                                        rows="4"
+                                        value={refillActionNotes}
+                                        onChange={event => this.setState({ refillActionNotes: event.target.value })}
+                                        placeholder={refillAction === 'approve' ? 'Verified amount and treasury balance' : 'Explain why this refill should not proceed'}
+                                    />
+                                </label>
+                                <div className="refill-modal-actions">
+                                    <button type="button" className="delete-btn add-btn" onClick={this.closeRefillActionModal}>Cancel</button>
+                                    <button
+                                        type="button"
+                                        className={refillAction === 'approve' ? 'approve-modal-btn' : 'reject-modal-btn'}
+                                        onClick={this.submitRefillAction}
+                                    >
+                                        {refillAction === 'approve' ? 'Approve Treasury Refill' : 'Reject Refill'}
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </ModalBody>
@@ -545,13 +782,23 @@ class PendingWithdrawals extends React.Component {
 }
 
 const mapDispatchToProps = {
-    getPendingWithdrawals, approveWithdrawal, rejectWithdrawal, getWalletBalance, getApprovedWithdrawals, setLoader, toggleModal
+    getPendingWithdrawals,
+    approveWithdrawal,
+    rejectWithdrawal,
+    getWalletBalance,
+    getApprovedWithdrawals,
+    getHotWalletRefills,
+    requestHotWalletRefill,
+    approveHotWalletRefill,
+    rejectHotWalletRefill,
+    setLoader,
+    toggleModal
 };
 
 const mapStateToProps = ({ PendingWithdrawals, Auth }) => {
-    let { pendingWithdrawals, approvedWithdrawals, walletBalance } = PendingWithdrawals;
+    let { pendingWithdrawals, approvedWithdrawals, walletBalance, hotWalletRefills, refillRequirement } = PendingWithdrawals;
     let { isModal } = Auth;
-    return { pendingWithdrawals, approvedWithdrawals, walletBalance, isModal };
+    return { pendingWithdrawals, approvedWithdrawals, walletBalance, hotWalletRefills, refillRequirement, isModal };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PendingWithdrawals);

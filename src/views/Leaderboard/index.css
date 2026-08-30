@@ -52,6 +52,29 @@
   color: #6B1A10;
 }
 
+.performance-leaderboard { overflow: hidden; }
+.leaderboard-heading-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 15px; }
+.leaderboard-heading-row .main-container-heading { margin: 2px 0 3px; }
+.leaderboard-heading-row > div > small { color: #858991; font-size: 11px; }
+.leaderboard-eyebrow { color: #d0a535; font-size: 9px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; }
+.leaderboard-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(130px, 1fr)); gap: 8px; }
+.leaderboard-filter-grid label { display: flex; flex-direction: column; gap: 5px; margin: 0; color: #9699a0; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+.leaderboard-filter-grid select { height: 36px; padding: 0 10px; border: 1px solid #454952; border-radius: 6px; background: #171b20; color: #fff; font-size: 11px; outline: none; }
+.leaderboard-filter-grid select:focus { border-color: #d0a535; }
+.leaderboard-compat-note { margin-bottom: 10px; padding: 8px 11px; border: 1px solid rgba(208,165,53,.3); border-radius: 6px; background: rgba(208,165,53,.06); color: #b9aa7f; font-size: 10px; }
+.leaderboard-player strong, .leaderboard-player small, .leaderboard-ratio strong, .leaderboard-ratio small { display: block; }
+.leaderboard-player strong { color: #fff; }
+.leaderboard-player small, .leaderboard-ratio small { margin-top: 2px; color: #7f838a; font-size: 9px; }
+.leaderboard-positive { color: #63cf88; font-weight: 700; }
+.leaderboard-negative { color: #ef7373; font-weight: 700; }
+
+@media (max-width: 850px) {
+  .leaderboard-heading-row { align-items: stretch; flex-direction: column; }
+}
+@media (max-width: 620px) {
+  .leaderboard-filter-grid { grid-template-columns: 1fr; }
+}
+
 
 
 /* ========== Custom Styles Rewards Modal =========== */
