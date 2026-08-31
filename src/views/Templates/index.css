@@ -200,3 +200,10 @@
   -webkit-animation: animation-1ieb7bi 2.1s 0s infinite ease-in-out;
   animation: animation-1ieb7bi 2.1s 0s infinite ease-in-out;
 }
+.template-economy-hint {
+    display: block;
+    margin-top: 6px;
+    color: #999da7;
+    font-size: 10px;
+    line-height: 1.4;
+}

@@ -234,6 +234,13 @@
 }
 .ring-form-section__heading span { color: #858a94; font-size: 10px; }
 .ring-form-grid { display: grid; gap: 7px; }
+.ring-fp-notice {
+  display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 8px 10px;
+  border: 1px solid rgba(69, 161, 255, .35); border-radius: 8px; background: rgba(26, 105, 181, .1);
+}
+.ring-fp-notice strong { color: #75c1ff; font-size: 10px; text-transform: uppercase; white-space: nowrap; }
+.ring-fp-notice span { color: #aeb7c4; font-size: 9px; }
+.ring-form-section--charge.is-disabled-economy { opacity: .72; }
 .ring-form-grid--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .ring-form-grid--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .ring-field { display: flex; min-width: 0; margin: 0; flex-direction: column; gap: 3px; }

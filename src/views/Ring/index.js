@@ -101,6 +101,15 @@ class Ring extends React.Component {
             if (target.name === 'anteEnabled') next.ante = value ? (Number(formData.ante) || 1) : 0;
             if (target.name === 'timeBankEnabled') next.timeBankSeconds = value ? (Number(formData.timeBankSeconds) || 30) : 0;
             if (target.name === 'timeChargeTier' && value === 'NONE') next.timeChargeMinutesPerHour = 0;
+            if (target.name === 'balanceType') {
+                if (value === 'FP') {
+                    next.timeChargeTier = 'NONE';
+                    next.timeChargeMinutesPerHour = 0;
+                } else if (formData.balanceType === 'FP' && formData.timeChargeTier === 'NONE') {
+                    next.timeChargeTier = 'STANDARD';
+                    next.timeChargeMinutesPerHour = 60;
+                }
+            }
             return { formData: next };
         });
     };
@@ -133,6 +142,11 @@ class Ring extends React.Component {
             payload.timeChargeMinutesPerHour = 60;
         }
         payload.allowTopUp = Boolean(payload.allowTopUp);
+        if (payload.balanceType === 'FP') {
+            payload.timeChargeTier = 'NONE';
+            payload.timeChargeMpcePerHour = null;
+            payload.timeChargeMinutesPerHour = 0;
+        }
         payload.straddleMode = straddleEnabled ? payload.straddleMode : 'NONE';
         payload.ante = anteEnabled ? Number(payload.ante) : 0;
         payload.timeBankSeconds = timeBankEnabled ? Number(payload.timeBankSeconds) : 0;
@@ -318,20 +332,21 @@ class Ring extends React.Component {
                             </section>
 
                             <section className="ring-form-section ring-form-section--stakes ring-field--full">
-                                <div className="ring-form-section__heading"><h3>Stakes & access</h3><span>Amounts are shown in the selected table balance</span></div>
+                                <div className="ring-form-section__heading"><h3>{balanceType === 'FP' ? 'Free Play stakes & access' : 'Stakes & access'}</h3><span>{balanceType === 'FP' ? 'Every amount below is FP, not Cash or MPCE' : 'Amounts are shown in the selected table balance'}</span></div>
                                 <div className="ring-form-grid ring-form-grid--five">
-                                    <Field label="Small blind"><input className="ring-control" name="smallBlinds" type="number" min="0" step="any" value={smallBlinds} onChange={this.handleFormChange} placeholder="2" required /></Field>
-                                    <Field label="Big blind"><input className="ring-control" name="bigBlinds" type="number" min="0" step="any" value={bigBlinds} onChange={this.handleFormChange} placeholder="5" required /></Field>
-                                    <Field label="Minimum buy-in" hint={minBuyInBb !== null ? `${minBuyInBb.toFixed(0)} BB` : 'e.g. 40 BB / $200'}><input className="ring-control" name="minBuyIn" type="number" min="0" step="any" value={minBuyIn} onChange={this.handleFormChange} placeholder="200" required /></Field>
-                                    <Field label="Maximum buy-in" hint={maxBuyInBb !== null ? `${maxBuyInBb.toFixed(0)} BB` : 'e.g. 100 BB / $500'}><input className="ring-control" name="maxBuyIn" type="number" min="0" step="any" value={maxBuyIn} onChange={this.handleFormChange} placeholder="500" required /></Field>
-                                    <Field label="Balance type"><select className="ring-control" name="balanceType" value={balanceType} onChange={this.handleFormChange}><option value="CASH">Cash / USDC</option><option value="TIME">Time</option><option value="FP">FP</option></select></Field>
+                                    <Field label={`Small blind${balanceType === 'FP' ? ' (FP)' : ''}`}><input className="ring-control" name="smallBlinds" type="number" min="0" step="any" value={smallBlinds} onChange={this.handleFormChange} placeholder="2" required /></Field>
+                                    <Field label={`Big blind${balanceType === 'FP' ? ' (FP)' : ''}`}><input className="ring-control" name="bigBlinds" type="number" min="0" step="any" value={bigBlinds} onChange={this.handleFormChange} placeholder="5" required /></Field>
+                                    <Field label={`Minimum buy-in${balanceType === 'FP' ? ' (FP)' : ''}`} hint={minBuyInBb !== null ? `${minBuyInBb.toFixed(0)} BB` : (balanceType === 'FP' ? 'Non-withdrawable FP stack' : 'e.g. 40 BB / $200')}><input className="ring-control" name="minBuyIn" type="number" min="0" step="any" value={minBuyIn} onChange={this.handleFormChange} placeholder="200" required /></Field>
+                                    <Field label={`Maximum buy-in${balanceType === 'FP' ? ' (FP)' : ''}`} hint={maxBuyInBb !== null ? `${maxBuyInBb.toFixed(0)} BB` : (balanceType === 'FP' ? 'Non-withdrawable FP stack' : 'e.g. 100 BB / $500')}><input className="ring-control" name="maxBuyIn" type="number" min="0" step="any" value={maxBuyIn} onChange={this.handleFormChange} placeholder="500" required /></Field>
+                                    <Field label="Table economy"><select className="ring-control" name="balanceType" value={balanceType} onChange={this.handleFormChange}><option value="CASH">Cash / USD</option><option value="TIME">Time / MPCE</option><option value="FP">Free Play (FP)</option></select></Field>
                                 </div>
+                                {balanceType === 'FP' && <div className="ring-fp-notice"><strong>Free Play table</strong><span>Buy-ins, blinds, bets and payouts use FP only. FP cannot be withdrawn and this table never consumes MPCE time.</span></div>}
                             </section>
 
-                            <section className="ring-form-section ring-form-section--charge">
+                            <section className={`ring-form-section ring-form-section--charge ${balanceType === 'FP' ? 'is-disabled-economy' : ''}`}>
                                 <div className="ring-form-section__heading"><h3>Time charge</h3><span>Master: {standardMpcePerHour.toFixed(2)} MPCE/hour · {minutesPerMpce} minutes/MPCE</span></div>
                                 <div className="ring-form-grid ring-form-grid--four">
-                                    <Field label="Fee tier" className="ring-field--span-2"><select className="ring-control" name="timeChargeTier" value={timeChargeTier} onChange={this.handleFormChange}><option value="STANDARD">Standard — inherit general rate</option><option value="CUSTOM">Custom — override for this table</option><option value="NONE">None — do not consume table time</option></select></Field>
+                                    <Field label="Fee tier" className="ring-field--span-2" hint={balanceType === 'FP' ? 'Free Play never uses MPCE time.' : ''}><select className="ring-control" name="timeChargeTier" value={timeChargeTier} onChange={this.handleFormChange} disabled={balanceType === 'FP'}><option value="STANDARD">Standard — inherit general rate</option><option value="CUSTOM">Custom — override for this table</option><option value="NONE">None — do not consume table time</option></select></Field>
                                     {timeChargeTier === 'CUSTOM' && (
                                         <Field label="Table burn rate" className="ring-field--span-2" hint={`${effectiveCustomMinutesPerHour} time minutes/hour · ${customMultiplier.toFixed(2)}× master rate`}>
                                             <div className="ring-control-with-unit"><input className="ring-control" name="customBurnRateMpcePerHour" type="number" min="0.01" step="0.01" value={customBurnRateMpcePerHour} onChange={this.handleFormChange} /><span>MPCE / hour</span></div>

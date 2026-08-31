@@ -7,11 +7,14 @@ import { setLoader } from '../../store/actions/Auth';
 import './index.css';
 
 const EMPTY_PAGINATION = { page: 1, limit: 25, total: 0, totalPages: 1 };
+const EMPTY_FILTERS = { tableId: '', gameId: '', userId: '', search: '', status: 'all', economy: 'all' };
+const STREET_ORDER = ['preflop', 'flop', 'turn', 'river', 'showdown'];
 
 const unwrapError = error => error?.response?.data?.message || error?.message || 'Request failed';
 const formatNumber = value => Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 6 });
 const formatDate = value => value ? new Date(value).toLocaleString() : '—';
-const formatCard = card => String(card || '').toUpperCase();
+const responseBody = response => response?.data?.body || {};
+const normalizeStreet = value => String(value || 'preflop').toLowerCase();
 
 const getEconomy = hand => String(
     hand?.economy || hand?.economyType || hand?.balanceType || hand?.currencyType || ''
@@ -30,12 +33,9 @@ const getWinners = hand => {
 const winnerName = winner => winner?.username || winner?.playerName || winner?.name
     || (winner?.playerId !== undefined ? `Player ${winner.playerId}` : 'Winner');
 
-const movementLabel = movement => {
-    const action = movement.currentAction || movement.action || movement.eventType || 'Event';
-    return String(action).replaceAll('_', ' ');
-};
-
-const responseBody = response => response?.data?.body || {};
+const movementLabel = movement => String(
+    movement.currentAction || movement.action || movement.eventType || 'Event'
+).replaceAll('_', ' ');
 
 const normalizePagination = body => {
     const source = body?.pagination || {};
@@ -47,18 +47,88 @@ const normalizePagination = body => {
     };
 };
 
-const CardRow = ({ cards = [] }) => (
+const parseCard = value => {
+    const original = String(value || '').trim().toUpperCase();
+    if (!original) return null;
+    const suitSymbols = { S: '♠', H: '♥', D: '♦', C: '♣', '♠': '♠', '♥': '♥', '♦': '♦', '♣': '♣' };
+    const compact = original.replace(/[^0-9AJQKSCHD♠♥♦♣]/g, '');
+    const pieces = original.split(/[_\-\s]+/).filter(Boolean);
+    let rank = '';
+    let suit = '';
+
+    if (pieces.length >= 2) {
+        if (suitSymbols[pieces[0]]) {
+            suit = suitSymbols[pieces[0]];
+            rank = pieces[1];
+        } else {
+            rank = pieces[0];
+            suit = suitSymbols[pieces[1]] || pieces[1];
+        }
+    } else {
+        const first = compact.charAt(0);
+        const last = compact.charAt(compact.length - 1);
+        if (suitSymbols[first]) {
+            suit = suitSymbols[first];
+            rank = compact.slice(1);
+        } else if (suitSymbols[last]) {
+            rank = compact.slice(0, -1);
+            suit = suitSymbols[last];
+        } else {
+            rank = compact || original;
+        }
+    }
+
+    return { rank: rank === 'T' ? '10' : rank, suit, red: suit === '♥' || suit === '♦', original };
+};
+
+const PlayingCard = ({ value, compact = false }) => {
+    const card = parseCard(value);
+    if (!card) return null;
+    return <span className={`playing-card ${card.red ? 'red' : 'black'} ${compact ? 'compact' : ''}`} title={card.original}>
+        <strong>{card.rank}</strong><i>{card.suit}</i>
+    </span>;
+};
+
+const CardRow = ({ cards = [], compact = false, emptyLabel = 'Not available' }) => (
     <div className="hand-card-row">
-        {cards.length ? cards.map((card, index) => <span key={`${card}-${index}`}>{formatCard(card)}</span>) : <small>Not available</small>}
+        {cards.length
+            ? cards.map((card, index) => <PlayingCard key={`${card}-${index}`} value={card} compact={compact} />)
+            : <small>{emptyLabel}</small>}
     </div>
 );
+
+const BoardStages = ({ cards = [] }) => {
+    const stages = [
+        { label: 'Flop', cards: cards.slice(0, 3) },
+        { label: 'Turn', cards: cards.slice(3, 4) },
+        { label: 'River', cards: cards.slice(4, 5) },
+    ];
+    return <div className="hand-board-stages">
+        {stages.map(stage => <div key={stage.label} className="hand-board-stage">
+            <span>{stage.label}</span>
+            <CardRow cards={stage.cards} emptyLabel="—" />
+        </div>)}
+    </div>;
+};
+
+const latestBoardForRound = (round, fallback = []) => {
+    const movements = round?.movements || [];
+    for (let index = movements.length - 1; index >= 0; index -= 1) {
+        if (movements[index]?.currentCommunityCards?.length) return movements[index].currentCommunityCards;
+    }
+    const street = normalizeStreet(round?.street);
+    if (street === 'flop') return fallback.slice(0, 3);
+    if (street === 'turn') return fallback.slice(0, 4);
+    if (street === 'river' || street === 'showdown') return fallback.slice(0, 5);
+    return [];
+};
 
 const HandHistory = () => {
     const dispatch = useDispatch();
     const [hands, setHands] = useState([]);
     const [pagination, setPagination] = useState(EMPTY_PAGINATION);
-    const [filters, setFilters] = useState({ search: '', status: 'all', economy: 'all' });
-    const [appliedSearch, setAppliedSearch] = useState('');
+    const [filters, setFilters] = useState(EMPTY_FILTERS);
+    const [appliedFilters, setAppliedFilters] = useState(EMPTY_FILTERS);
     const [selected, setSelected] = useState(null);
     const [detail, setDetail] = useState(null);
     const [detailLoading, setDetailLoading] = useState(false);
@@ -68,11 +138,12 @@ const HandHistory = () => {
         if (showLoader) dispatch(setLoader(true));
         try {
             const params = new URLSearchParams({ page: String(page), limit: '25' });
-            if (appliedSearch) params.set('search', appliedSearch);
-            if (filters.status !== 'all') params.set('status', filters.status);
-            // The current backend safely ignores unknown query keys. Keeping this
-            // additive parameter makes the screen ready for economy-aware history.
-            if (filters.economy !== 'all') params.set('economy', filters.economy);
+            ['tableId', 'gameId', 'userId', 'search'].forEach(key => {
+                const value = String(appliedFilters[key] || '').trim();
+                if (value) params.set(key, value);
+            });
+            if (appliedFilters.status !== 'all') params.set('status', appliedFilters.status);
+            if (appliedFilters.economy !== 'all') params.set('economy', appliedFilters.economy);
             const response = await axios.get(`/history/admin/hands?${params.toString()}`);
             const body = responseBody(response);
             setHands(Array.isArray(body) ? body : (body.hands || body.items || []));
@@ -82,7 +153,7 @@ const HandHistory = () => {
         } finally {
             if (showLoader) dispatch(setLoader(false));
         }
-    }, [appliedSearch, dispatch, filters.economy, filters.status]);
+    }, [appliedFilters, dispatch]);
 
     useEffect(() => {
         loadHands(1);
@@ -110,12 +181,12 @@ const HandHistory = () => {
 
     const submitSearch = event => {
         event.preventDefault();
-        setAppliedSearch(filters.search.trim());
+        setAppliedFilters({ ...filters });
     };
 
     const clearFilters = () => {
-        setFilters({ search: '', status: 'all', economy: 'all' });
-        setAppliedSearch('');
+        setFilters(EMPTY_FILTERS);
+        setAppliedFilters(EMPTY_FILTERS);
     };
 
     const exportHand = async () => {
@@ -145,15 +216,21 @@ const HandHistory = () => {
     const selectedHand = detail?.hand || selected;
     const movements = useMemo(() => detail?.movements || [], [detail]);
     const rounds = useMemo(() => {
-        if (Array.isArray(detail?.rounds) && detail.rounds.length) return detail.rounds;
+        const provided = Array.isArray(detail?.rounds) ? detail.rounds : [];
+        if (provided.length) return [...provided].sort((a, b) => {
+            const streetDelta = STREET_ORDER.indexOf(normalizeStreet(a.street)) - STREET_ORDER.indexOf(normalizeStreet(b.street));
+            return streetDelta || Number(a.roundNumber || 0) - Number(b.roundNumber || 0);
+        });
         const grouped = new Map();
         movements.forEach(movement => {
-            const street = String(movement.street || 'preflop').toLowerCase();
+            const street = normalizeStreet(movement.street);
             if (!grouped.has(street)) grouped.set(street, { street, movements: [] });
             grouped.get(street).movements.push(movement);
         });
         return [...grouped.values()];
     }, [detail, movements]);
+
+    const finalBoard = getBoard(selectedHand || {});
 
     return (
         <div className="content hand-history-content">
@@ -162,27 +239,31 @@ const HandHistory = () => {
                     <div>
                         <span className="hand-history-eyebrow">Backend-authoritative records</span>
                         <h2>Hand History</h2>
-                        <p>Search completed and live hands, reconstruct every action, and export completed evidence.</p>
+                        <p>Find a table, narrow to a game, then inspect every hand and player action.</p>
                     </div>
                     <button type="button" className="hand-refresh-button" onClick={() => setRefreshKey(key => key + 1)}>Refresh</button>
                 </header>
 
                 <form className="hand-history-filters" onSubmit={submitSearch}>
-                    <label className="hand-search-field"><span>Search</span><input type="search" value={filters.search} onChange={event => setFilters(current => ({ ...current, search: event.target.value }))} placeholder="Hand ID, game ID, table name or table ID" /></label>
+                    <div className="hand-hierarchy-label"><strong>Search path</strong><span>Table → game → player</span></div>
+                    <label><span>1. Table ID</span><input value={filters.tableId} onChange={event => setFilters(current => ({ ...current, tableId: event.target.value }))} placeholder="Mongo table ID" /></label>
+                    <label><span>2. Game / session ID</span><input value={filters.gameId} onChange={event => setFilters(current => ({ ...current, gameId: event.target.value }))} placeholder="Game ID" /></label>
+                    <label><span>3. Player user ID</span><input value={filters.userId} onChange={event => setFilters(current => ({ ...current, userId: event.target.value }))} placeholder="User ID" /></label>
+                    <label className="hand-search-field"><span>Quick search</span><input type="search" value={filters.search} onChange={event => setFilters(current => ({ ...current, search: event.target.value }))} placeholder="Hand ID, table name, username, email or wallet" /></label>
                     <label><span>Status</span><select value={filters.status} onChange={event => setFilters(current => ({ ...current, status: event.target.value }))}><option value="all">All statuses</option><option value="COMPLETED">Completed</option><option value="IN_PROGRESS">In progress</option><option value="ABANDONED">Abandoned</option></select></label>
-                    <label><span>Economy</span><select value={filters.economy} onChange={event => setFilters(current => ({ ...current, economy: event.target.value }))}><option value="all">All economies</option><option value="CASH">Cash</option><option value="FP">Free Play</option></select></label>
-                    <button type="submit" className="hand-search-button">Search</button>
+                    <label><span>Economy</span><select value={filters.economy} onChange={event => setFilters(current => ({ ...current, economy: event.target.value }))}><option value="all">All economies</option><option value="CASH">Cash</option><option value="TIME">Time</option><option value="FP">Free Play</option></select></label>
+                    <button type="submit" className="hand-search-button">Search hands</button>
                     <button type="button" className="hand-clear-button" onClick={clearFilters}>Clear</button>
                 </form>
 
                 <div className="hand-history-summary">
                     <span><strong>{formatNumber(pagination.total)}</strong> matching hands</span>
-                    <small>Economy appears when recorded by the table-history service.</small>
+                    <small>Hole cards remain hidden for live hands and release only after backend completion.</small>
                 </div>
 
                 <div className="hand-history-table-wrap">
                     <table className="hand-history-table">
-                        <thead><tr><th>Hand / time</th><th>Table</th><th>Game</th><th>Economy</th><th>Stakes</th><th>Players</th><th>Pot</th><th>Winner</th><th>Status</th><th /></tr></thead>
+                        <thead><tr><th>Hand / time</th><th>Table</th><th>Game</th><th>Economy</th><th>Stakes</th><th>Board</th><th>Players</th><th>Pot</th><th>Winner</th><th>Status</th><th /></tr></thead>
                         <tbody>
                             {hands.map(hand => {
                                 const winners = getWinners(hand);
@@ -190,17 +271,18 @@ const HandHistory = () => {
                                 return <tr key={hand.handId || hand._id}>
                                     <td><strong className="hand-id" title={hand.handId}>{hand.handId || hand._id || '—'}</strong><small>{formatDate(hand.startedAt || hand.createdAt)}</small></td>
                                     <td><strong>{hand.tableName || 'Unnamed table'}</strong><small title={hand.tableId}>{hand.tableId || '—'}</small></td>
-                                    <td><strong>{hand.gameType || 'Poker'}</strong><small>Hand {hand.handNumber ?? '—'}</small></td>
+                                    <td><strong>{hand.gameType || 'Poker'}</strong><small title={hand.gameId}>Session {hand.gameId || '—'} · Hand {hand.handNumber ?? '—'}</small></td>
                                     <td><span className={`hand-economy ${economy.toLowerCase()}`}>{economy || 'Not recorded'}</span></td>
                                     <td>{formatNumber(hand.smallBlindAmount)} / {formatNumber(hand.bigBlindAmount)}</td>
+                                    <td><CardRow cards={getBoard(hand)} compact emptyLabel="—" /></td>
                                     <td>{getParticipants(hand).length}</td>
                                     <td>{formatNumber(hand.finalPot ?? hand.currentPot)}</td>
                                     <td>{winners.length ? winners.map(winnerName).join(', ') : '—'}</td>
                                     <td><span className={`hand-status ${String(hand.status || '').toLowerCase()}`}>{String(hand.status || 'Unknown').replaceAll('_', ' ')}</span></td>
-                                    <td><button type="button" className="hand-view-button" onClick={() => openHand(hand)}>View</button></td>
+                                    <td><button type="button" className="hand-view-button" onClick={() => openHand(hand)}>Inspect</button></td>
                                 </tr>;
                             })}
-                            {!hands.length && <tr><td className="hand-history-empty" colSpan="10">No hand records match these filters.</td></tr>}
+                            {!hands.length && <tr><td className="hand-history-empty" colSpan="11">No hand records match these filters.</td></tr>}
                         </tbody>
                     </table>
                 </div>
@@ -218,26 +300,30 @@ const HandHistory = () => {
                     {detailLoading && <div className="hand-detail-loading">Loading authoritative timeline…</div>}
                     {!detailLoading && selectedHand && <>
                         <section className="hand-detail-hero">
-                            <div><small>Hand ID</small><strong>{selectedHand.handId || selectedHand._id}</strong><span>{selectedHand.tableName || 'Unnamed table'} · Hand {selectedHand.handNumber ?? '—'}</span></div>
-                            <div className="hand-detail-actions"><span className={`hand-status ${String(selectedHand.status || '').toLowerCase()}`}>{String(selectedHand.status || '').replaceAll('_', ' ')}</span><button type="button" disabled={selectedHand.status !== 'COMPLETED' || !detail} onClick={exportHand} title={selectedHand.status === 'COMPLETED' ? 'Download a backend-signed evidence package' : 'Exports are available after completion'}>Export evidence</button></div>
+                            <div><small>Hand ID</small><strong>{selectedHand.handId || selectedHand._id}</strong><span>{selectedHand.tableName || 'Unnamed table'} · Game {selectedHand.gameId || '—'} · Hand {selectedHand.handNumber ?? '—'}</span></div>
+                            <div className="hand-detail-actions"><span className={`hand-status ${String(selectedHand.status || '').toLowerCase()}`}>{String(selectedHand.status || '').replaceAll('_', ' ')}</span><button type="button" disabled={selectedHand.status !== 'COMPLETED' || !detail} onClick={exportHand} title={selectedHand.status === 'COMPLETED' ? 'Download a backend evidence package' : 'Exports are available after completion'}>Export evidence</button></div>
                         </section>
 
                         <section className="hand-detail-grid">
                             <article><span>Started</span><strong>{formatDate(selectedHand.startedAt || selectedHand.createdAt)}</strong></article>
                             <article><span>Completed</span><strong>{formatDate(selectedHand.completedAt)}</strong></article>
                             <article><span>Stakes</span><strong>{formatNumber(selectedHand.smallBlindAmount)} / {formatNumber(selectedHand.bigBlindAmount)}</strong></article>
-                            <article><span>Final pot</span><strong>{formatNumber(selectedHand.finalPot ?? selectedHand.currentPot)}</strong></article>
+                            <article className="featured"><span>Final pot</span><strong>{formatNumber(selectedHand.finalPot ?? selectedHand.currentPot)} {getEconomy(selectedHand)}</strong></article>
                             <article><span>Actions</span><strong>{formatNumber(selectedHand.actionCount || movements.length)}</strong></article>
                             <article><span>Economy</span><strong>{getEconomy(selectedHand) || 'Not recorded'}</strong></article>
                         </section>
 
-                        <section className="hand-detail-section hand-board-section"><div><h4>Board</h4><p>Final authoritative runout</p></div><CardRow cards={getBoard(selectedHand)} /></section>
+                        <section className="hand-detail-section hand-board-section"><div><h4>Community cards</h4><p>Authoritative board by street</p></div><BoardStages cards={finalBoard} /></section>
 
                         <section className="hand-detail-section">
-                            <div className="hand-detail-section-title"><div><h4>Players & settlement</h4><p>Private cards appear only after backend completion.</p></div></div>
-                            <div className="hand-participant-table-wrap"><table className="hand-participant-table"><thead><tr><th>Seat / player</th><th>Stack</th><th>Cards</th><th>Final hand</th><th>Outcome</th></tr></thead><tbody>
-                                {getParticipants(selectedHand).map(participant => <tr key={`${participant.playerId}-${participant.seatNumber}`}><td><strong>{participant.username || `Player ${participant.playerId}`}</strong><small>Seat {Number(participant.seatNumber) + 1} · ID {participant.playerId}</small></td><td>{formatNumber(participant.startingStack)} → {formatNumber(participant.endingStack)}</td><td><CardRow cards={participant.pocketCards || []} /></td><td>{participant.finalHand?.name || participant.finalHand?.handName || participant.finalHand?.rank || '—'}</td><td>{participant.isWinner ? <strong className="hand-winner">Won {formatNumber(participant.prize)}</strong> : (participant.folded ? 'Folded' : '—')}</td></tr>)}
-                            </tbody></table></div>
+                            <div className="hand-detail-section-title"><div><h4>Players, hole cards & settlement</h4><p>Private cards appear only after backend completion.</p></div></div>
+                            <div className="hand-player-cards">
+                                {getParticipants(selectedHand).map(participant => <article className={participant.isWinner ? 'winner' : ''} key={`${participant.playerId}-${participant.seatNumber}`}>
+                                    <header><div><strong>{participant.username || `Player ${participant.playerId}`}</strong><small>Seat {Number(participant.seatNumber) + 1}</small></div>{participant.isWinner && <span>Winner</span>}</header>
+                                    <CardRow cards={participant.pocketCards || []} emptyLabel={selectedHand.status === 'COMPLETED' ? 'Not recorded' : 'Hidden until complete'} />
+                                    <dl><div><dt>User ID</dt><dd title={participant.userId}>{participant.userId || '—'}</dd></div><div><dt>Stack</dt><dd>{formatNumber(participant.startingStack)} → {formatNumber(participant.endingStack)}</dd></div><div><dt>Final hand</dt><dd>{participant.finalHand?.name || participant.finalHand?.handName || participant.finalHand?.rank || '—'}</dd></div><div><dt>Outcome</dt><dd>{participant.isWinner ? `Won ${formatNumber(participant.prize)}` : (participant.folded ? 'Folded' : '—')}</dd></div></dl>
+                                </article>)}
+                            </div>
                         </section>
 
                         <section className="hand-detail-section">
@@ -246,9 +332,17 @@ const HandHistory = () => {
                         </section>
 
                         <section className="hand-detail-section">
-                            <div className="hand-detail-section-title"><div><h4>Action timeline</h4><p>Strict backend sequence grouped by street.</p></div></div>
+                            <div className="hand-detail-section-title"><div><h4>Action by street</h4><p>Strict backend sequence with the board and pot state at each stage.</p></div></div>
                             <div className="hand-rounds">
-                                {rounds.map((round, roundIndex) => <article className="hand-round" key={`${round.street}-${round.roundNumber ?? roundIndex}`}><h5>{String(round.street || 'preflop').toUpperCase()}</h5><div className="hand-movement-list">{(round.movements || []).map(movement => <div className="hand-movement" key={movement._id || movement.eventKey || movement.sequence}><span className="hand-sequence">#{movement.sequence}</span><div><strong>{movement.username || (movement.playerId !== null && movement.playerId !== undefined ? `Player ${movement.playerId}` : 'Table')}</strong><small>{movementLabel(movement)}{movement.isAutomatic ? ' · automatic' : ''}</small></div><span className="hand-amount">{Number(movement.amountCommitted || movement.requestedAmount || 0) ? formatNumber(movement.amountCommitted || movement.requestedAmount) : '—'}</span><span className="hand-pot">Pot {formatNumber(movement.currentPot)}</span><time>{movement.timeStamp ? new Date(movement.timeStamp).toLocaleTimeString() : '—'}</time></div>)}</div></article>)}
+                                {rounds.map((round, roundIndex) => {
+                                    const roundBoard = latestBoardForRound(round, finalBoard);
+                                    const roundMovements = round.movements || [];
+                                    const finalMovement = roundMovements[roundMovements.length - 1] || {};
+                                    return <article className="hand-round" key={`${round.street}-${round.roundNumber ?? roundIndex}`}>
+                                        <header><div><h5>{normalizeStreet(round.street).toUpperCase()}</h5><CardRow cards={roundBoard} compact emptyLabel="No board cards" /></div><strong>Pot {formatNumber(finalMovement.currentPot)}</strong></header>
+                                        <div className="hand-movement-list">{roundMovements.map(movement => <div className="hand-movement" key={movement._id || movement.eventKey || movement.sequence}><span className="hand-sequence">#{movement.sequence}</span><div><strong>{movement.username || (movement.playerId !== null && movement.playerId !== undefined ? `Player ${movement.playerId}` : 'Table')}</strong><small>{movementLabel(movement)}{movement.isAutomatic ? ' · automatic' : ''}</small></div><span className="hand-amount">{Number(movement.amountCommitted || movement.requestedAmount || 0) ? formatNumber(movement.amountCommitted || movement.requestedAmount) : '—'}</span><span className="hand-pot">Pot {formatNumber(movement.currentPot)}</span><time>{movement.timeStamp ? new Date(movement.timeStamp).toLocaleTimeString() : '—'}</time></div>)}</div>
+                                    </article>;
+                                })}
                                 {!rounds.length && <div className="hand-history-empty">No action movements were recorded.</div>}
                             </div>
                         </section>

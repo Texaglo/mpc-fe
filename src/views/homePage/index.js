@@ -258,6 +258,120 @@ const AdminHomePage = () => {
         return classMap[action] || '';
     };
 
+    const dashboardKpiGroups = [
+        {
+            id: 'live-floor',
+            title: 'Live Floor',
+            caption: 'Current player and table activity',
+            items: [
+                {
+                    label: 'Players Online',
+                    value: stats?.live?.playersOnline?.toLocaleString() || '0',
+                    detail: `${stats?.live?.recentAuthenticatedPlayers ?? stats?.live?.httpActivePlayers ?? 0} authenticated · ${stats?.live?.socketConnections || 0} sockets`,
+                    icon: 'icon-wifi', iconClass: 'online-icon', to: '/home/users',
+                },
+                {
+                    label: 'Active Tables',
+                    value: stats?.live?.activeTables?.toLocaleString() || '0',
+                    detail: "Ring, Sit'n'Go & tournaments",
+                    icon: 'icon-controller', iconClass: 'active-tables-icon', to: '/home/games',
+                },
+                {
+                    label: 'Players Seated',
+                    value: stats?.live?.playersSeated?.toLocaleString() || '0',
+                    detail: `${stats?.live?.connectedRingPlayers || 0} connected at ring tables`,
+                    icon: 'icon-single-02', iconClass: 'seated-icon', to: '/home/games',
+                },
+                {
+                    label: 'Total Users',
+                    value: stats?.users?.total?.toLocaleString() || '0',
+                    detail: `${stats?.users?.newInPeriod?.toLocaleString() || 0} added in selected period`,
+                    icon: 'icon-single-02', iconClass: 'users-icon', to: '/home/users',
+                },
+                {
+                    label: 'New Today',
+                    value: stats?.users?.newToday?.toLocaleString() || '0',
+                    detail: 'New player accounts',
+                    icon: 'icon-simple-add', iconClass: 'new-accounts-icon', to: '/home/users',
+                },
+            ],
+        },
+        {
+            id: 'cash-flow',
+            title: "Today's Cash Flow",
+            caption: 'Movement requiring operator awareness',
+            items: [
+                {
+                    label: "Today's Deposits",
+                    value: stats?.today?.deposits?.count?.toLocaleString() || '0',
+                    detail: 'Recorded deposits',
+                    icon: 'icon-coins', iconClass: 'deposits-icon', to: '/home/cashier',
+                },
+                {
+                    label: "Today's Withdrawals",
+                    value: stats?.today?.withdrawals?.count?.toLocaleString() || '0',
+                    detail: 'Recorded withdrawals',
+                    icon: 'icon-send', iconClass: 'withdrawals-icon', to: '/home/pending-withdrawals',
+                },
+                {
+                    label: 'Pending Withdrawals',
+                    value: stats?.withdrawals?.pendingCount?.toLocaleString() || '0',
+                    detail: 'Awaiting operator review',
+                    icon: 'icon-credit-card', iconClass: 'pending-icon', to: '/home/pending-withdrawals',
+                },
+                {
+                    label: 'Time Purchased',
+                    value: `${formatMinutes(stats?.today?.timePurchases?.timeMinutes)} min`,
+                    detail: `${formatMpce(stats?.today?.timePurchases?.mpce)} MPCE · ${formatUsd(stats?.today?.timePurchases?.cashUsd)}`,
+                    icon: 'icon-time-alarm', iconClass: 'time-purchased-icon', to: '/home/cashier', valueClass: 'treasury-value',
+                },
+                {
+                    label: 'Revenue Today',
+                    value: formatUsd(stats?.revenueToday?.estimatedUsd),
+                    detail: `${formatMpce(stats?.revenueToday?.mpce)} MPCE · ${formatMinutes(stats?.revenueToday?.timeMinutes)} min`,
+                    icon: 'icon-coins', iconClass: 'revenue-today-icon', to: '/home/mpce-ledger', valueClass: 'treasury-value',
+                },
+            ],
+        },
+        {
+            id: 'economy-risk',
+            title: 'Economy & Risk',
+            caption: 'Liabilities, house earnings and custody',
+            items: [
+                {
+                    label: 'Player Liabilities',
+                    value: formatUsd(stats?.liabilities?.mainnetCashUsd ?? stats?.liabilities?.cashUsd),
+                    detail: `Dev ${formatUsd(stats?.liabilities?.devnetCashUsd)} · ${formatMpce(stats?.liabilities?.mpce)} MPCE · ${formatMpce(stats?.liabilities?.fp)} FP`,
+                    icon: 'icon-chart-pie-36', iconClass: 'liabilities-icon', to: '/home/users', valueClass: 'treasury-value',
+                },
+                {
+                    label: 'House MPCE',
+                    value: formatMpce(stats?.houseMpce?.availableBalance),
+                    detail: `+${formatMpce(stats?.houseMpce?.periodEarned)} in selected period`,
+                    icon: 'icon-bank', iconClass: 'house-mpce-icon', to: '/home/mpce-ledger',
+                },
+                {
+                    label: 'Treasury SOL',
+                    value: walletBalance?.treasuryWallet?.balanceSOL || 'Unavailable',
+                    detail: walletBalance?.network || 'Network unavailable',
+                    icon: 'icon-wallet-43', iconClass: 'treasury-icon', to: '/home/pending-withdrawals', valueClass: 'treasury-value',
+                },
+                {
+                    label: 'Treasury USDC',
+                    value: walletBalance?.treasuryWallet?.balanceUSDC || 'Unavailable',
+                    detail: 'Deposit custody',
+                    icon: 'icon-money-coins', iconClass: 'treasury-usdc-icon', to: '/home/pending-withdrawals', valueClass: 'treasury-value',
+                },
+                {
+                    label: 'Banned Users',
+                    value: stats?.users?.frozen?.toLocaleString() || '0',
+                    detail: 'Account access restricted',
+                    icon: 'icon-lock-circle', iconClass: 'frozen-icon', to: '/home/users',
+                },
+            ],
+        },
+    ];
+
     return (
         <div className="content">
             <div className="main-container dashboard-container">
@@ -319,182 +433,34 @@ const AdminHomePage = () => {
                     ))}
                 </section>
 
-                <div className="stats-grid">
-                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/users')}>
-                        <div className="stat-icon online-icon"><i className="tim-icons icon-wifi" /></div>
-                        <div className="stat-content">
-                            <span className="stat-value">{stats?.live?.playersOnline?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">Players Online</span>
-                            <span className="stat-detail">
-                                {stats?.live?.recentAuthenticatedPlayers ?? stats?.live?.httpActivePlayers ?? 0} authenticated session{(stats?.live?.recentAuthenticatedPlayers ?? stats?.live?.httpActivePlayers) === 1 ? '' : 's'} · {stats?.live?.socketConnections || 0} on this backend
-                            </span>
-                            <span className="stat-link-label">Open players →</span>
-                        </div>
-                    </button>
-
-                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/games')}>
-                        <div className="stat-icon active-tables-icon"><i className="tim-icons icon-controller" /></div>
-                        <div className="stat-content">
-                            <span className="stat-value">{stats?.live?.activeTables?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">Active Tables</span>
-                            <span className="stat-detail">Ring, Sit'n'Go and tournaments</span>
-                            <span className="stat-link-label">Open games →</span>
-                        </div>
-                    </button>
-
-                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/games')}>
-                        <div className="stat-icon seated-icon"><i className="tim-icons icon-single-02" /></div>
-                        <div className="stat-content">
-                            <span className="stat-value">{stats?.live?.playersSeated?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">Players Seated</span>
-                            <span className="stat-detail">{stats?.live?.connectedRingPlayers || 0} connected at ring tables</span>
-                            <span className="stat-link-label">View tables →</span>
-                        </div>
-                    </button>
-
-                    {/* Total Users */}
-                    <div className="stat-card">
-                        <div className="stat-icon users-icon">
-                            <i className="tim-icons icon-single-02"></i>
-                        </div>
-                        <div className="stat-content">
-                            <span className="stat-value">{stats?.users?.total?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">Total Users</span>
-                        </div>
-                    </div>
-
-                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/users')}>
-                        <div className="stat-icon new-accounts-icon"><i className="tim-icons icon-simple-add" /></div>
-                        <div className="stat-content">
-                            <span className="stat-value">{stats?.users?.newToday?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">New Accounts Today</span>
-                            <span className="stat-detail">{stats?.users?.newInPeriod?.toLocaleString() || 0} in selected period</span>
-                            <span className="stat-link-label">Open players →</span>
-                        </div>
-                    </button>
-
-                    <button type="button" className="stat-card dashboard-link-card liabilities-card" onClick={() => history.push('/home/users')}>
-                        <div className="stat-icon liabilities-icon"><i className="tim-icons icon-chart-pie-36" /></div>
-                        <div className="stat-content">
-                            <span className="stat-value treasury-value">{formatUsd(stats?.liabilities?.mainnetCashUsd ?? stats?.liabilities?.cashUsd)}</span>
-                            <span className="stat-label">Player Liabilities</span>
-                            <span className="stat-detail">Mainnet liability · Devnet {formatUsd(stats?.liabilities?.devnetCashUsd)}</span>
-                            <span className="stat-detail">{formatMpce(stats?.liabilities?.mpce)} MPCE · {formatMpce(stats?.liabilities?.fp)} FP</span>
-                            <span className="stat-detail">{formatMinutes(stats?.liabilities?.timeMinutes)} projected minutes</span>
-                        </div>
-                    </button>
-
-                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/cashier')}>
-                        <div className="stat-icon time-purchased-icon"><i className="tim-icons icon-time-alarm" /></div>
-                        <div className="stat-content">
-                            <span className="stat-value">{formatMinutes(stats?.today?.timePurchases?.timeMinutes)}</span>
-                            <span className="stat-label">Time Purchased Today</span>
-                            <span className="stat-detail">{formatMpce(stats?.today?.timePurchases?.mpce)} MPCE · {formatUsd(stats?.today?.timePurchases?.cashUsd)}</span>
-                            <span className="stat-link-label">Open cashier →</span>
-                        </div>
-                    </button>
-
-                    <button type="button" className="stat-card dashboard-link-card" onClick={() => history.push('/home/mpce-ledger')}>
-                        <div className="stat-icon revenue-today-icon"><i className="tim-icons icon-coins" /></div>
-                        <div className="stat-content">
-                            <span className="stat-value treasury-value">{formatUsd(stats?.revenueToday?.estimatedUsd)}</span>
-                            <span className="stat-label">Revenue Today</span>
-                            <span className="stat-detail">{formatMpce(stats?.revenueToday?.mpce)} MPCE burned · {formatMinutes(stats?.revenueToday?.timeMinutes)} minutes</span>
-                            <span className="stat-link-label">Open house ledger →</span>
-                        </div>
-                    </button>
-
-                    {/* Banned Users */}
-                    <div className="stat-card">
-                        <div className="stat-icon frozen-icon">
-                            <i className="tim-icons icon-lock-circle"></i>
-                        </div>
-                        <div className="stat-content">
-                            <span className="stat-value">{stats?.users?.frozen?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">Banned Users</span>
-                        </div>
-                    </div>
-
-                    {/* Pending Withdrawals */}
-                    <div className="stat-card">
-                        <div className="stat-icon pending-icon">
-                            <i className="tim-icons icon-credit-card"></i>
-                        </div>
-                        <div className="stat-content">
-                            <span className="stat-value">{stats?.withdrawals?.pendingCount?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">Pending Withdrawals</span>
-                        </div>
-                    </div>
-
-                    {/* Today's Deposits */}
-                    <div className="stat-card">
-                        <div className="stat-icon deposits-icon">
-                            <i className="tim-icons icon-coins"></i>
-                        </div>
-                        <div className="stat-content">
-                            <span className="stat-value">{stats?.today?.deposits?.count?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">Today's Deposits</span>
-                        </div>
-                    </div>
-
-                    {/* Today's Withdrawals */}
-                    <div className="stat-card">
-                        <div className="stat-icon withdrawals-icon">
-                            <i className="tim-icons icon-send"></i>
-                        </div>
-                        <div className="stat-content">
-                            <span className="stat-value">{stats?.today?.withdrawals?.count?.toLocaleString() || '0'}</span>
-                            <span className="stat-label">Today's Withdrawals</span>
-                        </div>
-                    </div>
-
-                    {/* House MPCE */}
-                    <button
-                        type="button"
-                        className="stat-card house-mpce-card dashboard-link-card"
-                        onClick={() => history.push('/home/mpce-ledger')}
-                        aria-label="Open House MPCE transaction ledger"
-                    >
-                        <div className="stat-icon house-mpce-icon">
-                            <i className="tim-icons icon-bank"></i>
-                        </div>
-                        <div className="stat-content">
-                            <span className="stat-value">{formatMpce(stats?.houseMpce?.availableBalance)}</span>
-                            <span className="stat-label">House MPCE Balance</span>
-                            <span className="stat-detail">
-                                +{formatMpce(stats?.houseMpce?.periodEarned)} in selected period
-                            </span>
-                            <span className="stat-link-label">View transactions →</span>
-                        </div>
-                    </button>
-
-                    {/* Treasury SOL */}
-                    <div className="stat-card">
-                        <div className="stat-icon treasury-icon">
-                            <i className="tim-icons icon-wallet-43"></i>
-                        </div>
-                        <div className="stat-content">
-                            <span className="stat-value treasury-value">
-                                {walletBalance?.treasuryWallet?.balanceSOL || 'Unavailable'}
-                            </span>
-                            <span className="stat-label">Treasury SOL</span>
-                            <span className="stat-detail">{walletBalance?.network || 'Network unavailable'}</span>
-                        </div>
-                    </div>
-
-                    {/* Treasury USDC */}
-                    <div className="stat-card">
-                        <div className="stat-icon treasury-usdc-icon">
-                            <i className="tim-icons icon-money-coins"></i>
-                        </div>
-                        <div className="stat-content">
-                            <span className="stat-value treasury-value">
-                                {walletBalance?.treasuryWallet?.balanceUSDC || 'Unavailable'}
-                            </span>
-                            <span className="stat-label">Treasury USDC</span>
-                            <span className="stat-detail">Deposit custody</span>
-                        </div>
-                    </div>
+                <div className="dashboard-kpi-groups">
+                    {dashboardKpiGroups.map((group) => (
+                        <section className="dashboard-kpi-group" aria-labelledby={`${group.id}-title`} key={group.id}>
+                            <div className="dashboard-kpi-group-header">
+                                <h3 id={`${group.id}-title`}>{group.title}</h3>
+                                <span>{group.caption}</span>
+                            </div>
+                            <div className="stats-grid">
+                                {group.items.map((item) => (
+                                    <button
+                                        type="button"
+                                        className="stat-card dashboard-link-card compact-stat-card"
+                                        onClick={() => history.push(item.to)}
+                                        aria-label={`${item.label}: ${item.value}. ${item.detail}`}
+                                        key={item.label}
+                                    >
+                                        <div className={`stat-icon ${item.iconClass}`}><i className={`tim-icons ${item.icon}`} /></div>
+                                        <div className="stat-content">
+                                            <span className={`stat-value ${item.valueClass || ''}`}>{item.value}</span>
+                                            <span className="stat-label">{item.label}</span>
+                                            <span className="stat-detail">{item.detail}</span>
+                                        </div>
+                                        <span className="compact-stat-arrow" aria-hidden="true">→</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+                    ))}
                 </div>
 
                 <section className="house-ledger-card">

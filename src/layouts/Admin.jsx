@@ -16,6 +16,7 @@ var ps;
 class Admin extends React.Component {
   constructor(props) {
     super(props);
+    this.mainPanelRef = React.createRef();
     this.state = {
       backgroundColor: "blue",
       // activeTab: localStorage.getItem('active'),
@@ -26,7 +27,7 @@ class Admin extends React.Component {
     if (navigator.platform.indexOf("Win") > -1) {
       document.documentElement.className += " perfect-scrollbar-on";
       document.documentElement.classList.remove("perfect-scrollbar-off");
-      ps = new PerfectScrollbar(this.refs.mainPanel, { suppressScrollX: true });
+      ps = new PerfectScrollbar(this.mainPanelRef.current, { suppressScrollX: true });
       let tables = document.querySelectorAll(".table-responsive");
       for (let i = 0; i < tables.length; i++) {
         ps = new PerfectScrollbar(tables[i]);
@@ -50,7 +51,7 @@ class Admin extends React.Component {
       }
       document.documentElement.scrollTop = 0;
       document.scrollingElement.scrollTop = 0;
-      this.refs.mainPanel.scrollTop = 0;
+      if (this.mainPanelRef.current) this.mainPanelRef.current.scrollTop = 0;
     }
   }
   // this function opens and closes the sidebar on small devices
@@ -125,7 +126,7 @@ class Admin extends React.Component {
         />
         <div
           className="main-panel"
-          ref="mainPanel"
+          ref={this.mainPanelRef}
           data={this.state.backgroundColor}
         >
           <AdminNavbar

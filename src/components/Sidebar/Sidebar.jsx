@@ -12,6 +12,7 @@ var ps;
 class Sidebar extends React.Component {
   constructor(props) {
     super(props);
+    this.sidebarRef = React.createRef();
     this.activeRoute.bind(this);
   }
   // verifies if routeName is the one active (in browser input)
@@ -20,7 +21,7 @@ class Sidebar extends React.Component {
   }
   componentDidMount() {
     if (navigator.platform.indexOf("Win") > -1) {
-      ps = new PerfectScrollbar(this.refs.sidebar, {
+      ps = new PerfectScrollbar(this.sidebarRef.current, {
         suppressScrollX: true,
         suppressScrollY: false
       });
@@ -35,15 +36,19 @@ class Sidebar extends React.Component {
     document.documentElement.classList.remove("nav-open");
   };
   render() {
-    const { role, bgColor, routes, rtlActive, logo } = this.props;
+    const { bgColor, routes, rtlActive } = this.props;
 
     return (
       <div className="sidebar" data={bgColor}>
-        <div className="sidebar-wrapper" ref="sidebar">
-          <div className="logo text-center text-white" style={{ padding: '15px 0px' }}>
-            <a href={logo.outterLink} target="_blank">
-              <img style={{ width: '80%' }} alt="..." src={require('../../assets/img/logo.png')} />
-            </a>
+        <div className="sidebar-wrapper" ref={this.sidebarRef}>
+          <div className="logo mpc-sidebar-brand">
+            <NavLink to="/home/dashboard" className="mpc-sidebar-brand-link" onClick={this.linkOnClick}>
+              <img alt="Modern Poker Club" src={require('../../assets/img/mpc-logo.png')} />
+              <span className="mpc-sidebar-console-label">
+                <strong>Admin Console</strong>
+                <small>Secure operations</small>
+              </span>
+            </NavLink>
           </div>
           <Nav>
             {routes.map((prop) => {

@@ -15,7 +15,6 @@ import {
   Navbar,
   NavLink,
   Nav,
-  Container,
   Modal
 } from "reactstrap";
 
@@ -86,15 +85,14 @@ class AdminNavbar extends React.Component {
   copied = () => EventBus.publish("success", 'Address is Copied');
 
   render() {
-    let { role } = this.state;
-    let { address, balance } = this.props;
+    const environment = process.env.REACT_APP_ENVIRONMENT || (process.env.NODE_ENV === 'production' ? 'Production' : 'Local');
     return (
       <div className="nav-bar">
         <Navbar
           className={classNames("navbar-absolute", this.state.color)}
           expand="lg"
         >
-          <Container fluid>
+          <div className="mpc-navbar-inner">
             <div className="navbar-wrapper">
               <div
                 className={classNames("navbar-toggle d-inline", {
@@ -102,6 +100,7 @@ class AdminNavbar extends React.Component {
                 })}
               >
                 <button
+                  aria-label={this.props.sidebarOpened ? "Close navigation" : "Open navigation"}
                   className="navbar-toggler"
                   type="button"
                   onClick={this.props.toggleSidebar}
@@ -111,13 +110,22 @@ class AdminNavbar extends React.Component {
                   <span className="navbar-toggler-bar bar3" />
                 </button>
               </div>
-              <NavbarBrand className="mt-2" href="#" target="_blank">
-                {/* <img alt="..." src={require('../../assets/img/logo.png')} style={{ width: '70%', padding: '20px' }} /> */}
+              <NavbarBrand className="mpc-navbar-brand" href="#" onClick={event => event.preventDefault()}>
+                <span className="mpc-navbar-brand-title">Modern Poker Club</span>
+                <span className="mpc-navbar-brand-subtitle">Operations Console</span>
               </NavbarBrand>
+              <div className="mpc-navbar-context" aria-label={`Current page: ${this.props.brandText}`}>
+                <span>Current workspace</span>
+                <strong>{this.props.brandText}</strong>
+              </div>
             </div>
             <Collapse navbar isOpen={this.state.collapseOpen}>
               <Nav className="ml-auto" navbar>
-
+                <li className="mpc-environment-status" aria-label={`${environment} environment`}>
+                  <span className="mpc-status-dot" />
+                  <span>{environment}</span>
+                  <small>Authenticated admin</small>
+                </li>
                 <UncontrolledDropdown nav>
                   <DropdownToggle
                     caret
@@ -126,13 +134,13 @@ class AdminNavbar extends React.Component {
                     nav
                     onClick={e => e.preventDefault()}
                   >
-                    <div className="photo">
-                      <img alt="..." src={require('../../assets/img/icon.png')} />
+                    <div className="photo mpc-admin-avatar" aria-hidden="true">
+                      <i className="tim-icons icon-lock-circle" />
                     </div>
                     <b className="caret d-none d-lg-block d-xl-block" />
                     <p className="d-lg-none">Logout</p>
                   </DropdownToggle>
-                  <DropdownMenu className="dropdown-navbar" right tag="ul">
+                  <DropdownMenu className="dropdown-navbar" end tag="ul">
                     {/* <DropdownItem divider tag="li" /> */}
                     <NavLink tag="li" onClick={this.logout}>
                       <DropdownItem className="nav-item">Logout</DropdownItem>
@@ -143,7 +151,7 @@ class AdminNavbar extends React.Component {
                 <li className="separator d-lg-none" />
               </Nav>
             </Collapse>
-          </Container>
+          </div>
         </Navbar>
         <Modal
           modalClassName="modal-search"

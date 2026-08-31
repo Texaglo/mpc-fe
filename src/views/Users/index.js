@@ -407,7 +407,7 @@ class Users extends React.Component {
                 accessor: 'username',
                 Header: 'Player',
                 Cell: ({ original }) => <div className="user-identity-cell"><strong>{original.username || 'N/A'}</strong><span>{original.email || 'No email'}</span></div>,
-                width: 170
+                width: 165
             },
             {
                 accessor: 'publicAddress',
@@ -422,14 +422,14 @@ class Users extends React.Component {
                     return 'N/A';
                 },
                 filterable: false,
-                width: 115
+                width: 105
             },
             {
                 id: 'balances',
                 Header: 'Balances',
                 Cell: ({ original }) => <div className="user-balance-stack"><span>Mainnet <strong>${Number(original.mainnetCashBalance ?? original.cashBalance ?? 0).toLocaleString()}</strong></span><span>Devnet <strong>${Number(original.devnetCashBalance || 0).toLocaleString()}</strong></span><span>MPCE <strong>{Number(original.mpceCredit || 0).toLocaleString()}</strong></span><span>FP <strong>{Number(original.fpBalance || 0).toLocaleString()}</strong></span></div>,
                 filterable: false,
-                width: 145
+                width: 135
             },
             {
                 id: 'currentSession',
@@ -447,7 +447,7 @@ class Users extends React.Component {
                     );
                 },
                 filterable: false,
-                width: 155
+                width: 145
             },
             {
                 accessor: 'isFrozen',
@@ -459,14 +459,14 @@ class Users extends React.Component {
                     </div>
                 ),
                 filterable: false,
-                width: 110
+                width: 105
             },
             {
                 accessor: 'createdAt',
                 Header: 'Joined',
                 Cell: ({ value }) => value ? new Date(value).toLocaleDateString() : 'N/A',
                 filterable: false,
-                width: 88
+                width: 84
             },
             {
                 Cell: item => (
@@ -507,7 +507,7 @@ class Users extends React.Component {
                 ),
                 Header: 'Actions',
                 filterable: false,
-                width: 430
+                width: 300
             },
         ];
 

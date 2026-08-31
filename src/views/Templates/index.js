@@ -31,6 +31,7 @@ class Template extends React.Component {
                 name: '',
                 time: '',
                 buyIn: '',
+                balanceType: 'CASH',
                 region: '',
                 regular: '',
                 minCoins: '',
@@ -87,6 +88,9 @@ class Template extends React.Component {
         const { formData, selectedGame } = this.state;
 
         formData['gameType'] = this.state.selectedOption
+        // `balanceType` is the canonical economy. Keep the legacy alias in the
+        // payload so older consumers that still inspect buyInType keep working.
+        formData['buyInType'] = formData.balanceType === 'TIME' ? 'mpceCredit' : formData.balanceType;
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
 
@@ -97,7 +101,8 @@ class Template extends React.Component {
     };
 
     editRing = (game) => {
-        this.setState({ selectedGame: game, formData: { ...game } });
+        const balanceType = game.balanceType || (game.buyInType === 'mpceCredit' ? 'TIME' : 'CASH');
+        this.setState({ selectedGame: game, formData: { ...game, balanceType } });
 
         if (game['gameType'] === "MTT") this.setState({ tournamentModal: true });
         if (game['gameType'] === "SNG") this.setState({ sngModal: true });
@@ -110,6 +115,7 @@ class Template extends React.Component {
             name: '',
             time: '',
             buyIn: '',
+            balanceType: 'CASH',
             region: '',
             regular: '',
             minCoins: '',
@@ -163,9 +169,9 @@ class Template extends React.Component {
     handleModal = () => {
         this.setState({ selectGameModal: false })
         let { selectedOption } = this.state;
-        if (selectedOption == "MTT") this.setState({ tournamentModal: true });
-        if (selectedOption == "SNG") this.setState({ sngModal: true });
-        if (selectedOption == "RING") this.setState({ ringModal: true });
+        if (selectedOption === "MTT") this.setState({ tournamentModal: true });
+        if (selectedOption === "SNG") this.setState({ sngModal: true });
+        if (selectedOption === "RING") this.setState({ ringModal: true });
     }
 
 
@@ -175,7 +181,7 @@ class Template extends React.Component {
         const { selectedGame, tournamentModal, selectedOption, selectGameModal, ringModal, sngModal } = this.state;
         let { allTemplates } = this.props;
         const allTournamentsArray = Object.values(allTemplates);
-        let { name, startingStack, buyIn, buyInType, tournamentStartingDate, smallBlinds, bigBlinds, minCoins, maxCoins, seatLimit, duration,
+        let { name, startingStack, buyIn, balanceType, tournamentStartingDate, smallBlinds, bigBlinds, minCoins, maxCoins, seatLimit, duration,
             region, gameVariant, formatLimit, minPlayers, maxPlayers, blinds, fee, prizePool } = this.state.formData;
 
         const columns = [
@@ -205,6 +211,12 @@ class Template extends React.Component {
                 filterMethod: (filter, row) => {
                     return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
                 },
+            },
+            {
+                id: 'balanceType',
+                Header: 'Economy',
+                accessor: row => row.balanceType || (row.buyInType === 'mpceCredit' ? 'TIME' : 'CASH'),
+                filterable: false,
             },
             {
                 Cell: row => (
@@ -370,21 +382,23 @@ class Template extends React.Component {
                                     </Grid>
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={6}>
-                                            <label>BuyIn Type</label>
+                                            <label>Template Economy</label>
                                             <select
                                                 fullWidth
                                                 className="dropdown-new"
-                                                name="buyInType"
-                                                value={buyInType}
+                                                name="balanceType"
+                                                value={balanceType}
                                                 variant="outlined"
                                                 margin="dense"
                                                 onChange={this.handleFormChange}
                                                 validators={['required']}
-                                                errorMessages={['Please Select Game Type']}
+                                                errorMessages={['Please Select Economy']}
                                             >
-                                                <option value="">Select BuyIn Type</option>
-                                                <option value="goldCoins">Gold Coins</option>
+                                                <option value="CASH">Cash / USD</option>
+                                                <option value="FP">Free Play (FP)</option>
+                                                <option value="TIME">Time (MPCE legacy)</option>
                                             </select>
+                                            <small className="template-economy-hint">FP buy-ins use non-withdrawable Free Play tokens and never consume table time.</small>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
                                             <label>BuyIn Value</label>
@@ -628,21 +642,23 @@ class Template extends React.Component {
                                     </Grid>
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                         <Grid className="input-fields" item xs={6}>
-                                            <label>BuyIn Type</label>
+                                            <label>Template Economy</label>
                                             <select
                                                 fullWidth
                                                 className="dropdown-new"
-                                                name="buyInType"
-                                                value={buyInType}
+                                                name="balanceType"
+                                                value={balanceType}
                                                 variant="outlined"
                                                 margin="dense"
                                                 onChange={this.handleFormChange}
                                                 validators={['required']}
-                                                errorMessages={['Please Select Game Type']}
+                                                errorMessages={['Please Select Economy']}
                                             >
-                                                <option value="">Select BuyIn Type</option>
-                                                <option value="goldCoins">Gold Coins</option>
+                                                <option value="CASH">Cash / USD</option>
+                                                <option value="FP">Free Play (FP)</option>
+                                                <option value="TIME">Time (MPCE legacy)</option>
                                             </select>
+                                            <small className="template-economy-hint">FP buy-ins use non-withdrawable Free Play tokens and never consume table time.</small>
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
                                             <label>BuyIn Value</label>
@@ -846,21 +862,23 @@ class Template extends React.Component {
                                             />
                                         </Grid>
                                         <Grid className="input-fields" item xs={6}>
-                                            <label>BuyIn Type</label>
+                                            <label>Template Economy</label>
                                             <select
                                                 fullWidth
                                                 className="dropdown-new"
-                                                name="buyInType"
-                                                value={buyInType}
+                                                name="balanceType"
+                                                value={balanceType}
                                                 variant="outlined"
                                                 margin="dense"
                                                 onChange={this.handleFormChange}
                                                 validators={['required']}
-                                                errorMessages={['Please Select Game Type']}
+                                                errorMessages={['Please Select Economy']}
                                             >
-                                                <option value="">Select BuyIn Type</option>
-                                                <option value="goldCoins">Gold Coins</option>
+                                                <option value="CASH">Cash / USD</option>
+                                                <option value="FP">Free Play (FP)</option>
+                                                <option value="TIME">Time (MPCE legacy)</option>
                                             </select>
+                                            <small className="template-economy-hint">FP stakes and buy-ins use non-withdrawable Free Play tokens and never consume table time.</small>
                                         </Grid>
                                     </Grid>
                                     <Grid container spacing={2} className="group-input" alignItems="flex-end">

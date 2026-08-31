@@ -1,585 +1,124 @@
 import './index.css';
-import moment from 'moment';
-import EventBus from "eventing-bus";
+import '../../assets/css/competition-management.css';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
-import React, { Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
+import React from 'react';
 import Button from '@material-ui/core/Button';
-import DateFnsUtils from '@date-io/date-fns';
-import { MuiPickersUtilsProvider, DateTimePicker, } from '@material-ui/pickers';
-// import DateTimePicker from 'react-datetime-picker';
-import { Add, Remove } from '@material-ui/icons';
-import { withStyles } from '@material-ui/core/styles';
-import Countdown from 'react-countdown';
-import { Modal, ModalHeader, ModalBody } from "reactstrap";
-import { addTournament } from "../../store/actions/Tournament"
+import EventBus from 'eventing-bus';
+import { Modal, ModalHeader, ModalBody } from 'reactstrap';
+import { addTournament, getAllTournaments, updateTournament, deleteTournament } from '../../store/actions/Tournament';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
-import { ValidatorForm, TextValidator } from '../../components/FormValidator';
-import { getAllTournaments, updateTournament, deleteTournament } from "../../store/actions/Tournament";
-import { getAllTemplates } from "../../store/actions/Template";
+import { getAllTemplates } from '../../store/actions/Template';
 
-import 'react-datetime-picker/dist/DateTimePicker.css';
-import 'react-calendar/dist/Calendar.css';
-import 'react-clock/dist/Clock.css';
+const REGIONS = [['asia','Asia'],['au','Australia'],['cae','Canada, East'],['eu','Europe'],['in','India'],['jp','Japan'],['za','South Africa'],['sa','South America'],['kr','South Korea'],['tr','Turkey'],['us','USA, East'],['ussc','USA, South Central']];
+const localDateTime = value => {
+    const date = value ? new Date(value) : new Date(Date.now() + 3600000);
+    if (Number.isNaN(date.getTime())) return '';
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+};
+const emptyForm = () => ({
+    name: '', balanceType: 'CASH', buyIn: '', fee: 0, prizePool: '', startingStack: 5000,
+    minPlayers: 2, maxPlayers: 30, gameVariant: "Texas Hold'em", formatLimit: 'No Limit',
+    region: 'us', tournamentStartingDate: localDateTime(),
+    blinds: [{ smallBlind: 25, bigBlind: 50, duration: 10, ante: 0 }],
+});
+const Field = ({ label, hint, className = '', children }) => <label className={`competition-field ${className}`}><span>{label}</span>{children}{hint && <small>{hint}</small>}</label>;
+const unitName = value => value === 'FP' ? 'FP' : value === 'TIME' ? 'MPCE' : 'USD';
+const economyName = value => value === 'FP' ? 'Free Play (FP)' : value === 'TIME' ? 'Time / MPCE' : 'Cash / USD';
 
 class Tournament extends React.Component {
+    state = { formData: emptyForm(), template: '', selectedGame: null };
+
     constructor(props) {
         super(props);
-        this.state = {
-            formData: {
-                fee: '',
-                time: '',
-                name: '',
-                buyIn: '',
-                buyInType: '',
-                prizePool: '',
-                minPlayers: '',
-                formatLimit: '',
-                maxPlayers: '',
-                startingStack: '',
-                region: 'Select Region',
-                gameVariant: 'Select Game Type',
-                blinds: [{ smallBlind: '', bigBlind: '' }],
-                tournamentStartingDate: new Date(Date.now()),
-                type: 'Select Type',
-            },
-            template: '',
-            selectedGame: null,
-            blind: { smallBlind: '', bigBlind: '' },
-        };
         props.getAllTournaments();
         props.getAllTemplates();
         props.setLoader(true);
     }
 
-
-    handleDateTimeChange = (tournamentStartingDate) => {
-        let now = moment();
-        let { formData } = this.state;
-        let selectedTime = moment(tournamentStartingDate);
-
-        if (selectedTime.isBefore(now)) {
-            EventBus.publish("error", "Selected time is in the past!");
-            return;
-        }
-        else {
-            formData.tournamentStartingDate = selectedTime.format(); // ISO format
-            this.setState({ formData });
-        }
-    };
-
-    handleFormChange = ({ target }) => {
-        let { formData } = this.state;
-        formData[target.name] = target.value;
-        this.setState({ formData });
-    };
+    handleFormChange = ({ target }) => this.setState(({ formData }) => ({ formData: { ...formData, [target.name]: target.value } }));
+    handleBlindChange = (index, field, value) => this.setState(({ formData }) => ({ formData: { ...formData, blinds: formData.blinds.map((blind, position) => position === index ? { ...blind, [field]: value } : blind) } }));
+    addBlind = () => this.setState(({ formData }) => ({ formData: { ...formData, blinds: [...formData.blinds, { smallBlind: '', bigBlind: '', duration: 10, ante: 0 }] } }));
+    removeBlind = index => this.setState(({ formData }) => ({ formData: { ...formData, blinds: formData.blinds.filter((_, position) => position !== index) } }));
 
     handleTemplateChange = ({ target }) => {
-        this.setState({ template: target.value });
-        let template = this.props.allTemplates.filter(template => template['_id'] === target.value);
-        if (template.length > 0) this.setState({ formData: { ...template[0] } })
-        else this.setState({
-            formData: {
-                fee: '',
-                time: '',
-                name: '',
-                buyIn: '',
-                buyInType: '',
-                prizePool: '',
-                minPlayers: '',
-                formatLimit: '',
-                maxPlayers: '',
-                startingStack: '',
-                region: 'Select Region',
-                gameVariant: 'Select Game Type',
-                type: 'Select Type',
-                blinds: [{ smallBlind: '', bigBlind: '' }],
-                tournamentStartingDate: new Date(Date.now())
-            }
-        })
+        const template = this.props.allTemplates.find(item => item._id === target.value);
+        this.setState({ template: target.value, formData: template ? { ...emptyForm(), ...template, tournamentStartingDate: localDateTime(template.tournamentStartingDate), balanceType: template.balanceType || (template.buyInType === 'mpceCredit' ? 'TIME' : 'CASH') } : emptyForm() });
     };
 
-    submitRing = () => {
-        const { formData, selectedGame, } = this.state;
+    openCreate = () => this.setState({ selectedGame: null, template: '', formData: emptyForm() }, () => this.props.toggleModal(true));
+    editGame = game => this.setState({ selectedGame: game, template: '', formData: { ...emptyForm(), ...game, tournamentStartingDate: localDateTime(game.tournamentStartingDate), balanceType: game.balanceType || 'TIME' } }, () => this.props.toggleModal(true));
+    cancelModal = () => this.setState({ selectedGame: null, template: '', formData: emptyForm() }, () => this.props.toggleModal(false));
 
-        if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
-        if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
-
-        this.props.toggleModal(false);
-        if (selectedGame) this.props.updateTournament(formData)
-        else this.props.addTournament(formData);
+    submitGame = event => {
+        event.preventDefault();
+        const { formData, selectedGame } = this.state;
+        if (!formData.name.trim() || !formData.region || !formData.gameVariant || !formData.formatLimit) return EventBus.publish('error', 'Complete all tournament setup fields');
+        if (Number(formData.buyIn) <= 0 || Number(formData.startingStack) <= 0 || Number(formData.prizePool) <= 0) return EventBus.publish('error', 'Buy-in, starting chips and prize pool must be greater than zero');
+        if (Number(formData.minPlayers) < 2 || Number(formData.maxPlayers) < Number(formData.minPlayers)) return EventBus.publish('error', 'Maximum players must be at least the minimum');
+        const scheduled = new Date(formData.tournamentStartingDate);
+        if (Number.isNaN(scheduled.getTime())) return EventBus.publish('error', 'Select a valid tournament start time');
+        const payload = {
+            ...formData,
+            buyIn: Number(formData.buyIn), fee: Number(formData.fee || 0), prizePool: Number(formData.prizePool), startingStack: Number(formData.startingStack), minPlayers: Number(formData.minPlayers), maxPlayers: Number(formData.maxPlayers),
+            tournamentStartingDate: scheduled.toISOString(),
+            buyInType: formData.balanceType === 'TIME' ? 'mpceCredit' : formData.balanceType,
+            blinds: formData.blinds.map(blind => ({ smallBlind: Number(blind.smallBlind), bigBlind: Number(blind.bigBlind), duration: Number(blind.duration || 10), ante: Number(blind.ante || 0) })),
+        };
+        if (selectedGame) this.props.updateTournament(payload); else this.props.addTournament(payload);
+        this.cancelModal();
     };
 
-    editRing = (ring) => this.setState({ selectedGame: ring, formData: { ...ring } }, () => this.props.toggleModal(true));
-
-    cancelModal = () => this.setState({
-        selectedGame: null,
-        template: '',
-        formData: {
-            name: '', startingStack: '', buyIn: '', buyInType: '', gameVariant: 'Select Game Type', region: 'Select Region',
-            tournamentStartingDate: new Date(Date.now()), time: '', minPlayers: '', maxPlayers: '', fee: '', prizePool: '', blinds: [{ smallBlind: '', bigBlind: '' }]
-        },
-    }, () => this.props.toggleModal(false));
-
-    deleteRing = (ringId) => this.props.deleteTournament(ringId);
-
-    handleBlindChange = ({ target }) => {
-        const { blinds } = this.state.formData;
-        let name = target.name.split('_')
-        blinds[name[1]][name[0]] = target.value;
-        this.setState({ blinds });
-    };
-
-    addBlind = () => {
-        const { formData, blind } = this.state;
-        const updatedBlinds = [...formData.blinds, { ...blind }];
-        this.setState({ formData: { ...formData, blinds: updatedBlinds } });
-    };
-    removeBlind = () => {
-        const { formData } = this.state;
-        const updatedBlinds = [...formData.blinds];
-        updatedBlinds.pop();
-        this.setState({ formData: { ...formData, blinds: updatedBlinds } });
-    };
     render() {
-        const { selectedGame, template } = this.state;
-        let { isModal, allTournaments, allTemplates } = this.props;
-        const allTournamentsArray = Object.values(allTournaments);
-        let { name, startingStack, buyIn, buyInType, tournamentStartingDate, region, gameVariant, minPlayers, maxPlayers, blinds, fee, prizePool, type } = this.state.formData;
-
+        const { formData, selectedGame, template } = this.state;
+        const games = Object.values(this.props.allTournaments || {}).filter(game => !game.isTemplate);
+        const unit = unitName(formData.balanceType);
+        const isFreePlay = formData.balanceType === 'FP';
         const columns = [
-            {
-                Header: '#',
-                Cell: ({ index }) => index + 1,
-                width: 100,
-                filterable: false
-            },
-            {
-                accessor: 'name',
-                Header: 'Name',
-                filterMethod: (filter, row) => {
-                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
-                },
-            },
-            {
-                accessor: 'tournamentStartingDate',
-                Header: 'Schedule',
-                Cell: row => {
-                    const scheduleDate = moment(row.value);
-
-                    return <Countdown date={scheduleDate + 10000} />
-                },
-                filterable: false
-            },
-            {
-                accessor: 'participants',
-                Header: 'Registered Players',
-                Cell: row => `${row.original.totalRegisteredPlayers}`,
-                filterable: false
-            },
-            {
-                accessor: 'participants',
-                Header: 'Participants',
-                Cell: row => `${row.original.playersJoined}/${row.original.maxPlayers}`,
-                filterable: false
-            },
-            {
-                accessor: 'status',
-                Header: 'Status',
-                filterMethod: (filter, row) => {
-                    return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
-                },
-            },
-            {
-                Cell: row => (
-                    <div>
-                        <button onClick={() => this.editRing(row.original)} className="add-btn">Edit</button>
-                        <button onClick={() => this.deleteRing(row.original._id)} className="delete-btn add-btn">Delete</button>
-                    </div>
-                ),
-                Header: 'Actions',
-                filterable: false
-            },
+            { Header: '#', width: 48, filterable: false, Cell: ({ index }) => index + 1 },
+            { Header: 'Tournament', accessor: 'name', minWidth: 170 },
+            { Header: 'Starts', minWidth: 130, filterable: false, Cell: row => new Date(row.original.tournamentStartingDate).toLocaleString() },
+            { Header: 'Economy', minWidth: 112, filterable: false, Cell: row => <span className={`competition-economy ${String(row.original.balanceType || 'TIME').toLowerCase()}`}>{economyName(row.original.balanceType || 'TIME')}</span> },
+            { Header: 'Buy-in', minWidth: 92, filterable: false, Cell: row => `${Number(row.original.buyIn || 0).toLocaleString()} ${unitName(row.original.balanceType || 'TIME')}` },
+            { Header: 'Prize pool', minWidth: 105, filterable: false, Cell: row => `${Number(row.original.prizePool || 0).toLocaleString()} ${unitName(row.original.balanceType || 'TIME')}` },
+            { Header: 'Players', minWidth: 82, filterable: false, Cell: row => `${row.original.totalRegisteredPlayers || 0}/${row.original.maxPlayers || 0}` },
+            { Header: 'Status', accessor: 'status', minWidth: 90 },
+            { Header: 'Actions', width: 180, filterable: false, sortable: false, Cell: row => <div className="competition-actions"><button onClick={() => this.editGame(row.original)} className="add-btn">Edit</button><button onClick={() => this.props.deleteTournament(row.original._id)} className="delete-btn add-btn">Delete</button></div> },
         ];
-        return (
-            <div className='content'>
-                <div className="main-container player-scores">
-                    <div className='main-container-head mb-3'>
-                        <p className="main-container-heading">Tourney</p>
-                        <button onClick={() => {
-                            this.props.toggleModal(true);
-                            this.setState({ selectedGame: null, template: '' })
-                        }} className="add-btn">Create New Tourney</button>
-                    </div>
-                    <Fragment>
-                        <div className='main-container-head mb-3'>
-                            <ReactTable
-                                minRows={20}
-                                className="table"
-                                data={allTournamentsArray}
-                                resolveData={data => data.map(row => row)}
-                                columns={columns}
-                                filterable={true}
-                            />
-                        </div>
-                    </Fragment>
-                </div>
-                {/* ---------------ADD MTT MODAL--------------- */}
 
-                <Modal isOpen={isModal} toggle={() => this.cancelModal()} className="main-modal reward-modal">
-                    <ModalHeader toggle={() => this.cancelModal()}>
-                        <div className="reward-modal-title"><p > {selectedGame ? 'Edit Tournament' : 'Create New Tournament'}</p></div>
-                        <div className="reward-modal-line"><hr /></div>
-                    </ModalHeader>
-                    <ModalBody className="modal-body modal-height reward-modal-body">
-                        <div className="row">
-                            <div className="col-12">
-                                <ValidatorForm className="row" >
-                                    {!selectedGame &&
-                                        <Grid container spacing={1} className="group-input select-template" alignItems="flex-start">
-                                            <Grid className="input-fields" item xs={12}>
-                                                <label>Select Template</label>
-                                                <select
-                                                    fullWidth
-                                                    className="dropdown-new"
-                                                    placeholder="Select"
-                                                    name="template"
-                                                    value={template}
-                                                    variant="outlined"
-                                                    margin="dense"
-                                                    onChange={this.handleTemplateChange}
-                                                >
-                                                    <option value="">Select Template</option>
-                                                    {allTemplates.map(template => {
-                                                        if (template['gameType'] == "MTT")
-                                                            return <option key={template['_id']} value={template['_id']}>{template['name']}</option>
-                                                    })}
-                                                </select>
-                                            </Grid>
-                                        </Grid>
-                                    }
-                                    <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        {/* Tournament Name Field */}
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Name</label>
-                                            <CustomTextField
-                                                fullWidth
-                                                className="text-field"
-                                                autoComplete='on'
-                                                placeholder="Tournament Name"
-                                                name="name"
-                                                type="text"
-                                                value={name}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Add Name']}
-                                            />
-                                        </Grid>
+        return <div className="content"><div className="main-container player-scores">
+            <div className="main-container-head competition-list-header mb-3"><p className="main-container-heading">TOURNAMENTS</p><button onClick={this.openCreate} className="add-btn">Create Tournament</button></div>
+            <div className="competition-list-shell"><ReactTable minRows={Math.min(Math.max(games.length, 1), 10)} defaultPageSize={10} showPagination={games.length > 10} className="table competition-table" data={games} columns={columns} filterable /></div>
+        </div>
 
-                                        {/* Type Field - commented out
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Type</label>
-                                            <select
-                                                fullWidth
-                                                className="dropdown-new"
-                                                placeholder="Type"
-                                                name="type"
-                                                value={type}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please select type']}
-                                            >
-                                                <option value="Select Type">Select Type</option>
-                                                <option value="free">Free</option>
-                                                <option value="paid">Paid</option>
-                                            </select>
-                                        </Grid>
-                                        */}
-                                    </Grid>
-                                    <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields time-piker" item xs={6}>
-                                            <label>Schedule</label>
-                                            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                                <DateTimePicker
-                                                    className='col-md-12 text-field'
-                                                    name="tournamentStartingDate"
-                                                    margin="normal"
-                                                    id="date-time-picker-dialog"
-                                                    format="MM/dd/yyyy HH:mm" // Format to display date and time
-                                                    value={tournamentStartingDate}
-                                                    onChange={(tournamentStartingDate) => this.handleDateTimeChange(tournamentStartingDate)}
-                                                // KeyboardButtonProps={{ 'aria-label': 'Date and Time' }}
-                                                />
-                                            </MuiPickersUtilsProvider>
-                                        </Grid>
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Fee</label>
-                                            <CustomTextField
-                                                fullWidth
-                                                className="text-field"
-                                                autoComplete='on'
-                                                placeholder="fee"
-                                                name="fee"
-                                                type="Number"
-                                                value={fee}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Enter fee']}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Starting Stack</label>
-                                            <CustomTextField
-                                                fullWidth
-                                                className="text-field"
-                                                autoComplete='on'
-                                                placeholder="Starting Stack"
-                                                name="startingStack"
-                                                type="Number"
-                                                value={startingStack}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Enter Starting Stack']}
-                                            />
-                                        </Grid>
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Prize Pool</label>
-                                            <CustomTextField
-                                                fullWidth
-                                                className="text-field"
-                                                autoComplete='on'
-                                                placeholder="Prize Pool"
-                                                name="prizePool"
-                                                type="Number"
-                                                value={prizePool}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Enter Prize Pool']}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        {/* <Grid className="input-fields" item xs={6}>
-                                            <label>BuyIn Type</label>
-                                            <select
-                                                fullWidth
-                                                className="dropdown-new"
-                                                name="buyInType"
-                                                value={buyInType}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Select Game Type']}
-                                            >
-                                                <option value="">Select BuyIn Type</option>
-                                                <option value="goldCoins">Gold Coins</option>
-                                            </select>
-                                        </Grid> */}
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Buy In</label>
-                                            <CustomTextField
-                                                fullWidth
-                                                className="text-field"
-                                                autoComplete='on'
-                                                placeholder="Buy In"
-                                                name="buyIn"
-                                                type="Number"
-                                                value={buyIn}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Enter Buy In']}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Minimum Players</label>
-                                            <CustomTextField
-                                                fullWidth
-                                                className="text-field"
-                                                autoComplete='on'
-                                                placeholder="Minimum Players"
-                                                name="minPlayers"
-                                                type="Number"
-                                                value={minPlayers}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Enter Minimum Players']}
-                                            />
-                                        </Grid>
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Maximum Players</label>
-                                            <CustomTextField
-                                                fullWidth
-                                                className="text-field"
-                                                autoComplete='on'
-                                                placeholder="Maximum Players"
-                                                name="maxPlayers"
-                                                type="Number"
-                                                value={maxPlayers}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Enter Maximum Players',]}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Game Type</label>
-                                            <select
-                                                fullWidth
-                                                className="dropdown-new"
-                                                placeholder="Game Type"
-                                                name="gameVariant"
-                                                value={gameVariant}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Select Game Type']}
-                                            >
-                                                <option value="">Select Game Type</option>
-                                                <option value="Omaha">Omaha (PLO)</option>
-                                                <option value="Texas Hold'em">Texas Hold'em (NLH)</option>
-                                            </select>
-                                        </Grid>
-                                        <Grid className="input-fields" item xs={6}>
-                                            <label>Region</label>
-                                            <select
-                                                fullWidth
-                                                className="dropdown-new"
-                                                placeholder="Region"
-                                                name="region"
-                                                value={region}
-                                                variant="outlined"
-                                                margin="dense"
-                                                onChange={this.handleFormChange}
-                                                validators={['required']}
-                                                errorMessages={['Please Select Region']}
-                                            >
-                                                <option value="">Select Region</option>
-                                                <option value="asia">Asia</option>
-                                                <option value="au">Australia</option>
-                                                <option value="cae">Canada, East</option>
-                                                <option value="eu">Europe</option>
-                                                <option value="in">India</option>
-                                                <option value="jp">Japan</option>
-                                                <option value="za">South Africa</option>
-                                                <option value="sa">South America</option>
-                                                <option value="kr">South Korea</option>
-                                                <option value="tr">Turkey</option>
-                                                <option value="us">USA, East</option>
-                                                <option value="ussc">USA, South Central</option>
-                                            </select>
-                                        </Grid>
-                                    </Grid>
-                                    {blinds && blinds.length > 0 && blinds.map((blind, index) => (
-                                        <Grid container spacing={2} className="group-input" alignItems="flex-end">
-                                            <Grid className="input-fields" item xs={6}>
-                                                <label>Small Blind</label>
-                                                <CustomTextField
-                                                    fullWidth
-                                                    className="text-field"
-                                                    autoComplete='on'
-                                                    placeholder="Small Blind"
-                                                    name={`smallBlind_${index}`}
-                                                    type="Number"
-                                                    value={blind['smallBlind']}
-                                                    variant="outlined"
-                                                    margin="dense"
-                                                    onChange={this.handleBlindChange}
-                                                    validators={['required']}
-                                                    errorMessages={['Please Enter Small Blind']}
-                                                />
-                                            </Grid>
-                                            <Grid className="input-fields" item xs={6}>
-                                                <label>Big Blind</label>
-                                                <CustomTextField
-                                                    fullWidth
-                                                    className="text-field"
-                                                    autoComplete='on'
-                                                    placeholder="Big Blind"
-                                                    name={`bigBlind_${index}`}
-                                                    type="Number"
-                                                    value={blind['bigBlind']}
-                                                    variant="outlined"
-                                                    margin="dense"
-                                                    onChange={this.handleBlindChange}
-                                                    validators={['required']}
-                                                    errorMessages={['Please Enter Big Blind',]}
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                    ))}
-                                    <Grid className='blind-btn-group col-12'>
-                                        <Add className='blind-btn' onClick={this.addBlind} />
-                                        <Remove className='blind-btn ml-2' onClick={this.removeBlind} />
-                                    </Grid>
-                                </ValidatorForm>
-                            </div>
-                            <div className="col-12 mt-2 d-flex justify-content-around">
-                                <Button className="delete-btn add-btn col-4" type='button' onClick={this.cancelModal}>Cancel</Button>
-                                <Button className="add-btn col-4" type='button' onClick={this.submitRing}>{selectedGame ? 'Update' : 'Create'}</Button>
-                            </div>
-                        </div>
-                    </ModalBody>
-                </Modal>
-            </div>
-        );
+        <Modal isOpen={this.props.isModal} toggle={this.cancelModal} className="main-modal reward-modal competition-modal">
+            <ModalHeader toggle={this.cancelModal}><div className="reward-modal-title"><p>{selectedGame ? 'Edit Tournament' : 'Create Tournament'}</p></div></ModalHeader>
+            <ModalBody className="modal-body reward-modal-body"><form className="competition-form" onSubmit={this.submitGame}>
+                {!selectedGame && <section className="competition-section"><div className="competition-grid"><Field label="Start from template" className="span-2"><select className="competition-control" value={template} onChange={this.handleTemplateChange}><option value="">Blank tournament</option>{this.props.allTemplates.filter(item => item.gameType === 'MTT').map(item => <option key={item._id} value={item._id}>{item.name}</option>)}</select></Field></div></section>}
+                <section className="competition-section"><div className="competition-section-heading"><h3>Tournament setup</h3><span>Schedule, format and capacity</span></div><div className="competition-grid">
+                    <Field label="Tournament name" className="span-2"><input className="competition-control" name="name" value={formData.name} onChange={this.handleFormChange} placeholder="e.g. Sunday Free Play Major" /></Field>
+                    <Field label="Starts"><input className="competition-control" type="datetime-local" name="tournamentStartingDate" value={formData.tournamentStartingDate} onChange={this.handleFormChange} /></Field>
+                    <Field label="Region"><select className="competition-control" name="region" value={formData.region} onChange={this.handleFormChange}>{REGIONS.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
+                    <Field label="Game type"><select className="competition-control" name="gameVariant" value={formData.gameVariant} onChange={this.handleFormChange}><option value="Texas Hold'em">Texas Hold’em (NLH)</option><option value="Omaha">Omaha (PLO)</option></select></Field>
+                    <Field label="Betting limit"><select className="competition-control" name="formatLimit" value={formData.formatLimit} onChange={this.handleFormChange}><option>No Limit</option><option>Pot Limit</option><option>Fixed Limit</option></select></Field>
+                    <Field label="Minimum players"><input className="competition-control" type="number" min="2" name="minPlayers" value={formData.minPlayers} onChange={this.handleFormChange} /></Field>
+                    <Field label="Maximum players"><input className="competition-control" type="number" min="2" name="maxPlayers" value={formData.maxPlayers} onChange={this.handleFormChange} /></Field>
+                </div></section>
+                <section className="competition-section"><div className="competition-section-heading"><h3>{isFreePlay ? 'Free Play economics' : 'Tournament economics'}</h3><span>All values explicitly follow the selected economy</span></div><div className="competition-grid five">
+                    <Field label="Tournament economy"><select className="competition-control" name="balanceType" value={formData.balanceType} onChange={this.handleFormChange}><option value="CASH">Cash / USD</option><option value="FP">Free Play (FP)</option><option value="TIME">Time / MPCE (legacy)</option></select></Field>
+                    <Field label={formData.balanceType === 'TIME' ? 'Configured buy-in (MPCE)' : `Buy-in (${unit})`} hint={formData.balanceType === 'TIME' ? 'Legacy TIME tournaments reserve starting-stack MPCE.' : `Charged from the player’s ${unit} balance.`}><input className="competition-control" type="number" min="0.01" step="any" name="buyIn" value={formData.buyIn} onChange={this.handleFormChange} /></Field>
+                    <Field label={`Fee (${unit})`}><input className="competition-control" type="number" min="0" step="any" name="fee" value={formData.fee} onChange={this.handleFormChange} /></Field>
+                    <Field label={`Prize pool (${unit})`}><input className="competition-control" type="number" min="0.01" step="any" name="prizePool" value={formData.prizePool} onChange={this.handleFormChange} /></Field>
+                    <Field label="Starting chips" hint="In-game tournament chips; not an extra FP charge."><input className="competition-control" type="number" min="1" name="startingStack" value={formData.startingStack} onChange={this.handleFormChange} /></Field>
+                </div>{isFreePlay && <div className="competition-economy-notice"><strong>FP entry + FP prizes</strong><span>The buy-in is deducted in FP, the prize pool is awarded in FP, and no value is withdrawable or converted to time.</span></div>}</section>
+                <section className="competition-section"><div className="competition-section-heading"><h3>Blind structure</h3><span>Levels use in-game tournament chips</span></div><div className="competition-blinds">{formData.blinds.map((blind,index) => <div className="competition-blind-row" key={index}><b>{index + 1}</b><Field label="Small blind"><input className="competition-control" type="number" min="1" value={blind.smallBlind} onChange={event => this.handleBlindChange(index,'smallBlind',event.target.value)} /></Field><Field label="Big blind"><input className="competition-control" type="number" min="1" value={blind.bigBlind} onChange={event => this.handleBlindChange(index,'bigBlind',event.target.value)} /></Field><Field label="Minutes · ante" className="blind-duration"><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5}}><input className="competition-control" type="number" min="1" value={blind.duration} onChange={event => this.handleBlindChange(index,'duration',event.target.value)} /><input className="competition-control" type="number" min="0" value={blind.ante || 0} onChange={event => this.handleBlindChange(index,'ante',event.target.value)} /></div></Field><button className="competition-icon-button" type="button" onClick={() => this.removeBlind(index)} disabled={formData.blinds.length === 1}>×</button></div>)}</div><button type="button" className="competition-add-level" onClick={this.addBlind}>+ Add blind level</button></section>
+                <div className="competition-form-actions"><Button className="delete-btn add-btn" type="button" onClick={this.cancelModal}>Cancel</Button><Button className="add-btn" type="submit">{selectedGame ? 'Save changes' : 'Create tournament'}</Button></div>
+            </form></ModalBody>
+        </Modal></div>;
     }
 }
 
-const CustomTextField = withStyles({
-    root: {
-        '& .MuiInputBase-input': {
-            color: '#fff', // Text color
-        },
-        '& .MuiInput-underline:before': {
-            borderBottomColor: '#fff', // Semi-transparent underline
-        },
-        '& .MuiInput-underline:hover:before': {
-            borderBottomColor: '#fff', // Solid underline on hover
-        },
-        '& .MuiInput-underline:after': {
-            borderBottomColor: '#fa6634', // Solid underline on focus
-        },
-    },
-    input: {
-        '&:-webkit-autofill': {
-            transitionDelay: '9999s',
-            transitionProperty: 'background-color, color',
-        }
-    }
-})(TextValidator);
-
-const mapDispatchToProps = {
-    getAllTemplates, getAllTournaments, addTournament, toggleModal, setLoader, updateTournament, deleteTournament
-};
-const mapStateToProps = ({ Auth, Tournament, Template }) => {
-    let { allTournaments } = Tournament;
-    let { allTemplates } = Template;
-    let { publicAddress, RingsData, isModal } = Auth;
-
-    return { allTournaments, allTemplates, publicAddress, RingsData, isModal };
-};
+const mapDispatchToProps = { getAllTemplates, getAllTournaments, addTournament, toggleModal, setLoader, updateTournament, deleteTournament };
+const mapStateToProps = ({ Auth, Tournament: TournamentState, Template }) => ({ allTournaments: TournamentState.allTournaments, allTemplates: Template.allTemplates, isModal: Auth.isModal });
 export default connect(mapStateToProps, mapDispatchToProps)(Tournament);

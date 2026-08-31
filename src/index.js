@@ -13,6 +13,7 @@ import 'react-table-6/react-table.css';
 import "./assets/css/nucleo-icons.css";
 import "./assets/scss/black-dashboard-react.css";
 import './assets/css/style.css';
+import './assets/css/mpc-design-system.css';
 
 
 const sagaMiddleware = createSagaMiddleware();

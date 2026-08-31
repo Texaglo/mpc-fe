@@ -1,8 +1,8 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Button from '@material-ui/core/Button';
 import { ValidatorForm } from '../../components/FormValidator';
-import logo from '../../assets/img/logo.png';
+import logo from '../../assets/img/mpc-logo.png';
 import EventBus from 'eventing-bus';
 import { message } from "../../store/config";
 import { login, toggleLogin, getNonce, setNonce } from "../../store/actions/Auth";
@@ -65,32 +65,49 @@ const Login = ({ history }) => {
   };
 
   return (
-    <div className="login-page">
-      <div className="row">
-        <div className="col-lg-6 col-md-6 col-sm-12 login-area">
+    <main className="login-page">
+      <section className="login-shell" aria-labelledby="admin-login-title">
+        <div className="login-brand-panel">
+          <img className="login-page-logo" src={logo} alt="Modern Poker Club" />
+          <div className="login-brand-copy">
+            <span className="login-eyebrow">Official operations portal</span>
+            <h1>Modern Poker Club</h1>
+            <p>One secure console for player, game, treasury and economy operations.</p>
+          </div>
+          <div className="login-authenticity-mark">
+            <i className="tim-icons icon-lock-circle" aria-hidden="true" />
+            <span><strong>Verify before signing</strong><small>Only approve the ModernPokerClub wallet message.</small></span>
+          </div>
+        </div>
+
+        <div className="login-area">
           <div className="login-form">
-            <p className="login-title">🅻🅾🅶🅸🅽</p>
-            <hr className='mt-3' />
+            <span className="login-eyebrow">Administrator access</span>
+            <h2 className="login-title" id="admin-login-title">Welcome back</h2>
+            <p className="login-intro">Connect the approved Phantom wallet to enter the admin console.</p>
             {false
               ? <div className="login-text pt-4"><h4>{message}</h4></div>
               : <Fragment>
-                <ValidatorForm className="validator-form mt-4" onSubmit={Nonce}>
-                  <Button type="Submit" variant="contained" className='text-white login-btn mt-4' disabled={isLogin}>
+                <ValidatorForm className="validator-form" onSubmit={Nonce}>
+                  <Button type="submit" variant="contained" className="login-btn" disabled={isLogin}>
                     {!isLogin
-                      ? 'LOGIN WITH PHANTOM'
-                      : <i className="fa-solid fa-spinner fa-spin fa-xl"></i>
+                      ? <><i className="tim-icons icon-wallet-43" aria-hidden="true" /> Connect approved wallet</>
+                      : <><i className="fa-solid fa-spinner fa-spin" aria-hidden="true" /> Verifying signature</>
                     }
                   </Button>
                 </ValidatorForm>
               </Fragment>
             }
+            <div className="login-security-points" aria-label="Authentication safeguards">
+              <span><i className="tim-icons icon-check-2" /> Wallet signature</span>
+              <span><i className="tim-icons icon-check-2" /> Role verification</span>
+              <span><i className="tim-icons icon-check-2" /> Audited session</span>
+            </div>
+            <small className="login-support-copy">Authorized administrators only. Never approve an unexpected wallet prompt.</small>
           </div>
         </div>
-        <div className="col-lg-6 col-md-6 col-sm-12 login-area">
-          <img className="login-page-logo" src={logo} alt='logo' />
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 
