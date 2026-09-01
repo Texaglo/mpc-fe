@@ -8,7 +8,7 @@ import { all, takeEvery, call, put } from 'redux-saga/effects';
 function* getSettings() {
     yield put(setLoader(true));
     const { error, response } = yield call(getCall, '/admin/settings');
-    if (error) EventBus.publish("error", error['response']['data']['message']);
+    if (error) EventBus.publish("error", error?.response?.data?.message || 'Unable to load settings');
     else if (response) yield put(setSettings(response['data']['body']['settings']));
     yield put(setLoader(false));
 }
@@ -17,7 +17,7 @@ function* getSettings() {
 function* updateSetting({ payload }) {
     yield put(setLoader(true));
     const { error, response } = yield call(putCall, '/admin/settings', payload);
-    if (error) EventBus.publish("error", error['response']['data']['message']);
+    if (error) EventBus.publish("error", error?.response?.data?.message || 'Unable to update that setting');
     else if (response) {
         EventBus.publish("success", response['data']['message']);
         yield put(setSettingUpdated(response['data']['body']));

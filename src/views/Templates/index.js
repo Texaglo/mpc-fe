@@ -17,6 +17,7 @@ import { createTemplate } from "../../store/actions/Template"
 import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { getAllTemplates, updateTemplate, deleteTemplate } from "../../store/actions/Template";
+import { withTableEconomyContract } from '../../utils/tableEconomy';
 
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
@@ -94,9 +95,10 @@ class Template extends React.Component {
         if (formData['gameVariant'] === "Omaha") formData['formatLimit'] = "Pot Limit"
         if (formData['gameVariant'] === "Texas Hold'em") formData['formatLimit'] = "No Limit"
 
-        if (selectedGame) this.props.updateTemplate(formData)
+        const payload = withTableEconomyContract(formData);
+        if (selectedGame) this.props.updateTemplate(payload)
         else
-            this.props.createTemplate(formData);
+            this.props.createTemplate(payload);
         this.cancelModal()
     };
 

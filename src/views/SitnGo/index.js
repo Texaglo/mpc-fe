@@ -9,6 +9,7 @@ import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { addSitnGoGame, getAllSitnGoGames, updateSitnGoGame, deleteSitnGoGame } from '../../store/actions/SitnGo';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { getAllTemplates } from '../../store/actions/Template';
+import { withTableEconomyContract } from '../../utils/tableEconomy';
 
 const REGIONS = [['asia','Asia'],['au','Australia'],['cae','Canada, East'],['eu','Europe'],['in','India'],['jp','Japan'],['za','South Africa'],['sa','South America'],['kr','South Korea'],['tr','Turkey'],['us','USA, East'],['ussc','USA, South Central']];
 const emptyForm = () => ({
@@ -51,12 +52,12 @@ class SitnGo extends React.Component {
         if (!formData.name.trim() || !formData.region || !formData.gameVariant || !formData.formatLimit) return EventBus.publish('error', 'Complete all Sit & Go setup fields');
         if (Number(formData.buyIn) <= 0 || Number(formData.startingStack) <= 0) return EventBus.publish('error', 'Buy-in and starting stack must be greater than zero');
         if (Number(formData.seatLimit) < 2 || Number(formData.seatLimit) > 10) return EventBus.publish('error', 'Seat limit must be between 2 and 10');
-        const payload = {
+        const payload = withTableEconomyContract({
             ...formData,
             buyIn: Number(formData.buyIn), seatLimit: Number(formData.seatLimit), startingStack: Number(formData.startingStack), duration: Number(formData.duration || 10),
             buyInType: formData.balanceType === 'TIME' ? 'mpceCredit' : formData.balanceType,
             blinds: formData.blinds.map(blind => ({ smallBlind: Number(blind.smallBlind), bigBlind: Number(blind.bigBlind), duration: Number(blind.duration || 10) })),
-        };
+        });
         if (selectedGame) this.props.updateSitnGoGame(payload); else this.props.addSitnGoGame(payload);
         this.cancelModal();
     };

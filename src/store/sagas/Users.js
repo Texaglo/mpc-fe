@@ -3,6 +3,7 @@ import EventBus from 'eventing-bus';
 import { setUsers, updateUserFreezeStatus, setUserTransactions, setUserInventory, setInventoryCatalog } from "../actions/Users";
 import { setLoader } from "../actions/Auth";
 import { all, takeEvery, call, put } from 'redux-saga/effects';
+import { buildBalanceAdjustmentPayload } from './userPayloads';
 
 /************************** GET USERS *****************************/
 function* getUsers({ payload }) {
@@ -57,15 +58,10 @@ function* adjustUserBalance({ payload }) {
     yield put(setLoader(true));
     const { error, response } = yield call(postCall, {
         path: `/admin/users/adjust-balance`,
-        payload: {
-            userId: payload.userId,
-            amount: payload.amount,
-            reason: payload.reason,
-            asset: payload.asset
-        }
+        payload: buildBalanceAdjustmentPayload(payload)
     });
     if (error) {
-        EventBus.publish("error", error['response']['data']['message']);
+        EventBus.publish("error", error?.response?.data?.message || 'Unable to adjust that balance');
         yield put(setLoader(false));
     } else if (response) {
         EventBus.publish("success", response['data']['message'] || "Balance adjusted successfully");

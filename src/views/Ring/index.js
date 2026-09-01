@@ -9,6 +9,7 @@ import { addRingGame, getAllRingGames, updateRingGame, deleteRingGame } from '..
 import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { getAllTemplates } from '../../store/actions/Template';
 import { getSettings, updateSetting } from '../../store/actions/Settings';
+import { withTableEconomyContract } from '../../utils/tableEconomy';
 
 import './index.css';
 
@@ -150,7 +151,7 @@ class Ring extends React.Component {
         payload.straddleMode = straddleEnabled ? payload.straddleMode : 'NONE';
         payload.ante = anteEnabled ? Number(payload.ante) : 0;
         payload.timeBankSeconds = timeBankEnabled ? Number(payload.timeBankSeconds) : 0;
-        return payload;
+        return withTableEconomyContract(payload);
     };
 
     validatePayload = payload => {

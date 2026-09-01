@@ -9,6 +9,7 @@ import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { addTournament, getAllTournaments, updateTournament, deleteTournament } from '../../store/actions/Tournament';
 import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { getAllTemplates } from '../../store/actions/Template';
+import { withTableEconomyContract } from '../../utils/tableEconomy';
 
 const REGIONS = [['asia','Asia'],['au','Australia'],['cae','Canada, East'],['eu','Europe'],['in','India'],['jp','Japan'],['za','South Africa'],['sa','South America'],['kr','South Korea'],['tr','Turkey'],['us','USA, East'],['ussc','USA, South Central']];
 const localDateTime = value => {
@@ -59,13 +60,13 @@ class Tournament extends React.Component {
         if (Number(formData.minPlayers) < 2 || Number(formData.maxPlayers) < Number(formData.minPlayers)) return EventBus.publish('error', 'Maximum players must be at least the minimum');
         const scheduled = new Date(formData.tournamentStartingDate);
         if (Number.isNaN(scheduled.getTime())) return EventBus.publish('error', 'Select a valid tournament start time');
-        const payload = {
+        const payload = withTableEconomyContract({
             ...formData,
             buyIn: Number(formData.buyIn), fee: Number(formData.fee || 0), prizePool: Number(formData.prizePool), startingStack: Number(formData.startingStack), minPlayers: Number(formData.minPlayers), maxPlayers: Number(formData.maxPlayers),
             tournamentStartingDate: scheduled.toISOString(),
             buyInType: formData.balanceType === 'TIME' ? 'mpceCredit' : formData.balanceType,
             blinds: formData.blinds.map(blind => ({ smallBlind: Number(blind.smallBlind), bigBlind: Number(blind.bigBlind), duration: Number(blind.duration || 10), ante: Number(blind.ante || 0) })),
-        };
+        });
         if (selectedGame) this.props.updateTournament(payload); else this.props.addTournament(payload);
         this.cancelModal();
     };
