@@ -11,7 +11,7 @@
 .bot-tests select, .bot-tests input, .bot-tests textarea { width:100%; border:1px solid #344653; border-radius:8px; background:#0c141b; color:#fff; padding:11px 12px; }
 .bot-tests textarea { min-height:68px; resize:vertical; }
 .bot-tests__fields { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
-.bot-tests__table-facts { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:-2px 0 14px; }
+.bot-tests__table-facts { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin:-2px 0 14px; }
 .bot-tests__table-facts span { padding:9px; border-radius:7px; background:#192630; color:#83919a; font-size:10px; }
 .bot-tests__table-facts strong { display:block; margin-top:3px; color:#e0b23a; font-size:12px; }
 .bot-tests__gate { display:grid; gap:2px; padding:10px 12px; margin-bottom:13px; border-left:3px solid #48b979; background:rgba(72,185,121,.08); color:#7f9189; font-size:11px; }
@@ -30,6 +30,6 @@
 .bot-run__error { color:#ff7777 !important; }
 .bot-run__status { padding:4px 7px; border-radius:10px; background:#3e4650; color:#d5d8db; font-size:8px; font-weight:900; }
 .bot-run__status.is-running, .bot-run__status.is-completed { background:#174e35; color:#72dda5; }
-.bot-run__status.is-waiting_for_human { background:#55451a; color:#f0c452; }
+.bot-run__status.is-waiting_for_human, .bot-run__status.is-waiting_for_next_hand { background:#55451a; color:#f0c452; }
 .bot-run__status.is-failed { background:#57262b; color:#ff8b91; }
 @media(max-width:1000px){.bot-tests__grid{grid-template-columns:1fr}.bot-tests__fields,.bot-tests__table-facts{grid-template-columns:1fr 1fr}.games-tabs-container{flex-wrap:wrap}}

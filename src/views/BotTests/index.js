@@ -3,7 +3,7 @@ import axios from 'axios';
 import EventBus from 'eventing-bus';
 import './index.css';
 
-const ACTIVE = new Set(['STARTING', 'WAITING_FOR_HUMAN', 'RUNNING', 'STOPPING']);
+const ACTIVE = new Set(['STARTING', 'WAITING_FOR_HUMAN', 'WAITING_FOR_NEXT_HAND', 'RUNNING', 'STOPPING']);
 const bodyOf = (response) => response?.data?.body ?? [];
 
 export default function BotTests() {
@@ -77,9 +77,9 @@ export default function BotTests() {
         <h3>Deploy to a table</h3>
         <label>Free Play table<select value={selectedId} onChange={(event) => { setSelectedId(event.target.value); setForm((current) => ({ ...current, startingStack: '' })); }} disabled={loading}>
           {!tables.length && <option value="">No eligible FP tables</option>}
-          {tables.map((table) => <option key={table.id} value={table.id}>{table.name} · {table.smallBlind}/{table.bigBlind} FP · {table.seated}/{table.seatLimit} seated</option>)}
+          {tables.map((table) => <option key={table.id} value={table.id}>{table.name} · {table.smallBlind}/{table.bigBlind} FP · {table.seated} seated{table.waiting ? ` + ${table.waiting} waiting` : ''} / {table.seatLimit}</option>)}
         </select></label>
-        {selected && <div className="bot-tests__table-facts"><span>Buy-in <strong>{selected.minBuyIn}–{selected.maxBuyIn} FP</strong></span><span>Bot capacity <strong>{selected.availableBotSeats}</strong></span><span>Status <strong>{selected.tableStatus}</strong></span></div>}
+        {selected && <div className="bot-tests__table-facts"><span>Buy-in <strong>{selected.minBuyIn}–{selected.maxBuyIn} FP</strong></span><span>Seats <strong>{selected.seated} seated · {selected.waiting || 0} waiting</strong></span><span>Bot capacity <strong>{selected.availableBotSeats}</strong></span><span>Status <strong>{selected.gameStatus || selected.tableStatus}</strong></span></div>}
         <div className="bot-tests__fields">
           <label>Bots<input type="number" min="1" max={Math.max(1, selected?.availableBotSeats || 1)} value={form.botCount} onChange={(event) => setForm({ ...form, botCount: Number(event.target.value) })} /></label>
           <label>Starting FP<input type="number" min={selected?.minBuyIn || 0.01} max={selected?.maxBuyIn || undefined} step="0.01" value={form.startingStack} onChange={(event) => setForm({ ...form, startingStack: event.target.value })} /></label>
@@ -94,7 +94,7 @@ export default function BotTests() {
       <div className="bot-tests__panel bot-tests__runs"><div className="bot-tests__panel-heading"><h3>Recent runs</h3><button type="button" onClick={() => refresh()}>Refresh</button></div>
         {!runs.length && <div className="bot-tests__empty">No bot tests have run since this backend started.</div>}
         {runs.map((run) => <article className="bot-run" key={run.runId}>
-          <div><span className={`bot-run__status is-${run.status.toLowerCase()}`}>{run.status.replaceAll('_', ' ')}</span><strong>{run.tableName || run.ringId}</strong><small>{run.config.botCount} bots · {run.completedHands}/{run.config.hands} hands · {run.botsJoined} seated</small></div>
+          <div><span className={`bot-run__status is-${run.status.toLowerCase()}`}>{run.status.replaceAll('_', ' ')}</span><strong>{run.tableName || run.ringId}</strong><small>{run.config.botCount} bots · {run.completedHands}/{run.config.hands} hands · {run.botsJoined} seated · {run.botsWaiting || 0} waiting for next hand</small></div>
           {run.error && <p className="bot-run__error">{run.error}</p>}
           {run.stoppedReason && <p>{run.stoppedReason}</p>}
           {ACTIVE.has(run.status) && <button type="button" onClick={() => stop(run)} disabled={run.status === 'STOPPING'}>{run.status === 'STOPPING' ? 'Stopping…' : 'Stop & remove'}</button>}
