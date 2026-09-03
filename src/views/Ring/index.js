@@ -85,6 +85,7 @@ class Ring extends React.Component {
             formData: { ...DEFAULT_RING_FORM }, selectedGame: null, template: '',
             showNewGamesModal: false, pendingNewGamesPaused: false, newGamesReason: '',
             showCloseModal: false, closeRing: null, closeReason: '',
+            showOpenModal: false, openRing: null, openReason: '',
         };
         props.getAllRingGames();
         props.getAllTemplates();
@@ -223,8 +224,31 @@ class Ring extends React.Component {
         }
     };
 
+    openTableControl = ring => this.setState({ showOpenModal: true, openRing: ring, openReason: '' });
+    closeOpenTableControl = () => this.setState({ showOpenModal: false, openRing: null, openReason: '' });
+    submitOpenTableControl = async event => {
+        event.preventDefault();
+        const { openRing, openReason } = this.state;
+        if (!openRing || openReason.trim().length < 3) return;
+        this.props.setLoader(true);
+        try {
+            const response = await axios.put('/ring/updateRingGame', {
+                _id: openRing._id,
+                tableStatus: 'ACTIVE',
+                reason: openReason.trim(),
+            });
+            EventBus.publish('success', response?.data?.message || 'Table opened');
+            this.props.getAllRingGames();
+            this.closeOpenTableControl();
+        } catch (error) {
+            EventBus.publish('error', error?.response?.data?.message || 'Unable to open table');
+        } finally {
+            this.props.setLoader(false);
+        }
+    };
+
     render() {
-        const { selectedGame, template, formData, showNewGamesModal, pendingNewGamesPaused, newGamesReason, showCloseModal, closeRing, closeReason } = this.state;
+        const { selectedGame, template, formData, showNewGamesModal, pendingNewGamesPaused, newGamesReason, showCloseModal, closeRing, closeReason, showOpenModal, openRing, openReason } = this.state;
         const {
             name, seatLimit, smallBlinds, bigBlinds, minBuyIn, maxBuyIn, balanceType,
             timeChargeTier, customBurnRateMpcePerHour, minPlayersToStart, tableStatus,
@@ -270,6 +294,7 @@ class Ring extends React.Component {
                     <div className="ring-table-actions">
                         <button onClick={() => this.editRing(row.original)} className="ring-action-btn ring-action-edit">Edit</button>
                         {String(row.original.tableStatus || 'ACTIVE').toUpperCase() === 'ACTIVE' && <button onClick={() => this.openCloseControl(row.original)} className="ring-action-btn ring-action-close">{row.original.closeAfterHand ? 'Cancel close' : 'Close safely'}</button>}
+                        {String(row.original.tableStatus || 'ACTIVE').toUpperCase() !== 'ACTIVE' && <button onClick={() => this.openTableControl(row.original)} className="ring-action-btn ring-action-open">Open table</button>}
                         <button onClick={() => this.props.deleteRingGame(row.original._id)} className="ring-action-btn ring-action-delete">Delete</button>
                     </div>
                 ),
@@ -409,6 +434,17 @@ class Ring extends React.Component {
                             <p>{closeRing?.closeAfterHand ? 'New joins will resume for this active table.' : 'New joins stop immediately. If a hand is active, seated players finish it before the table becomes Disabled.'}</p>
                             <Field label="Reason (required)"><textarea className="ring-operations-reason" value={closeReason} onChange={event => this.setState({ closeReason: event.target.value })} placeholder="Record why this table is changing state" /></Field>
                             <div className="ring-operations-actions"><Button className="delete-btn add-btn" type="button" onClick={this.closeCloseControl}>Cancel</Button><Button className="add-btn" type="submit" disabled={closeReason.trim().length < 3}>{closeRing?.closeAfterHand ? 'Keep table open' : 'Close after hand'}</Button></div>
+                        </form>
+                    </ModalBody>
+                </Modal>
+
+                <Modal isOpen={showOpenModal} toggle={this.closeOpenTableControl} className="main-modal reward-modal ring-operations-modal">
+                    <ModalHeader toggle={this.closeOpenTableControl}><div className="reward-modal-title"><p>Open table</p></div></ModalHeader>
+                    <ModalBody className="modal-body reward-modal-body">
+                        <form className="ring-operations-form" onSubmit={this.submitOpenTableControl}>
+                            <p><strong>{openRing?.name || 'This table'}</strong> will become Active and accept new joins again.</p>
+                            <Field label="Reason (required)"><textarea className="ring-operations-reason" value={openReason} onChange={event => this.setState({ openReason: event.target.value })} placeholder="Record why this table is reopening" /></Field>
+                            <div className="ring-operations-actions"><Button className="delete-btn add-btn" type="button" onClick={this.closeOpenTableControl}>Cancel</Button><Button className="add-btn" type="submit" disabled={openReason.trim().length < 3}>Open table</Button></div>
                         </form>
                     </ModalBody>
                 </Modal>
