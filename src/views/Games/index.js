@@ -4,6 +4,7 @@ import Ring from '../Ring/index';
 import SitnGo from '../SitnGo/index';
 import Tourney from '../Tourney/index';
 import Template from '../Templates/index';
+import BotTests from '../BotTests';
 
 import './index.css';
 
@@ -30,6 +31,8 @@ class Games extends React.Component {
                 return <Tourney />;
             case 'template':
                 return <Template />;
+            case 'botTests':
+                return <BotTests />;
             default:
                 return <Ring />;
         }
@@ -66,6 +69,12 @@ class Games extends React.Component {
                             onClick={() => this.switchTab('template')}
                         >
                             Template
+                        </button>
+                        <button
+                            className={`games-tab-button ${activeTab === 'botTests' ? 'active' : ''}`}
+                            onClick={() => this.switchTab('botTests')}
+                        >
+                            Test Bots
                         </button>
                     </div>
 
