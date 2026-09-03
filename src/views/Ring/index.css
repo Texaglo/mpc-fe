@@ -151,6 +151,7 @@
 .ring-status-badge.is-closing { background: rgba(239, 168, 61, .14); color: #efa83d; }
 .ring-action-close { background: #3f4658; color: #f2c84a; }
 .ring-action-open { background: #1f6f49; color: #e7fff1; }
+.ring-action-clear { background: #633c82; color: #f5eaff; }
 
 .ring-table-actions {
   width: 100%;

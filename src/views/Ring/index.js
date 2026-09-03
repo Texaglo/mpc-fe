@@ -86,6 +86,7 @@ class Ring extends React.Component {
             showNewGamesModal: false, pendingNewGamesPaused: false, newGamesReason: '',
             showCloseModal: false, closeRing: null, closeReason: '',
             showOpenModal: false, openRing: null, openReason: '',
+            showClearModal: false, clearRing: null, clearReason: '',
         };
         props.getAllRingGames();
         props.getAllTemplates();
@@ -247,8 +248,30 @@ class Ring extends React.Component {
         }
     };
 
+    openClearTableControl = ring => this.setState({ showClearModal: true, clearRing: ring, clearReason: '' });
+    closeClearTableControl = () => this.setState({ showClearModal: false, clearRing: null, clearReason: '' });
+    submitClearTableControl = async event => {
+        event.preventDefault();
+        const { clearRing, clearReason } = this.state;
+        if (!clearRing || clearReason.trim().length < 3) return;
+        this.props.setLoader(true);
+        try {
+            const response = await axios.put('/ring/clearTables', {
+                ringId: clearRing._id,
+                reason: clearReason.trim(),
+            });
+            EventBus.publish('success', response?.data?.message || 'Table seats cleared');
+            this.props.getAllRingGames();
+            this.closeClearTableControl();
+        } catch (error) {
+            EventBus.publish('error', error?.response?.data?.message || 'Unable to clear table seats');
+        } finally {
+            this.props.setLoader(false);
+        }
+    };
+
     render() {
-        const { selectedGame, template, formData, showNewGamesModal, pendingNewGamesPaused, newGamesReason, showCloseModal, closeRing, closeReason, showOpenModal, openRing, openReason } = this.state;
+        const { selectedGame, template, formData, showNewGamesModal, pendingNewGamesPaused, newGamesReason, showCloseModal, closeRing, closeReason, showOpenModal, openRing, openReason, showClearModal, clearRing, clearReason } = this.state;
         const {
             name, seatLimit, smallBlinds, bigBlinds, minBuyIn, maxBuyIn, balanceType,
             timeChargeTier, customBurnRateMpcePerHour, minPlayersToStart, tableStatus,
@@ -289,12 +312,13 @@ class Ring extends React.Component {
                 },
             },
             {
-                Header: 'Actions', width: 285, minWidth: 285, maxWidth: 300, filterable: false, sortable: false,
+                Header: 'Actions', width: 380, minWidth: 380, maxWidth: 400, filterable: false, sortable: false,
                 Cell: row => (
                     <div className="ring-table-actions">
                         <button onClick={() => this.editRing(row.original)} className="ring-action-btn ring-action-edit">Edit</button>
                         {String(row.original.tableStatus || 'ACTIVE').toUpperCase() === 'ACTIVE' && <button onClick={() => this.openCloseControl(row.original)} className="ring-action-btn ring-action-close">{row.original.closeAfterHand ? 'Cancel close' : 'Close safely'}</button>}
                         {String(row.original.tableStatus || 'ACTIVE').toUpperCase() !== 'ACTIVE' && <button onClick={() => this.openTableControl(row.original)} className="ring-action-btn ring-action-open">Open table</button>}
+                        <button onClick={() => this.openClearTableControl(row.original)} className="ring-action-btn ring-action-clear">Clear seats</button>
                         <button onClick={() => this.props.deleteRingGame(row.original._id)} className="ring-action-btn ring-action-delete">Delete</button>
                     </div>
                 ),
@@ -445,6 +469,17 @@ class Ring extends React.Component {
                             <p><strong>{openRing?.name || 'This table'}</strong> will become Active and accept new joins again.</p>
                             <Field label="Reason (required)"><textarea className="ring-operations-reason" value={openReason} onChange={event => this.setState({ openReason: event.target.value })} placeholder="Record why this table is reopening" /></Field>
                             <div className="ring-operations-actions"><Button className="delete-btn add-btn" type="button" onClick={this.closeOpenTableControl}>Cancel</Button><Button className="add-btn" type="submit" disabled={openReason.trim().length < 3}>Open table</Button></div>
+                        </form>
+                    </ModalBody>
+                </Modal>
+
+                <Modal isOpen={showClearModal} toggle={this.closeClearTableControl} className="main-modal reward-modal ring-operations-modal">
+                    <ModalHeader toggle={this.closeClearTableControl}><div className="reward-modal-title"><p>Clear table seats</p></div></ModalHeader>
+                    <ModalBody className="modal-body reward-modal-body">
+                        <form className="ring-operations-form" onSubmit={this.submitClearTableControl}>
+                            <p><strong>{clearRing?.name || 'This table'}</strong> will end its current table session, refund every seated and queued stack to the matching player balance, and leave connected clients as spectators. The table itself is not deleted.</p>
+                            <Field label="Reason (required)"><textarea className="ring-operations-reason" value={clearReason} onChange={event => this.setState({ clearReason: event.target.value })} placeholder="Record why all seats are being cleared" /></Field>
+                            <div className="ring-operations-actions"><Button className="delete-btn add-btn" type="button" onClick={this.closeClearTableControl}>Cancel</Button><Button className="add-btn" type="submit" disabled={clearReason.trim().length < 3}>Clear all seats</Button></div>
                         </form>
                     </ModalBody>
                 </Modal>
