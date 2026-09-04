@@ -25,6 +25,7 @@ var routes = [
     sidebarName: "Overview",
     component: AdminHomePage,
     icon: "tim-icons icon-chart-pie-36",
+    permission: 'overview.view',
   },
   {
     layout: "/home",
@@ -33,6 +34,7 @@ var routes = [
     component: MpceLedger,
     icon: "tim-icons icon-bank",
     hidden: true,
+    permission: 'economy.view',
   },
   {
     layout: "/home",
@@ -41,6 +43,7 @@ var routes = [
     component: Progress,
     icon: "tim-icons icon-check-2",
     hidden: true,
+    permission: 'overview.view',
   },
   {
     layout: "/home",
@@ -48,6 +51,7 @@ var routes = [
     name: "Games",
     component: Games,
     icon: "tim-icons icon-controller",
+    permission: ['games.view', 'bots.view', 'bots.manage'],
   },
   {
     layout: "/home",
@@ -56,6 +60,7 @@ var routes = [
     component: Leaderboards,
     icon: "tim-icons icon-planet",
     hidden: true,
+    permission: 'players.view',
   },
   {
     layout: "/home",
@@ -64,6 +69,7 @@ var routes = [
     component: HandHistory,
     icon: "tim-icons icon-notes",
     hidden: true,
+    permission: 'hand_history.view',
   },
   // {
   //   layout: "/home",
@@ -86,6 +92,7 @@ var routes = [
     sidebarName: "Commerce",
     component: gameStore,
     icon: "tim-icons icon-bag-16",
+    permission: 'commerce.view',
   },
   {
     layout: "/home",
@@ -94,6 +101,7 @@ var routes = [
     component: Marketplace,
     icon: "tim-icons icon-cart",
     hidden: true,
+    permission: 'commerce.view',
   },
   {
     layout: "/home",
@@ -101,6 +109,7 @@ var routes = [
     name: "Achievements",
     component: Achievement,
     icon: "tim-icons icon-book-bookmark",
+    permission: 'achievements.view',
   },
   {
     layout: "/home",
@@ -108,6 +117,7 @@ var routes = [
     name: "Tournament",
     component: Tournament,
     icon: "tim-icons icon-trophy",
+    permission: 'tournaments.view',
   },
   {
     layout: "/home",
@@ -116,6 +126,7 @@ var routes = [
     sidebarName: "Operations",
     component: PendingWithdrawals,
     icon: "tim-icons icon-credit-card",
+    permission: 'operations.view',
   },
   {
     layout: "/home",
@@ -124,6 +135,7 @@ var routes = [
     component: Cashier,
     icon: "tim-icons icon-money-coins",
     hidden: true,
+    permission: 'cashier.view',
   },
   {
     layout: "/home",
@@ -132,6 +144,7 @@ var routes = [
     component: FreePlay,
     icon: "tim-icons icon-coins",
     hidden: true,
+    permission: 'free_play.view',
   },
   {
     layout: "/home",
@@ -140,6 +153,7 @@ var routes = [
     sidebarName: "Players",
     component: Users,
     icon: "tim-icons icon-single-02",
+    permission: 'players.view',
   },
   {
     layout: "/home",
@@ -147,6 +161,7 @@ var routes = [
     name: "Admin Audit Log",
     component: AuditLog,
     icon: "tim-icons icon-notes",
+    permission: 'audit.view',
   },
   {
     layout: "/home",
@@ -155,6 +170,7 @@ var routes = [
     component: Settings,
     icon: "tim-icons icon-settings-gear-63",
     hidden: true,
+    permission: 'economy.view',
   },
 ];
 

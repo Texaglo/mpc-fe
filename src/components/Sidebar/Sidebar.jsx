@@ -6,6 +6,7 @@ import PerfectScrollbar from "perfect-scrollbar";
 
 // reactstrap components
 import { Nav } from "reactstrap";
+import { canAccess } from '../../utils/adminAccess';
 
 var ps;
 
@@ -36,7 +37,8 @@ class Sidebar extends React.Component {
     document.documentElement.classList.remove("nav-open");
   };
   render() {
-    const { bgColor, routes, rtlActive } = this.props;
+    const { bgColor, routes, rtlActive, role, permissions } = this.props;
+    const access = { role, permissions };
 
     return (
       <div className="sidebar" data={bgColor}>
@@ -51,7 +53,7 @@ class Sidebar extends React.Component {
             </NavLink>
           </div>
           <Nav>
-            {routes.map((prop) => {
+            {routes.filter((route) => canAccess(access, route.permission)).map((prop) => {
               return (
                 <React.Fragment key={`${prop.layout}${prop.path}`}>
                   {!prop['hidden'] &&
@@ -113,7 +115,7 @@ Sidebar.propTypes = {
 const mapDispatchToProps = {};
 
 const mapStateToProps = ({ Auth }) => {
-  let { role } = Auth;
-  return { role };
+  let { role, permissions } = Auth;
+  return { role, permissions };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Sidebar);

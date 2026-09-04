@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import EventBus from 'eventing-bus';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Modal, ModalBody, ModalHeader } from 'reactstrap';
 import { setLoader } from '../../store/actions/Auth';
+import { canAccess } from '../../utils/adminAccess';
 import './index.css';
 
 const SETTING_META = {
@@ -25,6 +26,8 @@ const unwrapError = error => error?.response?.data?.message || error?.message ||
 
 const Cashier = () => {
     const dispatch = useDispatch();
+    const access = useSelector(({ Auth }) => ({ role: Auth.role, permissions: Auth.permissions }));
+    const canManage = canAccess(access, 'cashier.manage');
     const [settings, setSettings] = useState({});
     const [transactions, setTransactions] = useState([]);
     const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalTransactions: 0 });
@@ -125,12 +128,12 @@ const Cashier = () => {
                         return (
                             <article className={`cashier-switch-card ${enabled ? 'enabled' : ''} ${meta.danger ? 'danger' : ''}`} key={key}>
                                 <div><h4>{meta.label}</h4><p>{meta.hint}</p></div>
-                                <button
+                                {canManage ? <button
                                     type="button"
                                     className={`cashier-toggle ${enabled ? 'on' : 'off'}`}
                                     aria-label={`${meta.label}: ${enabled ? 'paused' : 'running'}`}
                                     onClick={() => openEditor(key, enabled ? 0 : 1)}
-                                ><span />{enabled ? 'Paused' : 'Running'}</button>
+                                ><span />{enabled ? 'Paused' : 'Running'}</button> : <span className={`cashier-toggle ${enabled ? 'on' : 'off'}`}><span />{enabled ? 'Paused' : 'Running'}</span>}
                             </article>
                         );
                     })}
@@ -142,7 +145,7 @@ const Cashier = () => {
                         {Object.entries(SETTING_META).map(([key, meta]) => (
                             <article className="cashier-limit-card" key={key}>
                                 <div><span>{meta.label}</span><strong>{formatNumber(settings[key]?.value)} <small>{meta.unit}</small></strong><p>{meta.hint}</p></div>
-                                <button type="button" onClick={() => openEditor(key)}>Edit</button>
+                                {canManage && <button type="button" onClick={() => openEditor(key)}>Edit</button>}
                             </article>
                         ))}
                     </div>

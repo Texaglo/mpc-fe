@@ -17,6 +17,7 @@ import EventBus from 'eventing-bus';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { withStyles } from '@material-ui/core/styles';
+import { canAccess } from '../../utils/adminAccess';
 
 import './index.css';
 
@@ -63,8 +64,10 @@ class PendingWithdrawals extends React.Component {
             isRefillActionModalOpen: false,
         };
         props.getPendingWithdrawals();
-        props.getWalletBalance();
-        props.getHotWalletRefills();
+        if (canAccess({ role: props.role, permissions: props.permissions }, 'cashier.view')) {
+            props.getWalletBalance();
+            props.getHotWalletRefills();
+        }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -247,6 +250,10 @@ class PendingWithdrawals extends React.Component {
         const hasEstimatedCoverage = hotWalletSol >= estimatedRequiredSol;
 
         // Pending withdrawals columns with Actions
+        const access = { role: this.props.role, permissions: this.props.permissions };
+        const canManageWithdrawals = canAccess(access, 'withdrawals.manage');
+        const canViewWallets = canAccess(access, 'cashier.view');
+        const canManageWallets = canAccess(access, 'cashier.manage');
         const pendingColumns = [
             {
                 Header: '#',
@@ -325,7 +332,7 @@ class PendingWithdrawals extends React.Component {
                 Cell: ({ value }) => value ? new Date(value).toLocaleDateString() : 'N/A',
                 filterable: false
             },
-            {
+            ...(canManageWithdrawals ? [{
                 Cell: item => (
                     <div className="action-buttons">
                         <button onClick={() => this.openApproveModal(item['original'])} className="approve-btn">Approve</button>
@@ -334,7 +341,7 @@ class PendingWithdrawals extends React.Component {
                 ),
                 Header: 'Actions',
                 filterable: false
-            },
+            }] : []),
         ];
 
         // Approved withdrawals columns (no Actions, add Processed By and Processed At)
@@ -459,9 +466,9 @@ class PendingWithdrawals extends React.Component {
                         <p className="main-container-heading">
                             {activeTab === 'pending' ? 'PENDING WITHDRAWALS' : 'APPROVED WITHDRAWALS'}
                         </p>
-                        <button className="balance-btn" onClick={this.openBalanceModal}>
+                        {canViewWallets && <button className="balance-btn" onClick={this.openBalanceModal}>
                             Wallet Operations {pendingRefills.length > 0 ? `(${pendingRefills.length})` : ''}
-                        </button>
+                        </button>}
                     </div>
 
                     {/* Stats Summary */}
@@ -659,7 +666,7 @@ class PendingWithdrawals extends React.Component {
                                     </div>
                                 </div>
 
-                                <div className="col-12 mb-4">
+                                {canManageWallets && <div className="col-12 mb-4">
                                     <div className="refill-request-panel">
                                         <div className="refill-panel-copy">
                                             <span className="refill-eyebrow">Treasury → distribution wallet</span>
@@ -692,7 +699,7 @@ class PendingWithdrawals extends React.Component {
                                             </button>
                                         </div>
                                     </div>
-                                </div>
+                                </div>}
 
                                 <div className="col-12">
                                     <div className="refill-queue-panel">
@@ -713,10 +720,10 @@ class PendingWithdrawals extends React.Component {
                                                     <strong>{refill.reason}</strong>
                                                     <span>{refill.requestedBy || 'Admin'} · {refill.requestedAt ? new Date(refill.requestedAt).toLocaleString() : 'Now'}</span>
                                                 </div>
-                                                <div className="refill-row-actions">
+                                                {canManageWallets && <div className="refill-row-actions">
                                                     <button type="button" className="approve-btn" onClick={() => this.openRefillActionModal(refill, 'approve')}>Review & Approve</button>
                                                     <button type="button" className="reject-btn" onClick={() => this.openRefillActionModal(refill, 'reject')}>Reject</button>
-                                                </div>
+                                                </div>}
                                             </div>
                                         )) : (
                                             <div className="empty-refill-queue">No refill requests are awaiting approval.</div>
@@ -797,8 +804,8 @@ const mapDispatchToProps = {
 
 const mapStateToProps = ({ PendingWithdrawals, Auth }) => {
     let { pendingWithdrawals, approvedWithdrawals, walletBalance, hotWalletRefills, refillRequirement } = PendingWithdrawals;
-    let { isModal } = Auth;
-    return { pendingWithdrawals, approvedWithdrawals, walletBalance, hotWalletRefills, refillRequirement, isModal };
+    let { isModal, role, permissions } = Auth;
+    return { pendingWithdrawals, approvedWithdrawals, walletBalance, hotWalletRefills, refillRequirement, isModal, role, permissions };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PendingWithdrawals);

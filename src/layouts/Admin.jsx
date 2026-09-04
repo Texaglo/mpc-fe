@@ -10,6 +10,8 @@ import Footer from "../components/Footer/Footer.jsx";
 import Sidebar from "../components/Sidebar/Sidebar.jsx";
 import AdminNavbar from "../components/Navbars/AdminNavbar.jsx";
 import SectionTabs from "../components/SectionTabs/SectionTabs.jsx";
+import axios from 'axios';
+import { canAccess } from '../utils/adminAccess';
 
 
 var ps;
@@ -24,6 +26,10 @@ class Admin extends React.Component {
     };
   }
   componentDidMount() {
+    axios.get('/admin/access/me').then((response) => {
+      const access = response?.data?.body || {};
+      this.props.setAdminAccess({ role: access.role, permissions: access.permissions || [] });
+    }).catch(() => {});
     if (navigator.platform.indexOf("Win") > -1) {
       document.documentElement.className += " perfect-scrollbar-on";
       document.documentElement.classList.remove("perfect-scrollbar-off");
@@ -61,10 +67,13 @@ class Admin extends React.Component {
   };
 
   getRoutes = routes => {
+    const allowedRoutes = routes.filter((route) => canAccess({ role: this.props.role, permissions: this.props.permissions }, route.permission));
+    const firstAllowedRoute = allowedRoutes[0] || routes[0];
+    const firstAllowedPath = firstAllowedRoute.layout + firstAllowedRoute.path;
     return (
       <Router>
         <Switch>
-          {routes.map((prop, key) => {
+          {allowedRoutes.map((prop, key) => {
             if (prop.layout === "/home") {
               const PageComponent = prop.component;
               return (
@@ -82,7 +91,8 @@ class Admin extends React.Component {
               );
             } else return null;
           })}
-          <Redirect exact from="/home" to="/home/dashboard" />
+          <Redirect exact from="/home" to={firstAllowedPath} />
+          <Redirect to={firstAllowedPath} />
         </Switch>
       </Router>
     );
@@ -144,8 +154,12 @@ class Admin extends React.Component {
 }
 
 const mapStateToProps = ({ Auth }) => {
-  let { auth, isLoader } = Auth
-  return { auth, isLoader }
+  let { auth, isLoader, role, permissions } = Auth
+  return { auth, isLoader, role, permissions }
 }
 
-export default connect(mapStateToProps)(Admin);
+const mapDispatchToProps = dispatch => ({
+  setAdminAccess: access => dispatch({ type: 'SET_ADMIN_ACCESS', payload: access }),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Admin);

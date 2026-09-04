@@ -264,7 +264,7 @@ select.ring-control { padding-right: 26px; color: #c4c7cc; }
   font-size: 10px; pointer-events: none; transform: translateY(-50%);
 }
 
-.ring-toggle-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.ring-toggle-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
 .ring-toggle-card {
   display: flex; min-width: 0; min-height: 42px; margin: 0; padding: 6px 8px;
   align-items: center; justify-content: space-between; gap: 8px; background: #171c22;

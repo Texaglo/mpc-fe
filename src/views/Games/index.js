@@ -5,6 +5,7 @@ import SitnGo from '../SitnGo/index';
 import Tourney from '../Tourney/index';
 import Template from '../Templates/index';
 import BotTests from '../BotTests';
+import { canAccess } from '../../utils/adminAccess';
 
 import './index.css';
 
@@ -22,9 +23,12 @@ class Games extends React.Component {
 
     renderActiveContent = () => {
         const { activeTab } = this.state;
+        const access = { role: this.props.role, permissions: this.props.permissions };
+        const canViewGames = canAccess(access, 'games.view');
+        const canViewBots = canAccess(access, ['bots.view', 'bots.manage']);
         switch (activeTab) {
             case 'ring':
-                return <Ring />;
+                return canViewGames ? <Ring /> : canViewBots ? <BotTests /> : null;
             case 'sitNgo':
                 return <SitnGo />;
             case 'tourney':
@@ -32,7 +36,7 @@ class Games extends React.Component {
             case 'template':
                 return <Template />;
             case 'botTests':
-                return <BotTests />;
+                return canViewBots ? <BotTests /> : canViewGames ? <Ring /> : null;
             default:
                 return <Ring />;
         }
@@ -40,47 +44,51 @@ class Games extends React.Component {
 
     render() {
         const { activeTab } = this.state;
+        const access = { role: this.props.role, permissions: this.props.permissions };
+        const canViewGames = canAccess(access, 'games.view');
+        const canViewBots = canAccess(access, ['bots.view', 'bots.manage']);
+        const effectiveTab = (!canViewGames && canViewBots) ? 'botTests' : activeTab;
 
         return (
             <div className='content'>
                 <div className="main-container games-page">
                     {/* Tabs */}
                     <div className="games-tabs-container">
-                        <button
-                            className={`games-tab-button ${activeTab === 'ring' ? 'active' : ''}`}
+                        {canViewGames && <button
+                            className={`games-tab-button ${effectiveTab === 'ring' ? 'active' : ''}`}
                             onClick={() => this.switchTab('ring')}
                         >
                             Ring
-                        </button>
-                        <button
+                        </button>}
+                        {canViewGames && <button
                             className={`games-tab-button ${activeTab === 'sitNgo' ? 'active' : ''}`}
                             onClick={() => this.switchTab('sitNgo')}
                         >
                             SIT'N'GO
-                        </button>
-                        <button
+                        </button>}
+                        {canViewGames && <button
                             className={`games-tab-button ${activeTab === 'tourney' ? 'active' : ''}`}
                             onClick={() => this.switchTab('tourney')}
                         >
                             Tourney
-                        </button>
-                        <button
+                        </button>}
+                        {canViewGames && <button
                             className={`games-tab-button ${activeTab === 'template' ? 'active' : ''}`}
                             onClick={() => this.switchTab('template')}
                         >
                             Template
-                        </button>
-                        <button
-                            className={`games-tab-button ${activeTab === 'botTests' ? 'active' : ''}`}
+                        </button>}
+                        {canViewBots && <button
+                            className={`games-tab-button ${effectiveTab === 'botTests' ? 'active' : ''}`}
                             onClick={() => this.switchTab('botTests')}
                         >
                             Test Bots
-                        </button>
+                        </button>}
                     </div>
 
                     {/* Active Content */}
                     <div className="games-content">
-                        {this.renderActiveContent()}
+                        {effectiveTab === 'botTests' ? <BotTests /> : this.renderActiveContent()}
                     </div>
                 </div>
             </div>
@@ -90,8 +98,8 @@ class Games extends React.Component {
 
 const mapDispatchToProps = {};
 
-const mapStateToProps = () => {
-    return {};
+const mapStateToProps = ({ Auth }) => {
+    return { role: Auth.role, permissions: Auth.permissions };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Games);

@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 import React from 'react';
 import { getSettings, updateSetting } from "../../store/actions/Settings";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import { canAccess } from '../../utils/adminAccess';
 
 import './index.css';
 
@@ -109,7 +110,7 @@ class Settings extends React.Component {
                 </div>
             </div>
             <div className="setting-card-footer">
-                <button className="add-btn" onClick={() => this.openEditModal(setting)}>Edit</button>
+                    {canAccess({ role: this.props.role, permissions: this.props.permissions }, 'economy.manage') && <button className="add-btn" onClick={() => this.openEditModal(setting)}>Edit</button>}
             </div>
         </div>
     )
@@ -228,9 +229,9 @@ class Settings extends React.Component {
     }
 }
 
-const mapStateToProps = ({ Settings }) => {
+const mapStateToProps = ({ Settings, Auth }) => {
     const { settings, loading } = Settings;
-    return { settings, loading };
+    return { settings, loading, role: Auth.role, permissions: Auth.permissions };
 };
 
 const mapDispatchToProps = {

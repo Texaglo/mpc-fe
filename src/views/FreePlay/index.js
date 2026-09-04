@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import EventBus from 'eventing-bus';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { setLoader } from '../../store/actions/Auth';
+import { canAccess } from '../../utils/adminAccess';
 import './index.css';
 
 const DEFAULT_SETTINGS = {
@@ -80,6 +81,9 @@ const Toggle = ({ active, label, hint, onClick }) => (
 
 const FreePlay = () => {
     const dispatch = useDispatch();
+    const access = useSelector(({ Auth }) => ({ role: Auth.role, permissions: Auth.permissions }));
+    const canManage = canAccess(access, 'free_play.manage');
+    const canAdjustBalances = canAccess(access, 'balances.manage');
     const history = useHistory();
     const [settings, setSettings] = useState(DEFAULT_SETTINGS);
     const [savedSettings, setSavedSettings] = useState(DEFAULT_SETTINGS);
@@ -192,9 +196,10 @@ const FreePlay = () => {
                 <section className="fp-notice">
                     <i className="tim-icons icon-lock-circle" />
                     <div><strong>FP is the only Free Play balance.</strong><p>It may be granted, earned or purchased, but it cannot be withdrawn or converted into Cash, USDC, SOL or MPCE.</p></div>
-                    <button type="button" onClick={() => history.push('/home/users')}>Adjust a player’s FP →</button>
+                    {canAdjustBalances && <button type="button" onClick={() => history.push('/home/users')}>Adjust a player’s FP →</button>}
                 </section>
 
+                <fieldset disabled={!canManage} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
                 <section className="fp-toggle-grid">
                     <Toggle active={settings.enabled} label="Free Play availability" hint="Controls Free Play access and automated rewards" onClick={() => updateSetting('enabled', !settings.enabled)} />
                     <Toggle active={settings.purchasesEnabled} label="FP purchases" hint="Allows deposited Cash/USD to purchase non-withdrawable FP" onClick={() => updateSetting('purchasesEnabled', !settings.purchasesEnabled)} />
@@ -230,6 +235,7 @@ const FreePlay = () => {
                     <button type="button" className="fp-reset" disabled={!isDirty || saving} onClick={resetSettings}>Discard</button>
                     <button type="button" className="fp-save" disabled={!canSave} onClick={saveSettings}>{saving ? 'Saving…' : 'Save changes'}</button>
                 </section>
+                </fieldset>
 
                 <section className="fp-panel fp-ledger-panel">
                     <div className="fp-panel-title"><div><h3>FP ledger</h3><p>Recent database issuance, purchases and operator adjustments.</p></div><button type="button" className="fp-ledger-refresh" onClick={() => loadLedger(pagination.currentPage || 1)}>Refresh</button></div>

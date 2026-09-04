@@ -12,11 +12,30 @@
 .bot-tests select, .bot-tests input, .bot-tests textarea { width:100%; border:1px solid #344653; border-radius:8px; background:#0c141b; color:#fff; padding:11px 12px; }
 .bot-tests textarea { min-height:68px; resize:vertical; }
 .bot-tests__fields { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+.bot-tests__mode { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:13px; }
+.bot-tests__mode button { background:#0c141b; border:1px solid #344653; border-radius:9px; color:#fff; display:grid; gap:3px; padding:11px; text-align:left; }
+.bot-tests__mode button span { color:#7e8b94; font-size:10px; }
+.bot-tests__mode button.is-selected { border-color:#d9ac2f; box-shadow:inset 0 0 0 1px rgba(217,172,47,.25); }
 .bot-tests__table-facts { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin:-2px 0 14px; }
 .bot-tests__table-facts span { padding:9px; border-radius:7px; background:#192630; color:#83919a; font-size:10px; }
 .bot-tests__table-facts strong { display:block; margin-top:3px; color:#e0b23a; font-size:12px; }
 .bot-tests__gate { display:grid; gap:2px; padding:10px 12px; margin-bottom:13px; border-left:3px solid #48b979; background:rgba(72,185,121,.08); color:#7f9189; font-size:11px; }
 .bot-tests__gate strong { color:#6ed49b; }
+.bot-tests__check { align-items:center; background:#192630; border-radius:8px; display:flex !important; gap:9px !important; padding:9px 11px; }
+.bot-tests__check input { accent-color:#d9ac2f; flex:0 0 auto; height:18px; width:18px; }
+.bot-tests__check span { display:grid; gap:2px; }
+.bot-tests__check small { color:#7e8b94; }
+.bot-profiles { border:1px solid rgba(255,255,255,.08); border-radius:9px; margin:4px 0 13px; overflow:hidden; }
+.bot-profiles__heading { align-items:center; display:flex; justify-content:space-between; padding:10px 12px; }
+.bot-profiles__heading h4 { font-size:13px; margin:0; text-transform:uppercase; }
+.bot-profiles__heading span { color:#7e8b94; font-size:9px; }
+.bot-profile { border-top:1px solid rgba(255,255,255,.08); }
+.bot-profile summary { align-items:center; cursor:pointer; display:flex; justify-content:space-between; padding:10px 12px; }
+.bot-profile summary span { color:#d9ac2f; font-size:10px; text-transform:capitalize; }
+.bot-profile__grid { background:#0e171e; display:grid; gap:8px; grid-template-columns:repeat(3,minmax(0,1fr)); padding:11px; }
+.bot-profile__grid label { font-size:9px; margin:0; }
+.bot-profile__grid input, .bot-profile__grid select { padding:8px; }
+.bot-profile__grid .bot-tests__check { align-self:end; grid-column:span 2; }
 .bot-tests__active-warning { margin-bottom:12px; padding:9px 11px; border:1px solid rgba(240,196,82,.35); border-radius:7px; background:rgba(240,196,82,.08); color:#c9b77d; font-size:11px; }
 .bot-tests__active-warning strong { color:#f0c452; }
 .bot-tests__deploy { width:100%; border:0; border-radius:8px; background:#d9ac2f; color:#101820; padding:12px; font-weight:900; }
@@ -29,8 +48,15 @@
 .bot-run small { grid-column:2; color:#89959e; }
 .bot-run p { grid-column:1/-1; margin:0; color:#9da8af; font-size:11px; }
 .bot-run__error { color:#ff7777 !important; }
+.bot-run__actions { display:flex !important; grid-template-columns:none !important; gap:6px !important; }
+.bot-run__events { background:#0b1319; border:1px solid #263640; border-radius:8px; grid-column:1/-1 !important; max-height:270px; overflow:auto; padding:8px; }
+.bot-run__events div { align-items:center; border-top:1px solid rgba(255,255,255,.05); display:grid; gap:7px; grid-template-columns:76px 125px 1fr; padding:6px; }
+.bot-run__events div:first-child { border-top:0; }
+.bot-run__events time, .bot-run__events span { color:#84919a; font-size:9px; }
+.bot-run__events strong { color:#d9ac2f; font-size:9px; text-transform:uppercase; }
 .bot-run__status { padding:4px 7px; border-radius:10px; background:#3e4650; color:#d5d8db; font-size:8px; font-weight:900; }
 .bot-run__status.is-running, .bot-run__status.is-completed { background:#174e35; color:#72dda5; }
 .bot-run__status.is-waiting_for_human, .bot-run__status.is-waiting_for_next_hand { background:#55451a; color:#f0c452; }
 .bot-run__status.is-failed { background:#57262b; color:#ff8b91; }
-@media(max-width:1000px){.bot-tests__grid{grid-template-columns:1fr}.bot-tests__fields,.bot-tests__table-facts{grid-template-columns:1fr 1fr}.games-tabs-container{flex-wrap:wrap}}
+@media(max-width:1000px){.bot-tests__grid{grid-template-columns:1fr}.bot-tests__fields,.bot-tests__table-facts,.bot-profile__grid{grid-template-columns:1fr 1fr}.games-tabs-container{flex-wrap:wrap}}
+@media(max-width:620px){.bot-tests__mode,.bot-tests__fields,.bot-tests__table-facts,.bot-profile__grid{grid-template-columns:1fr}.bot-profile__grid .bot-tests__check{grid-column:auto}.bot-run{grid-template-columns:1fr}.bot-run__events div{grid-template-columns:70px 1fr}.bot-run__events span{grid-column:1/-1}}

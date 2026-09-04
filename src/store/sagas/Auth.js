@@ -20,13 +20,15 @@ function* login({ payload, history }) {
   else if (response) {
 
     const decoded = jwtDecode(response["data"]["body"]["token"]);
-    if (decoded["role"] !== "admin") {
-      EventBus.publish("error", "Can't login through User account ");
+    if (!["admin", "sub_admin"].includes(decoded["role"])) {
+      EventBus.publish("error", "This account does not have console access");
       return;
     }
     let data = {
       token: response['data']['body']['token'],
-      publicAddress: payload['publicAddress']
+      publicAddress: payload['publicAddress'],
+      role: response['data']['body']['role'] || decoded['role'],
+      permissions: response['data']['body']['permissions'] || []
     }
     yield put(setLoginData(data));
     EventBus.publish("success", response['data']['body']['message'])

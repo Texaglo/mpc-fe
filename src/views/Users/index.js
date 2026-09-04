@@ -6,6 +6,7 @@ import EventBus from 'eventing-bus';
 import { getUsers, toggleFreezeUser, getUserTransactions, adjustUserBalance, forceLogoutUser, getUserInventory, getInventoryCatalog, grantInventoryItem, revokeInventoryItem } from "../../store/actions/Users";
 import { setLoader, toggleModal } from "../../store/actions/Auth";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import { canAccess } from '../../utils/adminAccess';
 
 import './index.css';
 
@@ -51,6 +52,13 @@ class Users extends React.Component {
             grantReason: '',
             revokeEntry: null,
             revokeReason: '',
+            showAccessModal: false,
+            accessUser: null,
+            accessRole: 'user',
+            accessPermissions: [],
+            permissionGroups: [],
+            accessReason: '',
+            accessSaving: false,
             // Bulk selection
             selectedUsers: []
         };
@@ -175,6 +183,50 @@ class Users extends React.Component {
     }
 
     closeProfileModal = () => this.setState({ showProfileModal: false, profileUser: null, profileData: null, profileLoading: false });
+
+    openAccessModal = async (user) => {
+        this.setState({
+            showAccessModal: true,
+            accessUser: user,
+            accessRole: user.role || 'user',
+            accessPermissions: Array.isArray(user.adminPermissions) ? user.adminPermissions : [],
+            accessReason: ''
+        });
+        if (this.state.permissionGroups.length) return;
+        try {
+            const response = await axios.get('/admin/permissions/catalog');
+            this.setState({ permissionGroups: response?.data?.body?.groups || [] });
+        } catch (error) {
+            EventBus.publish('error', error?.response?.data?.message || 'Unable to load administrative permissions');
+        }
+    }
+
+    closeAccessModal = () => this.setState({ showAccessModal: false, accessUser: null, accessReason: '', accessSaving: false });
+
+    toggleAccessPermission = (permission) => this.setState((current) => ({
+        accessPermissions: current.accessPermissions.includes(permission)
+            ? current.accessPermissions.filter((key) => key !== permission)
+            : [...current.accessPermissions, permission]
+    }));
+
+    submitAdminAccess = async () => {
+        const { accessUser, accessRole, accessPermissions, accessReason, searchTerm, currentPage } = this.state;
+        if (!accessUser || accessReason.trim().length < 3) return;
+        this.setState({ accessSaving: true });
+        try {
+            await axios.put(`/admin/users/${accessUser._id}/admin-access`, {
+                role: accessRole,
+                permissions: accessRole === 'sub_admin' ? accessPermissions : [],
+                reason: accessReason.trim()
+            });
+            EventBus.publish('success', 'Administrative access updated; existing sessions were revoked');
+            this.closeAccessModal();
+            this.props.getUsers({ search: searchTerm, page: currentPage, limit: 20 });
+        } catch (error) {
+            this.setState({ accessSaving: false });
+            EventBus.publish('error', error?.response?.data?.message || 'Unable to update administrative access');
+        }
+    }
 
     // Adjust Balance Modal handlers
     openAdjustModal = (user) => {
@@ -372,8 +424,13 @@ class Users extends React.Component {
     }
 
     render() {
-        let { usersData, searchTerm, selectedUser, freezeAction, freezeReason, showHistoryModal, historyUser, historyTransactions, historyPagination, historyFilters, showProfileModal, profileUser, profileData, profileLoading, showAdjustModal, adjustUser, adjustAmount, adjustType, adjustAsset, adjustNetwork, adjustReason, showLogoutModal, logoutUser, logoutReason, showInventoryModal, inventoryUser, inventorySearch, inventoryStatus, inventoryPage, catalogSearch, grantItemId, grantQuantity, grantReason, revokeEntry, revokeReason, selectedUsers } = this.state;
-        const { isModal, pagination, userInventory, inventoryPagination, inventoryCatalog } = this.props;
+        let { usersData, searchTerm, selectedUser, freezeAction, freezeReason, showHistoryModal, historyUser, historyTransactions, historyPagination, historyFilters, showProfileModal, profileUser, profileData, profileLoading, showAdjustModal, adjustUser, adjustAmount, adjustType, adjustAsset, adjustNetwork, adjustReason, showLogoutModal, logoutUser, logoutReason, showInventoryModal, inventoryUser, inventorySearch, inventoryStatus, inventoryPage, catalogSearch, grantItemId, grantQuantity, grantReason, revokeEntry, revokeReason, selectedUsers, showAccessModal, accessUser, accessRole, accessPermissions, permissionGroups, accessReason, accessSaving } = this.state;
+        const { isModal, pagination, userInventory, inventoryPagination, inventoryCatalog, role, permissions } = this.props;
+        const access = { role, permissions };
+        const canManagePlayers = canAccess(access, 'players.manage');
+        const canManageBalances = canAccess(access, 'balances.manage');
+        const canManageInventory = canAccess(access, 'inventory.manage');
+        const canManageAdminAccess = role === 'admin';
 
         const columns = [
             {
@@ -406,7 +463,7 @@ class Users extends React.Component {
             {
                 accessor: 'username',
                 Header: 'Player',
-                Cell: ({ original }) => <div className="user-identity-cell"><strong>{original.username || 'N/A'}</strong><span>{original.email || 'No email'}</span></div>,
+                Cell: ({ original }) => <div className="user-identity-cell"><strong>{original.username || 'N/A'}</strong><span>{original.email || 'No email'}</span>{original.role && original.role !== 'user' && <small className={`admin-role-badge is-${original.role}`}>{original.role === 'sub_admin' ? 'Sub-admin' : 'Full admin'}</small>}</div>,
                 width: 165
             },
             {
@@ -480,15 +537,16 @@ class Users extends React.Component {
                             History
                         </button>
                         <button onClick={() => this.openInventoryModal(item.original)} className="inventory-btn" title="View and manage inventory">Inventory</button>
-                        <button
+                        {canManageBalances && <button
                             onClick={() => this.openAdjustModal(item.original)}
                             className="adjust-btn"
                             title="Adjust Balance"
                         >
                             Adjust
-                        </button>
-                        <button onClick={() => this.openLogoutModal(item.original)} className="logout-btn" title="Revoke all active sessions">Logout</button>
-                        {item.original.isFrozen ? (
+                        </button>}
+                        {canManageAdminAccess && <button onClick={() => this.openAccessModal(item.original)} className="access-btn" title="Set full or delegated admin access">Access</button>}
+                        {canManagePlayers && <button onClick={() => this.openLogoutModal(item.original)} className="logout-btn" title="Revoke all active sessions">Logout</button>}
+                        {canManagePlayers && (item.original.isFrozen ? (
                             <button
                                 onClick={() => this.openFreezeModal(item.original, false)}
                                 className="unfreeze-btn"
@@ -502,12 +560,12 @@ class Users extends React.Component {
                             >
                                 Ban
                             </button>
-                        )}
+                        ))}
                     </div>
                 ),
                 Header: 'Actions',
                 filterable: false,
-                width: 300
+                width: 350
             },
         ];
 
@@ -840,7 +898,7 @@ class Users extends React.Component {
                                 <div><small>Owned records</small><strong>{inventoryPagination?.totalItems || 0}</strong></div>
                             </div>
 
-                            <section className="inventory-grant-panel">
+                            {canManageInventory && <section className="inventory-grant-panel">
                                 <div className="inventory-section-heading">
                                     <div><h5>Grant catalog item</h5><p>Creates a zero-cost entitlement and records the administrator and reason.</p></div>
                                 </div>
@@ -854,7 +912,7 @@ class Users extends React.Component {
                                     <label className="inventory-reason"><span>Required audit reason</span><input className="form-input" value={grantReason} onChange={(e) => this.setState({ grantReason: e.target.value })} placeholder="Why is this entitlement being granted?" /></label>
                                     <button type="button" className="inventory-grant-btn" disabled={!grantItemId || !grantReason.trim() || Number(grantQuantity) < 1} onClick={this.submitInventoryGrant}>Grant item</button>
                                 </div>
-                            </section>
+                            </section>}
 
                             <section className="inventory-owned-panel">
                                 <div className="inventory-toolbar">
@@ -882,7 +940,7 @@ class Users extends React.Component {
                                                 <td>{entry.isEquipped ? <span className="inventory-equipped">Equipped{entry.equipSlot !== null ? ` · slot ${entry.equipSlot}` : ''}</span> : <span className="inventory-muted">Unequipped</span>}</td>
                                                 <td>{entry.acquiredAt ? new Date(entry.acquiredAt).toLocaleString() : '—'}</td>
                                                 <td>{String(entry.acquisitionSource || 'legacy').replace(/_/g, ' ')}</td>
-                                                <td>{entry.status === 'active' && !entry.unlockedByDefault ? <button type="button" className="inventory-revoke-btn" onClick={() => this.setState({ revokeEntry: entry, revokeReason: '' })}>Revoke</button> : entry.unlockedByDefault ? <span className="inventory-muted" title="Disable default unlock in the catalog before individual revocation">Default access</span> : <span className="inventory-muted">—</span>}</td>
+                                                <td>{canManageInventory && entry.status === 'active' && !entry.unlockedByDefault ? <button type="button" className="inventory-revoke-btn" onClick={() => this.setState({ revokeEntry: entry, revokeReason: '' })}>Revoke</button> : entry.unlockedByDefault ? <span className="inventory-muted" title="Disable default unlock in the catalog before individual revocation">Default access</span> : <span className="inventory-muted">—</span>}</td>
                                             </tr>)}
                                             {(!userInventory || userInventory.length === 0) && <tr><td colSpan="8" className="inventory-empty">No inventory records match this view.</td></tr>}
                                         </tbody>
@@ -895,7 +953,7 @@ class Users extends React.Component {
                                 </div>}
                             </section>
 
-                            {revokeEntry && <section className="inventory-revoke-confirm">
+                            {canManageInventory && revokeEntry && <section className="inventory-revoke-confirm">
                                 <div><strong>Revoke {revokeEntry.name}?</strong><p>This removes access without deleting the ownership history. Equipped items are unequipped immediately.</p></div>
                                 <input className="form-input" value={revokeReason} onChange={(e) => this.setState({ revokeReason: e.target.value })} placeholder="Required audit reason" />
                                 <button type="button" className="inventory-cancel-revoke" onClick={() => this.setState({ revokeEntry: null, revokeReason: '' })}>Cancel</button>
@@ -916,6 +974,28 @@ class Users extends React.Component {
                         </div>}
                     </ModalBody>
                 </Modal>
+
+                <Modal isOpen={showAccessModal} toggle={this.closeAccessModal} className="main-modal admin-access-modal" size="lg">
+                    <ModalHeader toggle={this.closeAccessModal}><div className="modal-title"><p>Administrative Access</p></div></ModalHeader>
+                    <ModalBody className="modal-body admin-access-body">
+                        {accessUser && <div className="admin-access-layout">
+                            <div className="admin-access-player"><div><small>Account</small><strong>{accessUser.username || accessUser.email || accessUser._id}</strong></div><span>Changing access revokes this user's current sessions.</span></div>
+                            <div className="admin-role-options">
+                                {[
+                                    ['user', 'Player', 'Unity access only; no operations console.'],
+                                    ['sub_admin', 'Sub-admin', 'Can play in Unity and use only delegated console features.'],
+                                    ['admin', 'Full admin', 'Full operations authority; blocked from Unity tables.']
+                                ].map(([value, label, description]) => <button type="button" key={value} className={accessRole === value ? 'is-selected' : ''} onClick={() => this.setState({ accessRole: value })}><strong>{label}</strong><span>{description}</span></button>)}
+                            </div>
+                            {accessRole === 'sub_admin' && <div className="permission-groups">
+                                {(permissionGroups || []).map((group) => <section key={group.key}><div><h5>{group.label}</h5><p>{group.description}</p></div><div className="permission-toggle-grid">{group.permissions.map((permission) => <label key={permission.key} className={permission.sensitive ? 'is-sensitive' : ''}><span><strong>{permission.label}</strong>{permission.sensitive && <small>Sensitive authority</small>}</span><input type="checkbox" checked={accessPermissions.includes(permission.key)} onChange={() => this.toggleAccessPermission(permission.key)} /></label>)}</div></section>)}
+                                {!permissionGroups.length && <p className="profile-empty">Loading permission catalog…</p>}
+                            </div>}
+                            <label className="admin-access-reason"><span>Required audit reason</span><textarea className="form-textarea" rows="3" value={accessReason} onChange={(event) => this.setState({ accessReason: event.target.value })} placeholder="Why is this user's administrative access changing?" /></label>
+                            <div className="admin-access-actions"><button type="button" className="delete-btn add-btn" onClick={this.closeAccessModal}>Cancel</button><button type="button" className="add-btn" disabled={accessSaving || accessReason.trim().length < 3} onClick={this.submitAdminAccess}>{accessSaving ? 'Saving…' : 'Save access'}</button></div>
+                        </div>}
+                    </ModalBody>
+                </Modal>
             </div>
         );
     }
@@ -929,8 +1009,8 @@ const mapDispatchToProps = {
 
 const mapStateToProps = ({ Users, Auth }) => {
     let { users, pagination, userTransactions, userInventory, inventoryPagination, inventoryCatalog } = Users;
-    let { isModal } = Auth;
-    return { users, pagination, userTransactions, userInventory, inventoryPagination, inventoryCatalog, isModal };
+    let { isModal, role, permissions } = Auth;
+    return { users, pagination, userTransactions, userInventory, inventoryPagination, inventoryCatalog, isModal, role, permissions };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Users);

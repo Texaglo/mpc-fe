@@ -10,6 +10,7 @@ import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { getAllTemplates } from '../../store/actions/Template';
 import { getSettings, updateSetting } from '../../store/actions/Settings';
 import { withTableEconomyContract } from '../../utils/tableEconomy';
+import { canAccess } from '../../utils/adminAccess';
 
 import './index.css';
 
@@ -21,6 +22,7 @@ const DEFAULT_RING_FORM = {
     customBurnRateMpcePerHour: 20, minPlayersToStart: 2, tableStatus: 'ACTIVE',
     straddleMode: 'NONE', straddleEnabled: false, ante: 0, anteEnabled: false,
     actionTimerSeconds: 15, timeBankSeconds: 0, timeBankEnabled: false, allowTopUp: true,
+    idleSeatClearMinutes: 30, idleSeatClearEnabled: true,
     formatLimit: '', gameVariant: '', region: '',
 };
 
@@ -35,6 +37,7 @@ function normalizeFormData(source = {}, minutesPerMpce = TIME_MINUTES_PER_MPCE) 
     const timeChargeMinutesPerHour = Number(source.timeChargeMinutesPerHour ?? 60);
     const ante = Number(source.ante || 0);
     const timeBankSeconds = Number(source.timeBankSeconds || 0);
+    const idleSeatClearMinutes = Number(source.idleSeatClearMinutes ?? 30);
     const straddleMode = String(source.straddleMode || 'NONE').toUpperCase();
 
     return {
@@ -53,6 +56,8 @@ function normalizeFormData(source = {}, minutesPerMpce = TIME_MINUTES_PER_MPCE) 
         anteEnabled: ante > 0,
         timeBankSeconds,
         timeBankEnabled: timeBankSeconds > 0,
+        idleSeatClearMinutes,
+        idleSeatClearEnabled: idleSeatClearMinutes > 0,
         allowTopUp: source.allowTopUp !== false && String(source.allowTopUp) !== 'false',
     };
 }
@@ -103,6 +108,7 @@ class Ring extends React.Component {
             }
             if (target.name === 'anteEnabled') next.ante = value ? (Number(formData.ante) || 1) : 0;
             if (target.name === 'timeBankEnabled') next.timeBankSeconds = value ? (Number(formData.timeBankSeconds) || 30) : 0;
+            if (target.name === 'idleSeatClearEnabled') next.idleSeatClearMinutes = value ? (Number(formData.idleSeatClearMinutes) || 30) : 0;
             if (target.name === 'timeChargeTier' && value === 'NONE') next.timeChargeMinutesPerHour = 0;
             if (target.name === 'balanceType') {
                 if (value === 'FP') {
@@ -131,7 +137,7 @@ class Ring extends React.Component {
     getMinutesPerMpce = () => this.getSettingValue('mpceMinutesValue', TIME_MINUTES_PER_MPCE);
 
     buildPayload = () => {
-        const { customBurnRateMpcePerHour, straddleEnabled, anteEnabled, timeBankEnabled, ...payload } = this.state.formData;
+        const { customBurnRateMpcePerHour, straddleEnabled, anteEnabled, timeBankEnabled, idleSeatClearEnabled, ...payload } = this.state.formData;
         if (payload.timeChargeTier === 'CUSTOM') {
             payload.timeChargeMpcePerHour = Number(customBurnRateMpcePerHour);
             payload.timeChargeMinutesPerHour = Number(customBurnRateMpcePerHour) * this.getMinutesPerMpce();
@@ -153,6 +159,7 @@ class Ring extends React.Component {
         payload.straddleMode = straddleEnabled ? payload.straddleMode : 'NONE';
         payload.ante = anteEnabled ? Number(payload.ante) : 0;
         payload.timeBankSeconds = timeBankEnabled ? Number(payload.timeBankSeconds) : 0;
+        payload.idleSeatClearMinutes = idleSeatClearEnabled ? Number(payload.idleSeatClearMinutes) : 0;
         return withTableEconomyContract(payload);
     };
 
@@ -164,6 +171,7 @@ class Ring extends React.Component {
         if (Number(payload.smallBlinds) <= 0 || Number(payload.bigBlinds) <= Number(payload.smallBlinds)) return 'Big blind must be greater than the small blind';
         if (Number(payload.minBuyIn) < 0 || Number(payload.maxBuyIn) < Number(payload.minBuyIn)) return 'Maximum buy-in must be at least the minimum buy-in';
         if (payload.timeChargeTier === 'CUSTOM' && Number(payload.timeChargeMinutesPerHour) <= 0) return 'Enter a custom table burn rate greater than zero';
+        if (!Number.isInteger(Number(payload.idleSeatClearMinutes)) || Number(payload.idleSeatClearMinutes) < 0 || Number(payload.idleSeatClearMinutes) > 1440) return 'Waiting seat clear must be between 0 and 1440 minutes';
         return '';
     };
 
@@ -276,7 +284,8 @@ class Ring extends React.Component {
             name, seatLimit, smallBlinds, bigBlinds, minBuyIn, maxBuyIn, balanceType,
             timeChargeTier, customBurnRateMpcePerHour, minPlayersToStart, tableStatus,
             straddleMode, straddleEnabled, ante, anteEnabled, actionTimerSeconds,
-            timeBankSeconds, timeBankEnabled, allowTopUp, formatLimit, region, gameVariant,
+            timeBankSeconds, timeBankEnabled, idleSeatClearMinutes, idleSeatClearEnabled,
+            allowTopUp, formatLimit, region, gameVariant,
         } = formData;
         const { isModal, allTemplates, allRingGames } = this.props;
         const allRingGamesArray = Object.values(allRingGames);
@@ -289,6 +298,7 @@ class Ring extends React.Component {
         const customMultiplier = standardMinutesPerHour > 0 ? effectiveCustomMinutesPerHour / standardMinutesPerHour : 0;
         const newGamesPaused = this.getSettingValue('newGamesPaused', 0) === 1;
 
+        const canManage = canAccess({ role: this.props.role, permissions: this.props.permissions }, 'games.manage');
         const columns = [
             { Header: '#', Cell: ({ index }) => index + 1, width: 52, maxWidth: 52, filterable: false },
             {
@@ -311,7 +321,7 @@ class Ring extends React.Component {
                     return <span className={`ring-status-badge is-${row.original.closeAfterHand ? 'closing' : status.toLowerCase()}`}>{row.original.closeAfterHand ? 'CLOSING' : status}</span>;
                 },
             },
-            {
+            ...(canManage ? [{
                 Header: 'Actions', width: 380, minWidth: 380, maxWidth: 400, filterable: false, sortable: false,
                 Cell: row => (
                     <div className="ring-table-actions">
@@ -322,7 +332,7 @@ class Ring extends React.Component {
                         <button onClick={() => this.props.deleteRingGame(row.original._id)} className="ring-action-btn ring-action-delete">Delete</button>
                     </div>
                 ),
-            },
+            }] : []),
         ];
 
         return (
@@ -334,10 +344,10 @@ class Ring extends React.Component {
                             <span className={`ring-join-state ${newGamesPaused ? 'is-paused' : 'is-live'}`}>
                                 New joins: {newGamesPaused ? 'Paused' : 'Live'}
                             </span>
-                            <button onClick={() => this.openNewGamesControl(!newGamesPaused)} className={`ring-global-control ${newGamesPaused ? 'is-resume' : ''}`}>
+                            {canManage && <button onClick={() => this.openNewGamesControl(!newGamesPaused)} className={`ring-global-control ${newGamesPaused ? 'is-resume' : ''}`}>
                                 {newGamesPaused ? 'Resume new joins' : 'Pause new joins'}
-                            </button>
-                            <button onClick={() => { this.props.toggleModal(true); this.setState({ selectedGame: null, formData: { ...DEFAULT_RING_FORM }, template: '' }); }} className="add-btn">Create Ring Game</button>
+                            </button>}
+                            {canManage && <button onClick={() => { this.props.toggleModal(true); this.setState({ selectedGame: null, formData: { ...DEFAULT_RING_FORM }, template: '' }); }} className="add-btn">Create Ring Game</button>}
                         </div>
                     </div>
                     <Fragment>
@@ -412,12 +422,14 @@ class Ring extends React.Component {
                                     <Toggle name="straddleEnabled" checked={straddleEnabled} onChange={this.handleFormChange} title="Straddle" description="Enable a voluntary blind raise" />
                                     <Toggle name="anteEnabled" checked={anteEnabled} onChange={this.handleFormChange} title="Ante" description="Collect an ante before each hand" />
                                     <Toggle name="timeBankEnabled" checked={timeBankEnabled} onChange={this.handleFormChange} title="Time bank" description="Give players reserve decision time" />
+                                    <Toggle name="idleSeatClearEnabled" checked={idleSeatClearEnabled} onChange={this.handleFormChange} title="Waiting seat clear" description="Refund and free seats if a table cannot start" />
                                 </div>
                                 <div className="ring-form-grid ring-form-grid--four ring-conditional-rules">
                                     <Field label="Action timer"><div className="ring-control-with-unit"><input className="ring-control" name="actionTimerSeconds" type="number" min="1" max="300" value={actionTimerSeconds} onChange={this.handleFormChange} /><span>sec</span></div></Field>
                                     {straddleEnabled && <Field label="Straddle type"><select className="ring-control" name="straddleMode" value={straddleMode} onChange={this.handleFormChange}><option value="UTG">UTG only</option><option value="MISSISSIPPI">Mississippi</option></select></Field>}
                                     {anteEnabled && <Field label="Ante amount"><input className="ring-control" name="ante" type="number" min="0" step="any" value={ante} onChange={this.handleFormChange} /></Field>}
                                     {timeBankEnabled && <Field label="Time bank"><div className="ring-control-with-unit"><input className="ring-control" name="timeBankSeconds" type="number" min="1" max="3600" value={timeBankSeconds} onChange={this.handleFormChange} /><span>sec</span></div></Field>}
+                                    {idleSeatClearEnabled && <Field label="Clear waiting seats"><div className="ring-control-with-unit"><input className="ring-control" name="idleSeatClearMinutes" type="number" min="1" max="1440" step="1" value={idleSeatClearMinutes} onChange={this.handleFormChange} /><span>min</span></div></Field>}
                                 </div>
                             </section>
 
@@ -489,6 +501,6 @@ class Ring extends React.Component {
 }
 
 const mapDispatchToProps = { getAllRingGames, getAllTemplates, getSettings, updateSetting, addRingGame, toggleModal, setLoader, updateRingGame, deleteRingGame };
-const mapStateToProps = ({ Auth, Ring: RingState, Template, Settings }) => ({ allRingGames: RingState.allRingGames, allTemplates: Template.allTemplates, settings: Settings.settings, isModal: Auth.isModal });
+const mapStateToProps = ({ Auth, Ring: RingState, Template, Settings }) => ({ allRingGames: RingState.allRingGames, allTemplates: Template.allTemplates, settings: Settings.settings, isModal: Auth.isModal, role: Auth.role, permissions: Auth.permissions });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Ring);
