@@ -68,7 +68,7 @@ export default function BotTests() {
 
   return <section className="bot-tests">
     <header className="bot-tests__hero">
-      <div><span className="bot-tests__eyebrow">Controlled QA</span><h2>Free Play Table Bots</h2><p>Arm test players for an FP table. They stay out until a real player sits, never raise, and leave when the real player leaves.</p></div>
+      <div><span className="bot-tests__eyebrow">Controlled QA</span><h2>Free Play Table Bots</h2><p>Arm test players for an FP table. They wait for a real player, use hand-aware bets, raises, calls, folds and occasional bluffs, then leave when the requested table-hand count is complete.</p></div>
       <span className="bot-tests__safety">FP ONLY</span>
     </header>
 
@@ -79,16 +79,17 @@ export default function BotTests() {
           {!tables.length && <option value="">No eligible FP tables</option>}
           {tables.map((table) => <option key={table.id} value={table.id}>{table.name} · {table.smallBlind}/{table.bigBlind} FP · {table.seated} seated{table.waiting ? ` + ${table.waiting} waiting` : ''} / {table.seatLimit}</option>)}
         </select></label>
-        {selected && <div className="bot-tests__table-facts"><span>Buy-in <strong>{selected.minBuyIn}–{selected.maxBuyIn} FP</strong></span><span>Seats <strong>{selected.seated} seated · {selected.waiting || 0} waiting</strong></span><span>Bot capacity <strong>{selected.availableBotSeats}</strong></span><span>Status <strong>{selected.gameStatus || selected.tableStatus}</strong></span></div>}
+        {selected && <div className="bot-tests__table-facts"><span>Buy-in <strong>{selected.minBuyIn}–{selected.maxBuyIn} FP</strong></span><span>Seats <strong>{selected.seated} seated · {selected.waiting || 0} waiting</strong></span><span>Bot capacity <strong>{selected.availableBotSeats}</strong></span><span>Auto-rebuy <strong>{selected.allowTopUp === false ? 'Disabled' : 'Ready'}</strong></span></div>}
         <div className="bot-tests__fields">
           <label>Bots<input type="number" min="1" max={Math.max(1, selected?.availableBotSeats || 1)} value={form.botCount} onChange={(event) => setForm({ ...form, botCount: Number(event.target.value) })} /></label>
           <label>Starting FP<input type="number" min={selected?.minBuyIn || 0.01} max={selected?.maxBuyIn || undefined} step="0.01" value={form.startingStack} onChange={(event) => setForm({ ...form, startingStack: event.target.value })} /></label>
-          <label>Hands<input type="number" min="1" max="100" value={form.hands} onChange={(event) => setForm({ ...form, hands: Number(event.target.value) })} /></label>
+          <label>Table hands<input type="number" min="1" max="100" value={form.hands} onChange={(event) => setForm({ ...form, hands: Number(event.target.value) })} /><small>Completed hands for the whole table—not per bot.</small></label>
         </div>
         <label>Audit reason<textarea minLength="3" required value={form.reason} onChange={(event) => setForm({ ...form, reason: event.target.value })} placeholder="What are you validating?" /></label>
-        <div className="bot-tests__gate"><strong>Human-start gate is always on.</strong><span>Bots cannot start or continue a bot-only game.</span></div>
+        <div className="bot-tests__gate"><strong>Human-start gate is always on.</strong><span>Bots cannot start or continue a bot-only game. Busted bots automatically rebuy between hands; actions use part of the table timer.</span></div>
         {activeRun && <div className="bot-tests__active-warning">A test is already active on <strong>{activeRun.tableName || activeRun.ringId}</strong>. Stop it before arming another table.</div>}
-        <button className="bot-tests__deploy" disabled={submitting || activeRun || !selected || selected.availableBotSeats < 1 || selected.tableStatus !== 'ACTIVE'}>{submitting ? 'ARMING…' : 'ARM TEST BOTS'}</button>
+        {selected?.allowTopUp === false && <div className="bot-tests__active-warning">Enable <strong>Auto-rebuy / top-up</strong> in this table's settings before running a multi-hand bot test.</div>}
+        <button className="bot-tests__deploy" disabled={submitting || activeRun || !selected || selected.availableBotSeats < 1 || selected.tableStatus !== 'ACTIVE' || selected.allowTopUp === false}>{submitting ? 'ARMING…' : 'ARM TEST BOTS'}</button>
       </form>
 
       <div className="bot-tests__panel bot-tests__runs"><div className="bot-tests__panel-heading"><h3>Recent runs</h3><button type="button" onClick={() => refresh()}>Refresh</button></div>

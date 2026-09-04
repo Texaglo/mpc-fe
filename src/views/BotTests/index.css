@@ -8,6 +8,7 @@
 .bot-tests__grid { display:grid; grid-template-columns:minmax(360px,.9fr) minmax(420px,1.1fr); gap:14px; }
 .bot-tests__panel { padding:20px; }
 .bot-tests label { display:grid; gap:7px; margin-bottom:13px; color:#c8ccd0; font-size:12px; font-weight:700; }
+.bot-tests label small { color:#7e8b94; font-size:9px; font-weight:500; line-height:1.35; }
 .bot-tests select, .bot-tests input, .bot-tests textarea { width:100%; border:1px solid #344653; border-radius:8px; background:#0c141b; color:#fff; padding:11px 12px; }
 .bot-tests textarea { min-height:68px; resize:vertical; }
 .bot-tests__fields { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
