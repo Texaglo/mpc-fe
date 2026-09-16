@@ -5,6 +5,7 @@ import SitnGo from '../SitnGo/index';
 import Tourney from '../Tourney/index';
 import Template from '../Templates/index';
 import BotTests from '../BotTests';
+import CompetitionSetup from '../CompetitionSetup';
 import { canAccess } from '../../utils/adminAccess';
 
 import './index.css';
@@ -37,6 +38,8 @@ class Games extends React.Component {
                 return <Template />;
             case 'botTests':
                 return canViewBots ? <BotTests /> : canViewGames ? <Ring /> : null;
+            case 'competitionSetup':
+                return canAccess(access, 'tournaments.manage') ? <CompetitionSetup /> : null;
             default:
                 return <Ring />;
         }
@@ -78,6 +81,10 @@ class Games extends React.Component {
                         >
                             Template
                         </button>}
+                        {canAccess(access, 'tournaments.manage') && <button
+                            className={`games-tab-button ${activeTab === 'competitionSetup' ? 'active' : ''}`}
+                            onClick={() => this.switchTab('competitionSetup')}
+                        >Competition setup (testing)</button>}
                         {canViewBots && <button
                             className={`games-tab-button ${effectiveTab === 'botTests' ? 'active' : ''}`}
                             onClick={() => this.switchTab('botTests')}
