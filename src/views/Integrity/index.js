@@ -32,7 +32,7 @@ export function Integrity({ role, permissions, location }) {
         ]);
         setItems(list.data.body.items); setTotal(list.data.body.total); setOverview(summary.data.body);
     }, [tab, offset, userId]);
-    useEffect(() => { let active = true; refresh().catch(e => active && failure(e)); return () => { active = false; }; }, [refresh]);
+    useEffect(() => { let active = true; const load = () => refresh().catch(e => active && failure(e)); load(); const timer = setInterval(load, 30000); return () => { active = false; clearInterval(timer); }; }, [refresh]);
     const selectPlayer = useCallback(async id => {
         const request = ++playerRequest.current;
         setError(''); setUserId(id); setFilter(id); setOffset(0); setPlayer(null);
@@ -54,6 +54,11 @@ export function Integrity({ role, permissions, location }) {
                 {manage && <button className="add-btn" disabled={busy} onClick={() => act('scan', {}, false)}>Analyze recent hands</button>}</div></div>
         <p className="integrity-help">Alerts are evidence for review, not proof of cheating. Shared networks never trigger an automatic ban. Solvers and outside action recommendations are prohibited during play.</p>
         {overview && <div className="users-stats"><span className="stat-item"><span className="stat-label">Open alerts</span><strong className="stat-value">{overview.openAlerts}</strong></span><span className="stat-item"><span className="stat-label">Open reports</span><strong className="stat-value">{overview.openReports}</strong></span></div>}
+        {overview?.health && <section className="integrity-card" aria-label="Collection health"><h3>Collection health</h3>
+            <p>Automatic scanner: {overview.health.scannerRunning ? (overview.health.scanFresh ? 'Running · recent scan completed' : 'Running · awaiting a recent successful scan') : 'Stopped on this backend process'}</p>
+            <p>Last scan: {overview.health.lastScanAt ? new Date(overview.health.lastScanAt).toLocaleString() : 'No scan since startup'} · Last action: {overview.health.lastActionAt ? new Date(overview.health.lastActionAt).toLocaleString() : 'No action observed since startup'}</p>
+            <details><summary>Protection coverage and limits</summary>{(overview.capabilities || []).map(c => <p key={c.number}><strong>{c.number}. {c.name} — {c.status}.</strong> {c.detail}</p>)}</details>
+        </section>}
         {overview?.health?.failedWrites > 0 && <p role="alert" className="integrity-error">Evidence collection needs attention: {overview.health.failedWrites} failed operations since startup. Check backend logs.</p>}
         {error && <div role="alert" className="integrity-error">{error}</div>}
         <form className="integrity-actions" onSubmit={e => { e.preventDefault(); selectPlayer(filter.trim()); }}><label>Player ID<input className="search-input" value={filter} onChange={e => setFilter(e.target.value)} /></label><button className="add-btn">Open player</button><button type="button" className="add-btn" onClick={() => selectPlayer('')}>All players</button></form>
@@ -71,6 +76,9 @@ export function Integrity({ role, permissions, location }) {
                 <button className="add-btn" disabled={!otherUser} onClick={() => act('links', { userId, otherUserId: otherUser, confirmed: true })}>Confirm same owner</button>
                 {(player.links || []).map(link => <div className="integrity-row" key={link._id}><span>{link.users.join(' ↔ ')} · {link.confirmed ? 'Confirmed link' : 'Link cleared'}</span>{link.confirmed && <button className="add-btn" onClick={() => act('links', { userId, otherUserId: link.users.find(x => x !== userId), confirmed: false })}>Clear link</button>}</div>)}
             </fieldset>
+            <h4>60-minute return-stack requirements</h4>
+            {!(player.returnFloors || []).length && <p>No active return-stack requirements.</p>}
+            {(player.returnFloors || []).map((r, i) => <p key={i}>{r.tableName}: at least {r.amount} {r.balanceType} on return until {new Date(r.until).toLocaleString()}</p>)}
             <h4>Pending withdrawals</h4>
             {!player.withdrawals.length && <p>No pending withdrawals.</p>}
             {player.withdrawals.map(w => <div className="integrity-row" key={w._id}><span>{w.paidAmount} {w.asset} · {w.integrityHold ? 'Held for review' : 'Awaiting approval'} {w.integrityHoldReason}</span>{hold && <button className="add-btn" disabled={busy || w.payoutProcessing} onClick={() => act(`withdrawals/${w._id}/hold`, { hold: !w.integrityHold })}>{w.integrityHold ? 'Release review hold' : 'Hold for review'}</button>}</div>)}
@@ -82,6 +90,7 @@ export function Integrity({ role, permissions, location }) {
                 <div className="integrity-row"><h3>{title(item.rule || item.category || item.action || item.kind)}</h3><span className="kyc-badge pending">{item.status || 'Recorded'}</span></div>
                 <p>{new Date(item.createdAt || item.at).toLocaleString()} {item.handId && `· Hand ${item.handId}`} {item.tableId && `· Table ${item.tableId}`}</p>
                 <div className="integrity-actions">{(item.users || [item.subjectId || item.userId].filter(Boolean)).map(id => <button className="integrity-player" key={id} onClick={() => selectPlayer(id)}>{id}</button>)}</div>
+                {item.testOnly && <p>Test bot evidence — QA activity</p>}{!item.testOnly && item.hasTestAccounts && <p>Includes test bot activity</p>}
                 {item.description && <p>{item.description}</p>}{item.reason && <p>Reason: {item.reason}</p>}
                 <details><summary>Review evidence</summary><pre>{JSON.stringify(item.evidence || item.data || { actor: item.actorId, target: item.target, before: item.before, after: item.after, context: item.context }, null, 2)}</pre></details>
                 {manage && ['alerts', 'reports'].includes(tab) && <div className="integrity-actions">{(tab === 'alerts' ? ['reviewing', 'dismissed', 'confirmed'] : ['reviewing', 'closed']).map(status => <button className="add-btn" key={status} disabled={busy || item.status === status} onClick={() => act(`${tab}/${item._id}`, { status })}>{title(status)}</button>)}</div>}

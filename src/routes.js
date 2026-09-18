@@ -18,7 +18,10 @@ import HandHistory from "./views/HandHistory";
 import Integrity from "./views/Integrity";
 import FreePlay from "./views/FreePlay";
 
+import QaTests from "./views/QaTests";
+
 var routes = [
+  { layout: "/home", path: "/qa-tests", name: "Safe game tests", component: QaTests, hidden: true, permission: "bots.view" },
   { layout: "/home", path: "/integrity", name: "Player Integrity", component: Integrity, hidden: true, permission: "integrity.view" },
   {
     layout: "/home",

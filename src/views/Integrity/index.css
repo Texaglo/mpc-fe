@@ -6,7 +6,7 @@
 .integrity-page .add-btn { min-height: 34px; padding: 7px 14px; text-transform: capitalize; }
 .integrity-page button:disabled { opacity: .45; cursor: not-allowed; }
 .integrity-page label { display: block; color: var(--mpc-text); margin: 10px 0; }
-.integrity-page label > input:not([type=checkbox]), .integrity-page textarea { display: block; margin-top: 6px; min-width: 260px; }
+.integrity-page label > input:not([type=checkbox]), .integrity-page label > select, .integrity-page textarea { display: block; margin-top: 6px; min-width: 260px; }
 .integrity-reason { max-width: 650px; }
 .integrity-card { background: var(--mpc-panel); border: 1px solid var(--mpc-line); border-radius: 10px; padding: 18px; margin: 18px 0; }
 .integrity-record { padding: 12px 0; border-bottom: 1px solid var(--mpc-line); }
@@ -17,4 +17,4 @@
 .integrity-page summary { cursor: pointer; color: var(--mpc-muted); padding: 6px 0; }
 .integrity-tabs [aria-pressed=true] { border-color: var(--mpc-gold); color: var(--mpc-gold); }
 .integrity-error { padding: 12px; border: 1px solid #e66a78; border-radius: 6px; color: var(--mpc-danger); }
-@media(max-width:600px) { .integrity-page label > input:not([type=checkbox]), .integrity-page textarea { min-width: 0; width: 100%; } }
+@media(max-width:600px) { .integrity-page label > input:not([type=checkbox]), .integrity-page label > select, .integrity-page textarea { min-width: 0; width: 100%; } }
