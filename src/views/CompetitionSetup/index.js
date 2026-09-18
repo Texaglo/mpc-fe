@@ -89,7 +89,7 @@ export default function CompetitionSetup() {
         update(key, e.target.value);
         if (key === 'gameVariant') update('formatLimit', e.target.value === 'Omaha' ? 'Pot Limit' : 'No Limit');
     }}>{choices.map(choice => <option key={choice} value={choice}>{choice}</option>)}</select></Field>;
-    return <div className="content"><div className="main-container">
+    return <div className="content"><div className="main-container competition-workspace">
         <h2>Competition setup — testing</h2>
         <p role="status">Local / staging testing only. The tournament runner supports gameplay and prize settlement when enabled on the staging backend. Use isolated test accounts and a separate database. Existing tournament screens use the legacy API.</p>
         {error && <p role="alert">{error}</p>}
@@ -109,36 +109,36 @@ export default function CompetitionSetup() {
                 {['smallBlind', 'bigBlind', 'duration', 'ante'].map(key => <Field key={key} label={`${index + 1}: ${key === 'duration' ? 'Minutes' : key}`}>
                     <input className="competition-control" type="number" min="0" step="any" required value={level[key]} onChange={e => update('blinds', form.blinds.map((b, i) => i === index ? { ...b, [key]: e.target.value } : b))} />
                 </Field>)}
-                <button type="button" disabled={form.blinds.length === 1} onClick={() => update('blinds', form.blinds.filter((_, i) => i !== index))}>Remove level</button>
-            </div>)}<button type="button" onClick={() => update('blinds', [...form.blinds, { smallBlind: 20, bigBlind: 40, duration: 10, ante: 0 }])}>Add level</button></section>
+                <button className="add-btn" type="button" disabled={form.blinds.length === 1} onClick={() => update('blinds', form.blinds.filter((_, i) => i !== index))}>Remove level</button>
+            </div>)}<button className="add-btn" type="button" onClick={() => update('blinds', [...form.blinds, { smallBlind: 20, bigBlind: 40, duration: 10, ante: 0 }])}>Add level</button></section>
             <button className="add-btn" type="submit">Save draft</button>
-            {editing && <button type="button" onClick={() => { setEditing(null); setForm(blank()); }}>Discard form changes</button>}
+            {editing && <button className="add-btn" type="button" onClick={() => { setEditing(null); setForm(blank()); }}>Discard form changes</button>}
         </fieldset></form>
-        <section className="competition-section"><h3>Competitions ({total})</h3><button disabled={busy} onClick={refresh}>Refresh</button>
+        <section className="competition-section"><h3>Competitions ({total})</h3><button className="add-btn" disabled={busy} onClick={refresh}>Refresh</button>
             {items.map(item => <div key={item._id} className="competition-section">
                 <h4>{item.name} — {item.status}</h4>
                 <p>{item.kind} · {item.gameVariant} · {item.formatLimit} · {item.buyIn} + {item.fee} {item.balanceType} · {item.registeredCount}/{item.maxPlayers} registered · Pool: {item.prizePool}</p>
                 <p>ID: <code>{item._id}</code></p><div className="competition-actions">
-                    {item.status === 'Draft' && <><button disabled={busy} onClick={() => { setEditing(item._id); setForm({ ...blank(), ...item,
+                    {item.status === 'Draft' && <><button className="add-btn" disabled={busy} onClick={() => { setEditing(item._id); setForm({ ...blank(), ...item,
                         registrationOpensAt: localDate(item.registrationOpensAt), startsAt: item.startsAt ? localDate(item.startsAt) : blank().startsAt,
                         payoutPercentages: item.payoutPercentages.join(',') }); }}>Edit</button>
-                        <button disabled={busy} onClick={() => action(item, 'publish')}>Open staging registration</button></>}
-                    {['Draft', 'Registering'].includes(item.status) && <button disabled={busy} onClick={() => action(item, 'cancel')}>Cancel / refund</button>}
-                    <button disabled={busy} onClick={() => setLiveId(item._id)}>Live operations / results</button>
-                    <button disabled={busy} onClick={() => { setEditing(null); setForm({ ...blank(), ...item, name: `${item.name} (copy)`, registrationOpensAt: blank().registrationOpensAt, startsAt: blank().startsAt, payoutPercentages: item.payoutPercentages.join(',') }); }}>Clone as draft</button>
-                    {['registrations', 'audit', 'seating-preview', 'history'].map(resource => <button key={resource} disabled={busy} onClick={() => inspect(item, resource)}>{resource}</button>)}
+                        <button className="add-btn" disabled={busy} onClick={() => action(item, 'publish')}>Open staging registration</button></>}
+                    {['Draft', 'Registering'].includes(item.status) && <button className="add-btn" disabled={busy} onClick={() => action(item, 'cancel')}>Cancel / refund</button>}
+                    <button className="add-btn" disabled={busy} onClick={() => setLiveId(item._id)}>Live operations / results</button>
+                    <button className="add-btn" disabled={busy} onClick={() => { setEditing(null); setForm({ ...blank(), ...item, name: `${item.name} (copy)`, registrationOpensAt: blank().registrationOpensAt, startsAt: blank().startsAt, payoutPercentages: item.payoutPercentages.join(',') }); }}>Clone as draft</button>
+                    {['registrations', 'audit', 'seating-preview', 'history'].map(resource => <button className="add-btn" key={resource} disabled={busy} onClick={() => inspect(item, resource)}>{resource}</button>)}
                 </div>
             </div>)}
-            <button disabled={busy || offset === 0} onClick={() => setOffset(Math.max(0, offset - 20))}>Previous</button>
-            <button disabled={busy || offset + 20 >= total} onClick={() => setOffset(offset + 20)}>Next</button>
+            <button className="add-btn" disabled={busy || offset === 0} onClick={() => setOffset(Math.max(0, offset - 20))}>Previous</button>
+            <button className="add-btn" disabled={busy || offset + 20 >= total} onClick={() => setOffset(offset + 20)}>Next</button>
         </section>
         {liveId && <Operations key={liveId} id={liveId} onClose={() => setLiveId(null)} />}
         {detail && <section className="competition-section"><h3>{detail.name}: {detail.resource}</h3>{detail.resource === 'registrations' ? <table><thead><tr><th>Player ID</th><th>Status</th><th>Buy-in</th><th>Fee</th><th>Currency</th></tr></thead><tbody>{(detail.items || []).map(e => <tr key={e._id}><td>{e.userId}</td><td>{e.status}</td><td>{e.buyIn}</td><td>{e.fee}</td><td>{e.balanceType}</td></tr>)}</tbody></table>
                 : detail.resource === 'seating-preview' ? <ol>{(detail.tables || []).map((players, i) => <li key={i}>Table {i + 1}: {players.join(', ')}</li>)}</ol>
                 : <table><thead><tr><th>Time</th><th>Operation / hand</th><th>Details</th></tr></thead><tbody>{(detail.items || []).map(e => <tr key={e._id}><td>{new Date(e.createdAt).toLocaleString()}</td><td>{e.action || `Hand ${e.roundNumber}`}</td><td>{e.reason || (e.terminalState?.tableCards || []).join(' · ')}<details><summary>Full record</summary><pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{JSON.stringify(e, null, 2)}</pre></details></td></tr>)}</tbody></table>}
-            {detail.items && <><button disabled={busy || detail.offset === 0} onClick={() => inspect({ _id: detail.id, name: detail.name }, detail.resource, Math.max(0, detail.offset - 20))}>Previous records</button>
-                <button disabled={busy || detail.offset + 20 >= detail.total} onClick={() => inspect({ _id: detail.id, name: detail.name }, detail.resource, detail.offset + 20)}>Next records</button></>}
-            <button onClick={() => setDetail(null)}>Close details</button>
+            {detail.items && <><button className="add-btn" disabled={busy || detail.offset === 0} onClick={() => inspect({ _id: detail.id, name: detail.name }, detail.resource, Math.max(0, detail.offset - 20))}>Previous records</button>
+                <button className="add-btn" disabled={busy || detail.offset + 20 >= detail.total} onClick={() => inspect({ _id: detail.id, name: detail.name }, detail.resource, detail.offset + 20)}>Next records</button></>}
+            <button className="add-btn" onClick={() => setDetail(null)}>Close details</button>
         </section>}
     </div></div>;
 }

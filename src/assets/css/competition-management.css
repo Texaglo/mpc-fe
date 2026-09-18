@@ -54,3 +54,21 @@
   .competition-blind-row { grid-template-columns: 28px 1fr 1fr; }
   .competition-blind-row .blind-duration { grid-column: 2 / 4; }
 }
+
+/* V2 setup and operations use the same controls/palette as the table editor. */
+.competition-workspace { color: var(--mpc-text); }
+.competition-workspace h2, .competition-workspace h3, .competition-workspace h4 { color: var(--mpc-gold); }
+.competition-workspace h2 { font-size: 20px; }
+.competition-workspace h3 { font-size: 17px; }
+.competition-workspace h4 { font-size: 15px; }
+.competition-workspace > p { max-width: 950px; color: var(--mpc-muted); line-height: 1.6; }
+.competition-workspace .competition-form > fieldset { grid-column: 1 / -1; min-width: 0; }
+.competition-workspace .competition-section { margin: 14px 0; padding: 18px; overflow-x: auto; background: var(--mpc-panel); border-color: var(--mpc-line); }
+.competition-workspace .add-btn { padding: 7px 13px; min-height: 34px; margin: 6px 8px 6px 0; }
+.competition-workspace .add-btn:disabled { opacity: .45; cursor: not-allowed; }
+.competition-workspace table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.competition-workspace th, .competition-workspace td { padding: 12px; border-bottom: 1px solid var(--mpc-line); text-align: left; }
+.competition-workspace th { color: var(--mpc-gold); }
+.competition-workspace .competition-section > fieldset { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.competition-workspace .competition-section > fieldset > label { min-width: 200px; flex: 1; }
+.competition-workspace [role=alert] { color: var(--mpc-danger); }

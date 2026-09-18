@@ -27,6 +27,7 @@ const groups = [
         label: 'Players',
         icon: 'tim-icons icon-single-02',
         tabs: [
+            { path: '/home/integrity', label: 'Integrity & Reports', permission: 'integrity.view' },
             { path: '/home/users', label: 'User Management', permission: 'players.view' },
             { path: '/home/leaderboards', label: 'Leaderboards', permission: 'players.view' },
             { path: '/home/hand-history', label: 'Hand History', permission: 'hand_history.view' },

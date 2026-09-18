@@ -528,6 +528,7 @@ class Users extends React.Component {
             {
                 Cell: item => (
                     <div className="action-buttons">
+                        {canAccess(access, 'integrity.view') && <button className="profile-btn" title="Review player integrity" onClick={() => this.props.history.push(`/home/integrity?player=${item.original._id}`)}>Integrity</button>}
                         <button onClick={() => this.openProfileModal(item.original)} className="profile-btn" title="Open complete player profile">Profile</button>
                         <button
                             onClick={() => this.openHistoryModal(item.original)}

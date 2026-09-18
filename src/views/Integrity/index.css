@@ -1,0 +1,20 @@
+.integrity-page { color: var(--mpc-text); }
+.integrity-page h3, .integrity-page h4 { color: var(--mpc-gold); font-size: 16px; margin: 8px 0; text-transform: capitalize; }
+.integrity-help { color: var(--mpc-muted); font-size: 13px; line-height: 1.6; max-width: 900px; }
+.integrity-actions, .integrity-row, .integrity-tabs { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+.integrity-row { justify-content: space-between; }
+.integrity-page .add-btn { min-height: 34px; padding: 7px 14px; text-transform: capitalize; }
+.integrity-page button:disabled { opacity: .45; cursor: not-allowed; }
+.integrity-page label { display: block; color: var(--mpc-text); margin: 10px 0; }
+.integrity-page label > input:not([type=checkbox]), .integrity-page textarea { display: block; margin-top: 6px; min-width: 260px; }
+.integrity-reason { max-width: 650px; }
+.integrity-card { background: var(--mpc-panel); border: 1px solid var(--mpc-line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+.integrity-record { padding: 12px 0; border-bottom: 1px solid var(--mpc-line); }
+.integrity-record:last-child { border-bottom: 0; }
+.integrity-record p { overflow-wrap: anywhere; }
+.integrity-player { color: var(--mpc-gold); border: 0; background: transparent; padding: 0; text-decoration: underline; overflow-wrap: anywhere; }
+.integrity-page pre { color: var(--mpc-text); background: var(--mpc-panel-deep); padding: 12px; border-radius: 6px; max-height: 280px; overflow: auto; white-space: pre-wrap; }
+.integrity-page summary { cursor: pointer; color: var(--mpc-muted); padding: 6px 0; }
+.integrity-tabs [aria-pressed=true] { border-color: var(--mpc-gold); color: var(--mpc-gold); }
+.integrity-error { padding: 12px; border: 1px solid #e66a78; border-radius: 6px; color: var(--mpc-danger); }
+@media(max-width:600px) { .integrity-page label > input:not([type=checkbox]), .integrity-page textarea { min-width: 0; width: 100%; } }

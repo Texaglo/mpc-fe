@@ -34,7 +34,7 @@ export default function Operations({ id, onClose }) {
         finally { setBusy(false); }
     };
     return <section className="competition-section" aria-label="Live competition">
-        <button onClick={onClose}>Close live view</button>
+        <button className="add-btn" onClick={onClose}>Close live view</button>
         {error && <p role="alert">{error}</p>}
         {data && <>
             <h3>{data.event.name} — {data.event.status}</h3>
@@ -43,18 +43,18 @@ export default function Operations({ id, onClose }) {
             {data.level && <p>Level {data.level.index + 1}: {data.level.smallBlind}/{data.level.bigBlind}, ante {data.level.ante}
                 {data.level.onBreak ? ' · On break' : ''}{data.level.remainingSeconds != null ? ` · ${Math.ceil(data.level.remainingSeconds)} seconds remaining` : ' · Final level'}</p>}
             {['Registering', 'Running', 'Paused'].includes(data.event.status) && <fieldset disabled={busy}>
-                <label>Audit reason <input aria-label="Audit reason" value={reason} onChange={e => setReason(e.target.value)} /></label>
-                {data.event.status !== 'Registering' && <button onClick={() => control(data.event.status === 'Paused' ? 'resume' : 'pause')}>{data.event.status === 'Paused' ? 'Resume' : 'Pause'}</button>}
-                {data.event.status === 'Running' && <button disabled={data.event.pauseRequested} onClick={() => control('pause-after-hand')}>{data.event.pauseRequested ? 'Pause after hands requested' : 'Pause after current hands'}</button>}
-                {data.event.status === 'Paused' && <><label>Next-hand blind level <select aria-label="Next-hand blind level" value={level} onChange={e => setLevel(e.target.value)}>
+                <label>Audit reason <input className="competition-control" aria-label="Audit reason" value={reason} onChange={e => setReason(e.target.value)} /></label>
+                {data.event.status !== 'Registering' && <button className="add-btn" onClick={() => control(data.event.status === 'Paused' ? 'resume' : 'pause')}>{data.event.status === 'Paused' ? 'Resume' : 'Pause'}</button>}
+                {data.event.status === 'Running' && <button className="add-btn" disabled={data.event.pauseRequested} onClick={() => control('pause-after-hand')}>{data.event.pauseRequested ? 'Pause after hands requested' : 'Pause after current hands'}</button>}
+                {data.event.status === 'Paused' && <><label>Next-hand blind level <select className="competition-control" aria-label="Next-hand blind level" value={level} onChange={e => setLevel(e.target.value)}>
                     {data.event.blinds.map((b, i) => <option key={i} value={i}>{i + 1}: {b.smallBlind}/{b.bigBlind}</option>)}
-                </select></label><button onClick={() => control('level')}>Set level for next hand</button></>}
-                <label>Player ID <input aria-label="Player ID" value={userId} onChange={e => setUserId(e.target.value)} /></label>
-                {data.event.status === 'Registering' && <><button disabled={!userId} onClick={() => control('remove-entry')}>Remove entry and refund</button>
-                    {data.event.buyIn === 0 && data.event.fee === 0 && <button disabled={!userId} onClick={() => control('add-free-entry')}>Add free entry</button>}</>}
-                {data.event.status === 'Paused' && <><label>Target table <select aria-label="Target table" value={tableId} onChange={e => setTableId(e.target.value)}><option value="">Select table</option>{data.tables.filter(t => !t.closed).map(t => <option value={t._id} key={t._id}>{t.number}</option>)}</select></label>
-                    <button disabled={!userId || !tableId} onClick={() => control('move')}>Move between settled hands</button>
-                    <button disabled={!userId} onClick={() => control('disqualify')}>Disqualify outside paid places</button>
+                </select></label><button className="add-btn" onClick={() => control('level')}>Set level for next hand</button></>}
+                <label>Player ID <input className="competition-control" aria-label="Player ID" value={userId} onChange={e => setUserId(e.target.value)} /></label>
+                {data.event.status === 'Registering' && <><button className="add-btn" disabled={!userId} onClick={() => control('remove-entry')}>Remove entry and refund</button>
+                    {data.event.buyIn === 0 && data.event.fee === 0 && <button className="add-btn" disabled={!userId} onClick={() => control('add-free-entry')}>Add free entry</button>}</>}
+                {data.event.status === 'Paused' && <><label>Target table <select className="competition-control" aria-label="Target table" value={tableId} onChange={e => setTableId(e.target.value)}><option value="">Select table</option>{data.tables.filter(t => !t.closed).map(t => <option value={t._id} key={t._id}>{t.number}</option>)}</select></label>
+                    <button className="add-btn" disabled={!userId || !tableId} onClick={() => control('move')}>Move between settled hands</button>
+                    <button className="add-btn" disabled={!userId} onClick={() => control('disqualify')}>Disqualify outside paid places</button>
                     <p>Moves and disqualifications require all hands to have settled. Paid-place disqualifications require a separate prize ruling.</p></>}
             </fieldset>}
             <h4>Tables</h4>

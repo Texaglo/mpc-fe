@@ -15,9 +15,11 @@ import Progress from "./views/Progress";
 import Cashier from "./views/Cashier";
 import AuditLog from "./views/AuditLog";
 import HandHistory from "./views/HandHistory";
+import Integrity from "./views/Integrity";
 import FreePlay from "./views/FreePlay";
 
 var routes = [
+  { layout: "/home", path: "/integrity", name: "Player Integrity", component: Integrity, hidden: true, permission: "integrity.view" },
   {
     layout: "/home",
     path: "/dashboard",
