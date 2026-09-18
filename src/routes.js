@@ -51,7 +51,7 @@ var routes = [
     name: "Games",
     component: Games,
     icon: "tim-icons icon-controller",
-    permission: ['games.view', 'bots.view', 'bots.manage'],
+    permission: ['games.view', 'bots.view', 'bots.manage', 'tournaments.manage'],
   },
   {
     layout: "/home",

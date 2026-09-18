@@ -22,8 +22,7 @@ class Games extends React.Component {
         this.setState({ activeTab: tabName });
     }
 
-    renderActiveContent = () => {
-        const { activeTab } = this.state;
+    renderActiveContent = (activeTab = this.state.activeTab) => {
         const access = { role: this.props.role, permissions: this.props.permissions };
         const canViewGames = canAccess(access, 'games.view');
         const canViewBots = canAccess(access, ['bots.view', 'bots.manage']);
@@ -31,9 +30,9 @@ class Games extends React.Component {
             case 'ring':
                 return canViewGames ? <Ring /> : canViewBots ? <BotTests /> : null;
             case 'sitNgo':
-                return <SitnGo />;
+                return <><p>Legacy Sit’n’Go records. Use Competition setup for new events; legacy operations are disabled when the new runner is enabled.</p><SitnGo /></>;
             case 'tourney':
-                return <Tourney />;
+                return <><p>Legacy tournament records. Use Competition setup for new events; reconcile existing registrations before migration.</p><Tourney /></>;
             case 'template':
                 return <Template />;
             case 'botTests':
@@ -50,7 +49,7 @@ class Games extends React.Component {
         const access = { role: this.props.role, permissions: this.props.permissions };
         const canViewGames = canAccess(access, 'games.view');
         const canViewBots = canAccess(access, ['bots.view', 'bots.manage']);
-        const effectiveTab = (!canViewGames && canViewBots) ? 'botTests' : activeTab;
+        const effectiveTab = activeTab === 'ring' && !canViewGames ? (canViewBots ? 'botTests' : 'competitionSetup') : activeTab;
 
         return (
             <div className='content'>
@@ -95,7 +94,7 @@ class Games extends React.Component {
 
                     {/* Active Content */}
                     <div className="games-content">
-                        {effectiveTab === 'botTests' ? <BotTests /> : this.renderActiveContent()}
+                        {this.renderActiveContent(effectiveTab)}
                     </div>
                 </div>
             </div>

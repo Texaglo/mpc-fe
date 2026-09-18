@@ -85,7 +85,7 @@ class AdminNavbar extends React.Component {
   copied = () => EventBus.publish("success", 'Address is Copied');
 
   render() {
-    const environment = process.env.REACT_APP_ENVIRONMENT || (process.env.NODE_ENV === 'production' ? 'Production' : 'Local');
+    const environment = process.env.REACT_APP_ENVIRONMENT || (process.env.REACT_APP_ADMIN_API_ENV === 'development' ? 'Local / staging' : process.env.NODE_ENV === 'production' ? 'Production' : 'Local');
     return (
       <div className="nav-bar">
         <Navbar

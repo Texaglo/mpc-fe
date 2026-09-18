@@ -36,6 +36,6 @@ test('admin creates a draft through new API, never opens paid registration autom
 test('visibly identifies staging-only scope and displays backend failure', async () => {
     axios.get.mockRejectedValueOnce({ response: { data: { message: 'New backend required' } } });
     render(<CompetitionSetup />);
-    expect(screen.getByRole('status').textContent).toContain('Registration testing only');
+    expect(screen.getByRole('status').textContent).toContain('Local / staging testing only');
     expect((await screen.findByRole('alert')).textContent).toBe('New backend required');
 });
