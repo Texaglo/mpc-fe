@@ -30,8 +30,8 @@ const getWinners = hand => {
     return getParticipants(hand).filter(participant => participant.isWinner);
 };
 
-const winnerName = winner => winner?.username || winner?.playerName || winner?.name
-    || (winner?.playerId !== undefined ? `Player ${winner.playerId}` : 'Winner');
+const winnerName = winner => winner?.winnerName || winner?.username || winner?.playerName || winner?.name
+    || ((winner?.playerId ?? winner?.playerID ?? winner?.id) !== undefined ? `Player ${winner.playerId ?? winner.playerID ?? winner.id}` : 'Winner');
 
 const movementLabel = movement => String(
     movement.currentAction || movement.action || movement.eventType || 'Event'
@@ -328,7 +328,7 @@ const HandHistory = () => {
 
                         <section className="hand-detail-section">
                             <div className="hand-detail-section-title"><div><h4>Pot settlement</h4><p>Main pot, side pots, unmatched chips and refunds.</p></div></div>
-                            <div className="hand-pot-grid"><article><span>Winners</span><strong>{getWinners(selectedHand).length ? getWinners(selectedHand).map(winner => `${winnerName(winner)}${winner.prize !== undefined ? ` · ${formatNumber(winner.prize)}` : ''}`).join(', ') : '—'}</strong></article><article><span>Side pots</span><strong>{selectedHand.sidePots?.length ? selectedHand.sidePots.map((pot, index) => `#${index + 1} ${formatNumber(pot.amount ?? pot.pot ?? pot)}`).join(' · ') : 'None'}</strong></article><article><span>Refunds</span><strong>{selectedHand.sidePotRefunds?.length ? selectedHand.sidePotRefunds.map(refund => `${refund.username || refund.playerId}: ${formatNumber(refund.amount ?? refund)}`).join(' · ') : 'None'}</strong></article></div>
+                            <div className="hand-pot-grid"><article><span>Winners</span><strong>{getWinners(selectedHand).length ? getWinners(selectedHand).map(winner => `${winnerName(winner)}${winner.prize !== undefined ? ` · ${formatNumber(winner.prize)}` : ''}`).join(', ') : '—'}</strong></article><article><span>Main & side pots</span><strong>{selectedHand.sidePots?.length ? selectedHand.sidePots.map((pot, index) => `${pot.type === 'main' || (pot.type !== 'side' && index === 0) ? 'Main' : `Side ${pot.sidePotIndex >= 0 ? pot.sidePotIndex + 1 : index}`}: ${formatNumber(pot.amount ?? pot.pot ?? pot)}${pot.winners?.length ? ` → ${pot.winners.map(winner => `${winnerName(winner)} (${formatNumber(winner.prize)})`).join(', ')}` : ''}`).join(' · ') : 'None'}</strong></article><article><span>Refunds</span><strong>{selectedHand.sidePotRefunds?.length ? selectedHand.sidePotRefunds.map(refund => `${refund.username || `Player ${refund.playerId ?? refund.playerID}`}: ${formatNumber(refund.amount ?? refund)}`).join(' · ') : 'None'}</strong></article></div>
                         </section>
 
                         <section className="hand-detail-section">
