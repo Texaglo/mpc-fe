@@ -4,6 +4,7 @@ import axios from 'axios';
 import { canAccess } from '../../utils/adminAccess';
 import '../Users/index.css';
 import './index.css';
+import IntegrityControls from './Controls';
 
 const title = value => String(value || '').replace(/_/g, ' ');
 export function Integrity({ role, permissions, location }) {
@@ -59,6 +60,7 @@ export function Integrity({ role, permissions, location }) {
             <p>Last scan: {overview.health.lastScanAt ? new Date(overview.health.lastScanAt).toLocaleString() : 'No scan since startup'} · Last action: {overview.health.lastActionAt ? new Date(overview.health.lastActionAt).toLocaleString() : 'No action observed since startup'}</p>
             <details><summary>Protection coverage and limits</summary>{(overview.capabilities || []).map(c => <p key={c.number}><strong>{c.number}. {c.name} — {c.status}.</strong> {c.detail}</p>)}</details>
         </section>}
+        <IntegrityControls role={role} permissions={permissions} />
         {overview?.health?.failedWrites > 0 && <p role="alert" className="integrity-error">Evidence collection needs attention: {overview.health.failedWrites} failed operations since startup. Check backend logs.</p>}
         {error && <div role="alert" className="integrity-error">{error}</div>}
         <form className="integrity-actions" onSubmit={e => { e.preventDefault(); selectPlayer(filter.trim()); }}><label>Player ID<input className="search-input" value={filter} onChange={e => setFilter(e.target.value)} /></label><button className="add-btn">Open player</button><button type="button" className="add-btn" onClick={() => selectPlayer('')}>All players</button></form>

@@ -48,6 +48,7 @@ export function QaTests({ role, permissions }) {
       </fieldset>
     </form>}
     {runs.some(active) && <p role="status">A bot run is active. Only one run can operate at a time.</p>}
+    <p className="integrity-help">Individual anti-cheat switches are in Players → Integrity &amp; Reports. Choose this run’s reserved QA table, or explicitly choose the staging-wide scope before starting a run. Disabled detectors may prevent the alert target from being reached.</p>
     <section className="integrity-card" aria-label="QA runs"><h3>Test runs</h3>
       {runs.filter(r => r.config.qa).map(run => <article className="integrity-record" key={run.runId}>
         <h4>{run.config.qa.label} · {run.status}</h4><p>{run.tableName} · {run.runId}</p>
@@ -57,7 +58,7 @@ export function QaTests({ role, permissions }) {
       </article>)}
       {!runs.some(r => r.config.qa) && <p>No preset runs yet.</p>}
     </section>
-    {report && <section className="integrity-card" aria-label="Test results"><h3>Observed results</h3><p>Table: {report.tableId} · Results captured {new Date(report.generatedAt).toLocaleString()}. Use View results again to refresh.</p>
+    {report && <section className="integrity-card" aria-label="Test results"><h3>Observed results</h3>{report.testControls && <p>Disabled checks for this report: {Object.entries(report.testControls.values).filter(([, on]) => !on).map(([key]) => key.replace(/_/g, ' ')).join(', ') || 'none'}. Earlier cases and the original run completion are retained.</p>}<p>Table: {report.tableId} · Results captured {new Date(report.generatedAt).toLocaleString()}. Use View results again to refresh.</p>
       <p>{report.summary.goalReached ? 'Observation target reached' : 'Observation target not reached'} · {report.summary.completedHands} hands · {report.summary.actionCount} history records</p>
       <p>{report.summary.splitHands} split hands · {report.summary.sidePotHands} side-pot hands · {report.summary.tiedSidePotHands} tied side pots · {report.summary.differentMainWinnerHands} with a different main-pot winner</p>
       <p>{!report.summary.completedHands ? 'No completed hands to verify yet.' : report.summary.stackConservationFailures.length ? 'Stack conservation FAILED — inspect the affected histories.' : 'Starting and ending stacks balance in all completed hands.'}</p>
