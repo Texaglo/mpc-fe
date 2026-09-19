@@ -123,7 +123,8 @@ const latestBoardForRound = (round, fallback = []) => {
     return [];
 };
 
-const HandHistory = () => {
+const HandHistory = ({location}) => {
+    const linkedHand = new URLSearchParams(location?.search || '').get('hand');
     const dispatch = useDispatch();
     const [hands, setHands] = useState([]);
     const [pagination, setPagination] = useState(EMPTY_PAGINATION);
@@ -159,19 +160,21 @@ const HandHistory = () => {
         loadHands(1);
     }, [loadHands, refreshKey]);
 
-    const openHand = async hand => {
+    const openHand = useCallback(async hand => {
         setSelected(hand);
         setDetail(null);
         setDetailLoading(true);
         try {
-            const response = await axios.get(`/history/admin/hands/${encodeURIComponent(hand.handId || hand._id)}`);
+            const id=hand.handId || hand._id;
+            const response = await axios.get(String(id).startsWith('competition:') ? `/integrity/hands/${encodeURIComponent(id)}` : `/history/admin/hands/${encodeURIComponent(id)}`);
             setDetail(responseBody(response));
         } catch (error) {
             EventBus.publish('error', unwrapError(error));
         } finally {
             setDetailLoading(false);
         }
-    };
+    }, []);
+    useEffect(() => {if(linkedHand)openHand({handId:linkedHand});},[linkedHand,openHand]);
 
     const closeHand = () => {
         setSelected(null);
@@ -194,7 +197,8 @@ const HandHistory = () => {
         if (!hand || hand.status !== 'COMPLETED') return;
         dispatch(setLoader(true));
         try {
-            const response = await axios.get(`/history/admin/hands/${encodeURIComponent(hand.handId || hand._id)}/export`, { responseType: 'blob' });
+            const id=hand.handId || hand._id;
+            const response = String(id).startsWith('competition:') ? {data:new Blob([JSON.stringify(detail,null,2)],{type:'application/json'}),headers:{}} : await axios.get(`/history/admin/hands/${encodeURIComponent(id)}/export`, { responseType: 'blob' });
             const disposition = response.headers?.['content-disposition'] || '';
             const serverFilename = disposition.match(/filename="?([^";]+)"?/i)?.[1];
             const filename = serverFilename || `hand-${String(hand.handId || hand._id || 'history').replace(/[^a-z0-9._-]/gi, '_')}.json`;

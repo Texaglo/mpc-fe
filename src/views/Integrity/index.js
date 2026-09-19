@@ -5,6 +5,8 @@ import { canAccess } from '../../utils/adminAccess';
 import '../Users/index.css';
 import './index.css';
 import IntegrityControls from './Controls';
+import Evidence from './Evidence';
+import PlayerAnalysis from './PlayerAnalysis';
 
 const title = value => String(value || '').replace(/_/g, ' ');
 export function Integrity({ role, permissions, location }) {
@@ -24,6 +26,7 @@ export function Integrity({ role, permissions, location }) {
     const [busy, setBusy] = useState(false);
     const [overview, setOverview] = useState(null);
     const manage = canAccess({ role, permissions }, 'integrity.manage');
+    const canReadHands = canAccess({role,permissions}, 'hand_history.view');
     const hold = manage && canAccess({ role, permissions }, 'withdrawals.manage');
     const failure = e => setError(e.response?.data?.message || e.message);
     const refresh = useCallback(async () => {
@@ -85,16 +88,17 @@ export function Integrity({ role, permissions, location }) {
             {!player.withdrawals.length && <p>No pending withdrawals.</p>}
             {player.withdrawals.map(w => <div className="integrity-row" key={w._id}><span>{w.paidAmount} {w.asset} · {w.integrityHold ? 'Held for review' : 'Awaiting approval'} {w.integrityHoldReason}</span>{hold && <button className="add-btn" disabled={busy || w.payoutProcessing} onClick={() => act(`withdrawals/${w._id}/hold`, { hold: !w.integrityHold })}>{w.integrityHold ? 'Release review hold' : 'Hold for review'}</button>}</div>)}
         </section>}
+        {userId && <PlayerAnalysis key={userId} userId={userId} manage={manage} canReadHands={canReadHands} />}
         <nav className="integrity-tabs" aria-label="Integrity records">{['alerts', 'reports', 'events', 'audit'].map(name => <button key={name} aria-pressed={tab === name} className="add-btn" onClick={() => { setTab(name); setOffset(0); }}>{title(name)}</button>)}</nav>
         <section className="integrity-card" aria-label="Integrity records list">
             {!items.length && <p>No {tab} found.</p>}
             {items.map(item => <article className="integrity-record" key={item._id}>
-                <div className="integrity-row"><h3>{title(item.rule || item.category || item.action || item.kind)}</h3><span className="kyc-badge pending">{item.status || 'Recorded'}</span></div>
+                <div className="integrity-row"><h3>{item.evidence?.presentation?.title || title(item.rule || item.category || item.action || item.kind)}</h3><span className="kyc-badge pending">{item.status || 'Recorded'}</span></div>
                 <p>{new Date(item.createdAt || item.at).toLocaleString()} {item.handId && `· Hand ${item.handId}`} {item.tableId && `· Table ${item.tableId}`}</p>
-                <div className="integrity-actions">{(item.users || [item.subjectId || item.userId].filter(Boolean)).map(id => <button className="integrity-player" key={id} onClick={() => selectPlayer(id)}>{id}</button>)}</div>
+                <div className="integrity-actions">{(item.users || [item.subjectId || item.userId].filter(Boolean)).map(id => <button className="integrity-player" key={id} onClick={() => selectPlayer(id)}>{item.playerDetails?.find(p=>p.id===id)?.name || id}</button>)}</div>
                 {item.testOnly && <p>Test bot evidence — QA activity</p>}{!item.testOnly && item.hasTestAccounts && <p>Includes test bot activity</p>}
                 {item.description && <p>{item.description}</p>}{item.reason && <p>Reason: {item.reason}</p>}
-                <details><summary>Review evidence</summary><pre>{JSON.stringify(item.evidence || item.data || { actor: item.actorId, target: item.target, before: item.before, after: item.after, context: item.context }, null, 2)}</pre></details>
+                <Evidence item={item} canReadHands={canReadHands} />
                 {manage && ['alerts', 'reports'].includes(tab) && <div className="integrity-actions">{(tab === 'alerts' ? ['reviewing', 'dismissed', 'confirmed'] : ['reviewing', 'closed']).map(status => <button className="add-btn" key={status} disabled={busy || item.status === status} onClick={() => act(`${tab}/${item._id}`, { status })}>{title(status)}</button>)}</div>}
             </article>)}
         </section>

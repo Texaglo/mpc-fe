@@ -16,5 +16,15 @@
 .integrity-page pre { color: var(--mpc-text); background: var(--mpc-panel-deep); padding: 12px; border-radius: 6px; max-height: 280px; overflow: auto; white-space: pre-wrap; }
 .integrity-page summary { cursor: pointer; color: var(--mpc-muted); padding: 6px 0; }
 .integrity-tabs [aria-pressed=true] { border-color: var(--mpc-gold); color: var(--mpc-gold); }
+.integrity-metrics, .integrity-stats { display:flex; flex-wrap:wrap; gap:12px; margin:12px 0; }
+.integrity-metrics > div, .integrity-stats > div { background:var(--mpc-panel-deep); border:1px solid var(--mpc-line); border-radius:6px; padding:10px 14px; }
+.integrity-metrics dt { color:var(--mpc-muted); text-transform:capitalize; font-size:12px; }
+.integrity-metrics dd { margin:4px 0 0; font-weight:600; }
+.integrity-stats strong, .integrity-stats span, .integrity-stats meter { display:block; margin:4px 0; }
+.integrity-evidence a { color:var(--mpc-gold); overflow-wrap:anywhere; }
+.integrity-table-scroll { overflow:auto; }
+.integrity-table { width:100%; border-collapse:collapse; font-size:12px; }
+.integrity-table th, .integrity-table td { padding:10px; text-align:left; border-bottom:1px solid var(--mpc-line); }
+.integrity-evidence li { margin:6px 0; }
 .integrity-error { padding: 12px; border: 1px solid #e66a78; border-radius: 6px; color: var(--mpc-danger); }
 @media(max-width:600px) { .integrity-page label > input:not([type=checkbox]), .integrity-page label > select, .integrity-page textarea { min-width: 0; width: 100%; } }
