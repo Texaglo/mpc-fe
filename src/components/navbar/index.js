@@ -177,7 +177,7 @@ class Navbar extends Component {
                     <HashLink className='nav-link' smooth to='/#home'>Home</HashLink>
                   </li>
                   <li className='nav-item'>
-                    <a className='nav-link' href='https://tony-update.d3fd413nat6wcy.amplifyapp.com/' target="_blank" rel="noopener noreferrer">Start Playing</a>
+                    <a className='nav-link' href='https://main.du6evc0snv7lm.amplifyapp.com/' target="_blank" rel="noopener noreferrer">Start Playing</a>
                   </li>
                   <li className='nav-item'>
                     <Link className='nav-link' to="/bridge">NFT Migration</Link>
