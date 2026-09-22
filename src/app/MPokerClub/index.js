@@ -308,7 +308,7 @@ class MPokerClub extends Component {
                                 </div>
                                 <div className="section-copy">
                                     <p>MPCE time powers access to tables. Players buy time in game, play hands against each other, and keep their remaining balance available for withdrawal.</p>
-                                    <a className="copy-cta" href="https://tony-update.d3fd413nat6wcy.amplifyapp.com/" target="_blank" rel="noopener noreferrer">Start Playing</a>
+                                    <a className="copy-cta" href="https://main.du6evc0snv7lm.amplifyapp.com/" target="_blank" rel="noopener noreferrer">Start Playing</a>
                                 </div>
                             </div>
                         </div>
