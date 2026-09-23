@@ -7,6 +7,7 @@ import './index.css';
 import IntegrityControls from './Controls';
 import Evidence from './Evidence';
 import PlayerAnalysis from './PlayerAnalysis';
+import NetworkHistory from './NetworkHistory';
 
 const title = value => String(value || '').replace(/_/g, ' ');
 export function Integrity({ role, permissions, location }) {
@@ -88,6 +89,7 @@ export function Integrity({ role, permissions, location }) {
             {!player.withdrawals.length && <p>No pending withdrawals.</p>}
             {player.withdrawals.map(w => <div className="integrity-row" key={w._id}><span>{w.paidAmount} {w.asset} · {w.integrityHold ? 'Held for review' : 'Awaiting approval'} {w.integrityHoldReason}</span>{hold && <button className="add-btn" disabled={busy || w.payoutProcessing} onClick={() => act(`withdrawals/${w._id}/hold`, { hold: !w.integrityHold })}>{w.integrityHold ? 'Release review hold' : 'Hold for review'}</button>}</div>)}
         </section>}
+        {userId && <NetworkHistory key={`networks-${userId}`} userId={userId} onSelectPlayer={selectPlayer} />}
         {userId && <PlayerAnalysis key={userId} userId={userId} manage={manage} canReadHands={canReadHands} />}
         <nav className="integrity-tabs" aria-label="Integrity records">{['alerts', 'reports', 'events', 'audit'].map(name => <button key={name} aria-pressed={tab === name} className="add-btn" onClick={() => { setTab(name); setOffset(0); }}>{title(name)}</button>)}</nav>
         <section className="integrity-card" aria-label="Integrity records list">
