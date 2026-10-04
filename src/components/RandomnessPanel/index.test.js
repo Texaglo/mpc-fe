@@ -34,3 +34,14 @@ test('reviewed retry posts the same request ID with an audit reason', async () =
     await screen.findByText('Signed-attempt limit reached');
     expect(axios.post).toHaveBeenCalledWith('/randomness/admin/requests/pending-proof/retry', { reason: 'RPC repaired; reviewed previous transactions' });
 });
+
+test('completed wallet recovery requires cashier capability and a reason; sends no destination', async () => {
+    axios.get.mockResolvedValue({ data: { requests: [{ id: 'settled-proof', status: 'SETTLED', funder: 'original-treasury' }] } });
+    axios.post.mockResolvedValue({ data: { status: 'SUBMITTED' } });
+    render(<RandomnessPanel tableId="table" canRecover />);
+    const button = await screen.findByText('Return remaining SOL to treasury');
+    expect(button.disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText('Recovery reason'), { target: { value: 'Return finalized rent after settlement' } });
+    fireEvent.click(button);
+    expect(axios.post).toHaveBeenCalledWith('/randomness/admin/requests/settled-proof/recover', { reason: 'Return finalized rent after settlement' });
+});

@@ -11,7 +11,7 @@ const AppMode = ['development', process.env.REACT_APP_ADMIN_API_ENV || 'producti
 const development = process.env.REACT_APP_ADMIN_API_URL || 'http://localhost:4000';
 // const development = 'https://dserver.modernpokerclub.com';
 //const production = 'https://dserver.modernpokerclub.com';
-const production = process.env.REACT_APP_ADMIN_PRODUCTION_URL || 'https://mpc.texaglo.com';
+const production = process.env.REACT_APP_ADMIN_PRODUCTION_URL || 'https://server.modernpokerclub.com';
 
 //const testing = 'https://dserver.modernpokerclub.com';
 const testing = process.env.REACT_APP_ADMIN_TESTING_URL || 'https://mpc.texaglo.com';

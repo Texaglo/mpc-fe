@@ -434,7 +434,7 @@ export class Ring extends React.Component {
                                     </Field>
                                 </>}
                             </section>
-                            {selectedGame && canAccess({ role: this.props.role, permissions: this.props.permissions }, 'hand_history.view') && formData.randomnessProvider === 'ORAO' && <RandomnessPanel tableId={selectedGame._id} canCancel={canManage} canRetry={canManage} />}
+                            {selectedGame && canAccess({ role: this.props.role, permissions: this.props.permissions }, 'hand_history.view') && formData.randomnessProvider === 'ORAO' && <RandomnessPanel tableId={selectedGame._id} canCancel={canManage} canRetry={canManage} canRecover={canAccess({ role: this.props.role, permissions: this.props.permissions }, 'cashier.manage')} />}
 
                             <section className="ring-form-section ring-form-section--rules">
                                 <div className="ring-form-section__heading"><h3>Table rules</h3><span>Optional rules stay out of the way until enabled</span></div>

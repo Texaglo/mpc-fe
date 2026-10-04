@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 
-export default function RandomnessPanel({ tableId, canCancel = false, canRetry = false }) {
+export default function RandomnessPanel({ tableId, canCancel = false, canRetry = false, canRecover = false }) {
     const [rows, setRows] = useState([]);
     const [error, setError] = useState('');
     const [selected, setSelected] = useState(null);
@@ -21,6 +21,10 @@ export default function RandomnessPanel({ tableId, canCancel = false, canRetry =
     };
     const retry = async row => {
         try { await axios.post(`/randomness/admin/requests/${row.id}/retry`, { reason }); setReason(''); await refresh(); }
+        catch (e) { setError(e.response?.data?.message || e.message); }
+    };
+    const recover = async row => {
+        try { await axios.post(`/randomness/admin/requests/${row.id}/recover`, { reason }); setReason(''); await refresh(); }
         catch (e) { setError(e.response?.data?.message || e.message); }
     };
     const download = () => {
@@ -43,6 +47,11 @@ export default function RandomnessPanel({ tableId, canCancel = false, canRetry =
                 <label>Operator action reason <input className="competition-control" value={reason} onChange={e => setReason(e.target.value)} /></label>
                 {canCancel && <button type="button" className="add-btn" disabled={reason.trim().length < 5} onClick={() => cancel(row)}>Cancel undealt request</button>}
                 {canRetry && ['COMMITTED', 'PREPARED', 'PENDING'].includes(row.status) && <button type="button" className="add-btn" disabled={reason.trim().length < 5} onClick={() => retry(row)}>Retry same request</button>}
+            </div>}
+            {row.recovery && <p>Rent recovery: {row.recovery.status} · {(row.recovery.amountLamports || 0) / 1e9} SOL to treasury · {row.recovery.signature}</p>}
+            {canRecover && row.status === 'SETTLED' && row.recovery?.status !== 'CONFIRMED' && <div>
+                <label>Recovery reason <input className="competition-control" value={reason} onChange={e => setReason(e.target.value)} /></label>
+                <button type="button" className="add-btn" disabled={reason.trim().length < 5} onClick={() => recover(row)}>{row.recovery ? 'Confirm or retry SOL recovery' : 'Return remaining SOL to treasury'}</button>
             </div>}
             {(row.operatorActions || []).map((action, i) => <p key={i}>{action.action} · {action.at && new Date(action.at).toLocaleString()} · {action.reason} · Admin {action.actorId}</p>)}
         </div>)}
