@@ -8,7 +8,7 @@ const localDate = value => {
     const date = new Date(value);
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
-const blank = () => ({ name: '', description: '', kind: 'MTT', balanceType: 'FP', gameVariant: "Texas Hold'em",
+const blank = () => ({ randomnessProvider: 'CSPRNG', oraoTimeChargeMpcePerHour: '', name: '', description: '', kind: 'MTT', balanceType: 'FP', gameVariant: "Texas Hold'em",
     formatLimit: 'No Limit', buyIn: 10, fee: 0, startingStack: 1000, seatLimit: 6, minPlayers: 2,
     maxPlayers: 30, region: 'us', registrationOpensAt: localDate(Date.now()), startsAt: localDate(Date.now() + 3600000),
     actionTimerSeconds: 15, timeBankSeconds: 0, breakEveryLevels: 0, breakDurationSeconds: 0, payoutPercentages: '100',
@@ -20,6 +20,7 @@ export function configurationOf(form) {
     const fields = ['name', 'description', 'kind', 'balanceType', 'gameVariant', 'formatLimit', 'region'];
     const result = Object.fromEntries(fields.map(key => [key, form[key]]));
     for (const key of ['buyIn', 'fee', 'startingStack', 'seatLimit', 'actionTimerSeconds', 'timeBankSeconds']) result[key] = Number(form[key]);
+    if (form.randomnessProvider) { result.randomnessProvider = form.randomnessProvider; result.oraoTimeChargeMpcePerHour = form.oraoTimeChargeMpcePerHour === '' || form.oraoTimeChargeMpcePerHour == null ? null : Number(form.oraoTimeChargeMpcePerHour); }
     result.breakEveryLevels = Number(form.breakEveryLevels || 0);
     result.breakDurationSeconds = Number(form.breakDurationSeconds || 0);
     result.registrationOpensAt = new Date(form.registrationOpensAt).toISOString();
@@ -105,6 +106,14 @@ export default function CompetitionSetup() {
                 {input('actionTimerSeconds', 'Action timer (seconds)')}{input('timeBankSeconds', 'Time bank per hand (seconds)')}{input('breakEveryLevels', 'Break every N levels (0 disables)')}{input('breakDurationSeconds', 'Break duration (seconds)')}
                 {input('payoutPercentages', 'Payout percentages by finish, comma separated', 'text')}
             </div></section>
+            <section className="competition-section" style={form.randomnessProvider === 'ORAO' ? { border: '2px solid #b98c48' } : undefined}>
+                <h3>Verifiable shuffle</h3>
+                {select('randomnessProvider', 'Randomness provider', ['CSPRNG', 'ORAO'])}
+                {form.randomnessProvider === 'ORAO' && <>
+                    <p>Each table requests treasury-funded randomness for every hand. Complete deck verification opens after settlement, including folded cards. Oracle delays pause dealing. Free Play never burns MPCE. If a paid entrant runs out of MPCE, their entry and chips remain; the treasury covers the remaining oracle cost.</p>
+                    {input('oraoTimeChargeMpcePerHour', 'ORAO MPCE/hour (0 = treasury sponsored)')}
+                </>}
+            </section>
             <section className="competition-section"><h3>Blind levels</h3>{form.blinds.map((level, index) => <div className="competition-grid" key={index}>
                 {['smallBlind', 'bigBlind', 'duration', 'ante'].map(key => <Field key={key} label={`${index + 1}: ${key === 'duration' ? 'Minutes' : key}`}>
                     <input className="competition-control" type="number" min="0" step="any" required value={level[key]} onChange={e => update('blinds', form.blinds.map((b, i) => i === index ? { ...b, [key]: e.target.value } : b))} />

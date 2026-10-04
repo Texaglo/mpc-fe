@@ -13,10 +13,12 @@ import { withTableEconomyContract } from '../../utils/tableEconomy';
 import { canAccess } from '../../utils/adminAccess';
 
 import './index.css';
+import RandomnessPanel from '../../components/RandomnessPanel';
 
 const TIME_MINUTES_PER_MPCE = 6;
 
 const DEFAULT_RING_FORM = {
+    randomnessProvider: 'CSPRNG', oraoTimeChargeMpcePerHour: '',
     name: '', seatLimit: 6, smallBlinds: '', bigBlinds: '', minBuyIn: '', maxBuyIn: '',
     balanceType: 'CASH', timeChargeTier: 'STANDARD', timeChargeMinutesPerHour: 60,
     customBurnRateMpcePerHour: 20, minPlayersToStart: 2, tableStatus: 'ACTIVE',
@@ -152,6 +154,7 @@ export class Ring extends React.Component {
             payload.timeChargeMpcePerHour = null;
             payload.timeChargeMinutesPerHour = 60;
         }
+        payload.oraoTimeChargeMpcePerHour = payload.oraoTimeChargeMpcePerHour === '' || payload.oraoTimeChargeMpcePerHour == null ? null : Number(payload.oraoTimeChargeMpcePerHour);
         if (payload.gameVariant === 'Omaha') payload.formatLimit = 'Pot Limit';
         payload.allowTopUp = Boolean(payload.allowTopUp);
         if (payload.balanceType === 'FP') {
@@ -167,6 +170,7 @@ export class Ring extends React.Component {
     };
 
     validatePayload = payload => {
+        if (payload.randomnessProvider === 'ORAO' && (payload.oraoTimeChargeMpcePerHour == null || !Number.isFinite(payload.oraoTimeChargeMpcePerHour) || payload.oraoTimeChargeMpcePerHour < 0)) return 'Enter the ORAO MPCE/hour rate, or zero for treasury sponsorship';
         const required = ['name', 'gameVariant', 'formatLimit', 'region'];
         if (required.some(field => !String(payload[field] || '').trim())) return 'Complete all required game setup fields';
         if (Number(payload.seatLimit) < 2 || Number(payload.seatLimit) > 9) return 'Seat limit must be between 2 and 9';
@@ -417,6 +421,20 @@ export class Ring extends React.Component {
                                     )}
                                 </div>
                             </section>
+
+                            <section className={`ring-form-section ring-form-section--charge ${formData.randomnessProvider === 'ORAO' ? 'ring-oracle-enabled' : ''}`}>
+                                <div className="ring-form-section__heading"><h3>Verifiable shuffle</h3><span>Applies to new hands</span></div>
+                                <Toggle name="oraoEnabled" checked={formData.randomnessProvider === 'ORAO'}
+                                    onChange={e => this.handleFormChange({ target: { name: 'randomnessProvider', value: e.target.checked ? 'ORAO' : 'CSPRNG' } })}
+                                    title="ORAO randomness" description="Treasury-funded oracle request for each hand" />
+                                {formData.randomnessProvider === 'ORAO' && <>
+                                    <p>Full deck verification opens after the hand and pot settlement, including folded cards. Oracle delays pause dealing. Server setup and spending limits are required.</p>
+                                    <Field label="ORAO time rate (MPCE/hour)" hint={balanceType === 'FP' ? 'Free Play never burns MPCE. The treasury sponsors oracle costs.' : 'Replaces the ordinary rate while enabled; zero means treasury sponsored.'}>
+                                        <input className="ring-control" name="oraoTimeChargeMpcePerHour" type="number" min="0" step="any" value={formData.oraoTimeChargeMpcePerHour ?? ''} onChange={this.handleFormChange} required />
+                                    </Field>
+                                </>}
+                            </section>
+                            {selectedGame && canAccess({ role: this.props.role, permissions: this.props.permissions }, 'hand_history.view') && formData.randomnessProvider === 'ORAO' && <RandomnessPanel tableId={selectedGame._id} canCancel={canManage} canRetry={canManage} />}
 
                             <section className="ring-form-section ring-form-section--rules">
                                 <div className="ring-form-section__heading"><h3>Table rules</h3><span>Optional rules stay out of the way until enabled</span></div>

@@ -328,3 +328,5 @@ select.ring-control { padding-right: 26px; color: #c4c7cc; }
   .ring-form-section__heading { align-items: flex-start; flex-direction: column; gap: 3px; }
   .ring-form-actions { padding-top: 8px; }
 }
+
+.ring-oracle-enabled { border: 2px solid #b98c48; background: rgba(185, 140, 72, 0.08); }

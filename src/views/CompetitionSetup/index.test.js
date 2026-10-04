@@ -39,3 +39,8 @@ test('visibly identifies staging-only scope and displays backend failure', async
     expect(screen.getByRole('status').textContent).toContain('Local / staging testing only');
     expect((await screen.findByRole('alert')).textContent).toBe('New backend required');
 });
+
+test('competition configuration includes the selected ORAO provider and separate rate', () => {
+    expect(configurationOf({ ...form, randomnessProvider: 'ORAO', oraoTimeChargeMpcePerHour: '25' })).toMatchObject({ randomnessProvider: 'ORAO', oraoTimeChargeMpcePerHour: 25 });
+    expect(configurationOf({ ...form, randomnessProvider: 'ORAO', oraoTimeChargeMpcePerHour: '' }).oraoTimeChargeMpcePerHour).toBeNull();
+});

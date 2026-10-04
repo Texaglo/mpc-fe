@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import RandomnessPanel from '../../components/RandomnessPanel';
 
 export default function Operations({ id, onClose }) {
     const [data, setData] = useState(null);
@@ -39,6 +40,7 @@ export default function Operations({ id, onClose }) {
         {data && <>
             <h3>{data.event.name} — {data.event.status}</h3>
             <p>Hand round {data.event.roundNumber || 0} · Prize pool {data.event.prizePool} {data.event.balanceType} · Fees {data.event.collectedFees}</p>
+            {data.event.randomnessProvider === 'ORAO' && data.tables.map(t => <RandomnessPanel key={t._id} tableId={t._id} canRetry />)}
             {data.event.runnerError && <p role="alert">Runner needs attention: {data.event.runnerError}</p>}
             {data.level && <p>Level {data.level.index + 1}: {data.level.smallBlind}/{data.level.bigBlind}, ante {data.level.ante}
                 {data.level.onBreak ? ' · On break' : ''}{data.level.remainingSeconds != null ? ` · ${Math.ceil(data.level.remainingSeconds)} seconds remaining` : ' · Final level'}</p>}

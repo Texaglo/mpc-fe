@@ -4,7 +4,7 @@ export const withTableEconomyContract = (source = {}) => {
     const freePlay = balanceType === 'FP';
 
     payload.balanceType = balanceType;
-    payload.consumesTime = !freePlay && String(payload.timeChargeTier || 'STANDARD').toUpperCase() !== 'NONE';
+    payload.consumesTime = !freePlay && (payload.randomnessProvider === 'ORAO' ? Number(payload.oraoTimeChargeMpcePerHour) > 0 : String(payload.timeChargeTier || 'STANDARD').toUpperCase() !== 'NONE');
     payload.timeChargeEnabled = payload.consumesTime;
 
     if (freePlay) {

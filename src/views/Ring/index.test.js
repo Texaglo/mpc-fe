@@ -38,3 +38,25 @@ test('time-bank admin toggle sends configured seconds when enabled and zero when
     expect(normalizeFormData({ timeBankSeconds: 45 }).timeBankEnabled).toBe(true);
     expect(normalizeFormData({ timeBankSeconds: 0 }).timeBankEnabled).toBe(false);
 });
+
+test('ORAO rate survives switching off without overwriting the ordinary custom rate', () => {
+    const component = form();
+    component.state.formData = normalizeFormData({ randomnessProvider: 'ORAO', oraoTimeChargeMpcePerHour: 30,
+        timeChargeTier: 'CUSTOM', timeChargeMpcePerHour: 20, balanceType: 'CASH' });
+    expect(component.buildPayload()).toMatchObject({ randomnessProvider: 'ORAO', oraoTimeChargeMpcePerHour: 30, timeChargeMpcePerHour: 20 });
+    component.handleFormChange({ target: { name: 'randomnessProvider', value: 'CSPRNG' } });
+    expect(component.buildPayload()).toMatchObject({ randomnessProvider: 'CSPRNG', oraoTimeChargeMpcePerHour: 30, timeChargeMpcePerHour: 20 });
+});
+test('ORAO enabled on FP preserves no-burn contract', () => {
+    const component = form();
+    component.state.formData = normalizeFormData({ randomnessProvider: 'ORAO', oraoTimeChargeMpcePerHour: 50, balanceType: 'FP' });
+    expect(component.buildPayload()).toMatchObject({ consumesTime: false, timeChargeEnabled: false, timeChargeTier: 'NONE', timeChargeMinutesPerHour: 0 });
+});
+test('ORAO enabling requires an explicit rate but zero sponsorship is allowed', () => {
+    const component = form();
+    const payload = { name: 'Test', gameVariant: 'Omaha', formatLimit: 'Pot Limit', region: 'us', seatLimit: 6,
+        minPlayersToStart: 2, smallBlinds: 1, bigBlinds: 2, minBuyIn: 10, maxBuyIn: 100, idleSeatClearMinutes: 30,
+        randomnessProvider: 'ORAO', oraoTimeChargeMpcePerHour: null };
+    expect(component.validatePayload(payload)).toMatch(/ORAO/);
+    expect(component.validatePayload({ ...payload, oraoTimeChargeMpcePerHour: 0 })).toBe('');
+});
