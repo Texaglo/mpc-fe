@@ -26,3 +26,15 @@ test('switching back to Holdem selects No Limit', () => {
     component.handleFormChange({ target: { name: 'gameVariant', value: "Texas Hold'em" } });
     expect(component.buildPayload()).toMatchObject({ gameVariant: "Texas Hold'em", formatLimit: 'No Limit' });
 });
+
+test('time-bank admin toggle sends configured seconds when enabled and zero when disabled', () => {
+    const component = form();
+    component.handleFormChange({ target: { name: 'timeBankEnabled', type: 'checkbox', checked: true } });
+    expect(component.buildPayload().timeBankSeconds).toBe(30);
+    component.handleFormChange({ target: { name: 'timeBankSeconds', value: '45' } });
+    expect(component.buildPayload().timeBankSeconds).toBe(45);
+    component.handleFormChange({ target: { name: 'timeBankEnabled', type: 'checkbox', checked: false } });
+    expect(component.buildPayload().timeBankSeconds).toBe(0);
+    expect(normalizeFormData({ timeBankSeconds: 45 }).timeBankEnabled).toBe(true);
+    expect(normalizeFormData({ timeBankSeconds: 0 }).timeBankEnabled).toBe(false);
+});
