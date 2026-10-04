@@ -47,12 +47,17 @@ class Bridge extends Component {
             isLoading: false,
             selectedNfts: {},
             batchStatus: null,
-            batchProgress: null
+            batchProgress: null,
+            migrationPolicy: null,
+            migrationNotice: 'Checking migration eligibility…'
 
         };
     };
 
     async componentDidMount() {
+        fetch(`${ApiUrl}/bridge/eligibility`).then(r => r.json()).then(data => {
+            this.setState({ migrationPolicy: data.policy, migrationNotice: data.migrationEnabled ? `Migration is locked to Ethereum token IDs ${data.policy.firstEligibleTokenId}–${data.policy.lastEligibleTokenId}. Later mints cannot migrate.` : 'Migration is unavailable in this environment. Do not burn Ethereum NFTs for devnet testing.' });
+        }).catch(() => this.setState({ migrationNotice: 'Unable to verify migration eligibility. Do not burn NFTs.' }));
         const { publicAddress } = this.props;
         if (publicAddress) {
             this.loadUserData(publicAddress);
@@ -78,7 +83,7 @@ class Bridge extends Component {
             this.loadUserData(publicAddress);
         }
 
-        if (isBurnNftRecord === true && prevProps.isBurnNftRecord !== true && contractAddress && tokenId) {
+        if (isBurnNftRecord === true && prevProps.isBurnNftRecord !== true && contractAddress && tokenId != null) {
             const txhash = await this.handleContractBurn(publicAddress, contractAddress, tokenId);
             if (txhash) {
                 let data = { tokenId, contractAddress, EtherumWallet: publicAddress, transactionHashEtherum: txhash, status: 'burned' }
@@ -441,6 +446,7 @@ class Bridge extends Component {
     handleContractBurn = async (walletAddress, contractAddress, tokenId) => {
         this.setState({ isLoading: true });
         try {
+            await this.assertMigrationEligible(contractAddress, tokenId);
             const provider = getInjectedEthereumProvider();
             await switchToConfiguredEvmNetwork(provider);
             const evmWeb3 = new Web3(provider);
@@ -472,6 +478,7 @@ class Bridge extends Component {
 
         for (const item of items) {
             try {
+                await this.assertMigrationEligible(item.nftContractAddress, item.nftTokenId);
                 const contract = new evmWeb3.eth.Contract(
                     ERC721_TRANSFER_ABI,
                     item.nftContractAddress
@@ -608,7 +615,9 @@ class Bridge extends Component {
             nftTokenId: this.getNormalizedTokenId(nft.tokenId),
         }));
 
-        this.setState({ isLoading: true, batchStatus: 'authorizing', batchProgress: null });
+        this.setState({ isLoading: true, batchStatus: 'authorizing', batchProgress: null,
+            migrationPolicy: null,
+            migrationNotice: 'Checking migration eligibility…' });
         try {
             let bridgeAuthorizationMessage = await this.requestBatchAuthorization({
                 EtherumWallet: publicAddress,
@@ -689,7 +698,14 @@ class Bridge extends Component {
         `Burn address: ${BRIDGE_BURN_ADDRESS}`,
     ].join('\n'))
 
+    assertMigrationEligible = async (contractAddress, tokenId) => {
+        const response = await fetch(`${ApiUrl}/bridge/eligibility?contractAddress=${encodeURIComponent(contractAddress)}&tokenId=${encodeURIComponent(this.getNormalizedTokenId(tokenId))}`);
+        const data = await response.json();
+        if (!response.ok || !data.eligible || !data.migrationEnabled) throw new Error(data.message || 'Migration is unavailable. Do not burn this NFT.');
+    }
+
     signBridgeAuthorization = async ({ ethWallet, solanaWallet, contractAddress, tokenId }) => {
+        await this.assertMigrationEligible(contractAddress, tokenId);
         const provider = getInjectedEthereumProvider();
         await switchToConfiguredEvmNetwork(provider);
         const bridgeAuthorizationMessage = this.getBridgeAuthorizationMessage({
@@ -752,7 +768,7 @@ class Bridge extends Component {
             this.setState({ isLoading: false });
         } catch (error) {
             console.error("Error during burn process:", error);
-            EventBus.publish('error', 'Failed to burn NFT. Please try again.');
+            EventBus.publish('error', error.message || 'Failed to prepare migration.');
             this.setState({ isLoading: false });
         }
     };
@@ -1003,6 +1019,7 @@ class Bridge extends Component {
             <div className="mp-club-page" onWheel={this.onScroll}>
                 {this.state.isLoading && (<Loader />)}
                 <Navbar sticky={sticky} />
+                <div role="status" style={{padding: "130px 24px 0", color: "#e7bb59", textAlign: "center"}}>{this.state.migrationNotice} <a href="/mint" style={{color: "#e7bb59", textDecoration: "underline"}}>New Solana mints</a></div>
                 <div className="bridge-modals">
                     <div className="auto-container">
                         <div className="row">

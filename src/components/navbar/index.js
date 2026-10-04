@@ -180,6 +180,9 @@ class Navbar extends Component {
                     <a className='nav-link' href='https://main.du6evc0snv7lm.amplifyapp.com/' target="_blank" rel="noopener noreferrer">Start Playing</a>
                   </li>
                   <li className='nav-item'>
+                    <Link className='nav-link' to="/mint">Mint NFT</Link>
+                  </li>
+                  <li className="nav-item">
                     <Link className='nav-link' to="/bridge">NFT Migration</Link>
                   </li>
                   <li className='nav-item'>
@@ -208,7 +211,7 @@ class Navbar extends Component {
                 </ul>
 
                 {
-                  publicAddress ?
+                  this.props.hideWallet ? null : publicAddress ?
                     <>
                       <div className="wallet-dropdown">
                         <button

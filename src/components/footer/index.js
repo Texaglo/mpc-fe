@@ -32,6 +32,7 @@ class Footer extends Component {
                                 <ul>
                                     <li><a href="https://tony-update.d3fd413nat6wcy.amplifyapp.com/" target="_blank" rel="noopener noreferrer">Start Playing</a></li>
                                     <li><HashLink smooth to="/#buy-time">Buy Time / MPCE</HashLink></li>
+                                    <li><Link to="/mint">Mint NFT</Link></li>
                                     <li><Link to="/bridge">NFT Migration</Link></li>
                                     <li><HashLink smooth to="/#marketplace">Marketplace</HashLink></li>
                                 </ul>

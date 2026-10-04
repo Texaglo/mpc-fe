@@ -9,6 +9,7 @@ import { Router, Switch, Route } from "react-router-dom";
 
 import About from './About';
 import Bridge from './Bridge';
+import Mint from './Mint';
 import MPokerClub from './MPokerClub';
 import Loader from '../components/loader';
 import PrivacyPolicy from './PrivacyPolicy';
@@ -59,6 +60,7 @@ class App extends Component {
           <Switch>
             <Route exact path='/' component={props => <MPokerClub {...props} />} />
             <Route exact path='/About' component={props => <About {...props} />} />
+            <Route exact path='/mint' component={Mint} />
             <Route exact path='/Bridge' component={props => <Bridge {...props} />} />
             <Route exact path='/MPokerClub' component={props => <MPokerClub {...props} />} />
             <Route exact path='/privacy-policy' component={props => <PrivacyPolicy {...props} />} />
