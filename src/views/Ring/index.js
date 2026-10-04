@@ -32,7 +32,7 @@ const REGION_OPTIONS = [
     ['kr', 'South Korea'], ['tr', 'Turkey'], ['us', 'USA, East'], ['ussc', 'USA, South Central'],
 ];
 
-function normalizeFormData(source = {}, minutesPerMpce = TIME_MINUTES_PER_MPCE) {
+export function normalizeFormData(source = {}, minutesPerMpce = TIME_MINUTES_PER_MPCE) {
     const timeChargeTier = String(source.timeChargeTier || 'STANDARD').toUpperCase();
     const timeChargeMinutesPerHour = Number(source.timeChargeMinutesPerHour ?? 60);
     const ante = Number(source.ante || 0);
@@ -43,6 +43,7 @@ function normalizeFormData(source = {}, minutesPerMpce = TIME_MINUTES_PER_MPCE) 
     return {
         ...DEFAULT_RING_FORM,
         ...source,
+        formatLimit: source.gameVariant === 'Omaha' ? 'Pot Limit' : source.formatLimit || '',
         minBuyIn: source.minBuyIn ?? source.minCoins ?? '',
         maxBuyIn: source.maxBuyIn ?? source.maxCoins ?? '',
         timeChargeTier,
@@ -83,7 +84,7 @@ const Toggle = ({ name, checked, onChange, title, description }) => (
     </label>
 );
 
-class Ring extends React.Component {
+export class Ring extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -103,6 +104,7 @@ class Ring extends React.Component {
         const value = target.type === 'checkbox' ? target.checked : target.value;
         this.setState(({ formData }) => {
             const next = { ...formData, [target.name]: value };
+            if (target.name === 'gameVariant') next.formatLimit = value === 'Omaha' ? 'Pot Limit' : 'No Limit';
             if (target.name === 'straddleEnabled') {
                 next.straddleMode = value ? (formData.straddleMode === 'NONE' ? 'UTG' : formData.straddleMode) : 'NONE';
             }
@@ -150,6 +152,7 @@ class Ring extends React.Component {
             payload.timeChargeMpcePerHour = null;
             payload.timeChargeMinutesPerHour = 60;
         }
+        if (payload.gameVariant === 'Omaha') payload.formatLimit = 'Pot Limit';
         payload.allowTopUp = Boolean(payload.allowTopUp);
         if (payload.balanceType === 'FP') {
             payload.timeChargeTier = 'NONE';
@@ -384,8 +387,8 @@ class Ring extends React.Component {
                                     <Field label="Table name" className="ring-field--span-2"><input className="ring-control" name="name" value={name} onChange={this.handleFormChange} placeholder="e.g. Friday Night 2/5" required /></Field>
                                     <Field label="Status"><select className="ring-control" name="tableStatus" value={tableStatus} onChange={this.handleFormChange}><option value="ACTIVE">Active</option><option value="DISABLED">Disabled</option><option value="MAINTENANCE">Maintenance</option></select></Field>
                                     <Field label="Region"><select className="ring-control" name="region" value={region} onChange={this.handleFormChange} required><option value="">Select region</option>{REGION_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
-                                    <Field label="Game type"><select className="ring-control" name="gameVariant" value={gameVariant} onChange={this.handleFormChange} required><option value="">Select game</option><option value="Texas Hold'em">Texas Hold'em</option><option value="Omaha">Omaha</option></select></Field>
-                                    <Field label="Betting limit"><select className="ring-control" name="formatLimit" value={formatLimit} onChange={this.handleFormChange} required><option value="">Select limit</option><option value="No Limit">No Limit</option><option value="Pot Limit">Pot Limit</option><option value="Fixed Limit">Fixed Limit</option></select></Field>
+                                    <Field label="Game type"><select className="ring-control" name="gameVariant" value={gameVariant} onChange={this.handleFormChange} required><option value="">Select game</option><option value="Texas Hold'em">Texas Hold’em (2 cards)</option><option value="Omaha">Omaha / PLO (4 cards)</option></select></Field>
+                                    <Field label="Betting limit"><select className="ring-control" name="formatLimit" value={formatLimit} onChange={this.handleFormChange} disabled={gameVariant === 'Omaha'} required><option value="">Select limit</option><option value="No Limit">No Limit</option><option value="Pot Limit">Pot Limit</option></select></Field>
                                     <Field label="Seats"><input className="ring-control" name="seatLimit" type="number" min="2" max="9" value={seatLimit} onChange={this.handleFormChange} /></Field>
                                     <Field label="Players to start"><input className="ring-control" name="minPlayersToStart" type="number" min="2" max={seatLimit || 9} value={minPlayersToStart} onChange={this.handleFormChange} /></Field>
                                 </div>
