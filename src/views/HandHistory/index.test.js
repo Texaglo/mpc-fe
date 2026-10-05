@@ -13,3 +13,11 @@ test.each(['ring:exact-hand','competition:aaaaaaaaaaaaaaaaaaaaaaaa:2'])('opens t
  const expected=id.startsWith('competition:')?'/integrity/hands/':'/history/admin/hands/';
  await waitFor(()=>expect(axios.get).toHaveBeenCalledWith(expected+encodeURIComponent(id)));
 });
+test('preserves the backend one-based physical seats in hand reconstruction',async()=>{
+ axios.get.mockImplementation(url=>Promise.resolve({data:{body:url.includes('/hands/ring%3Aseats')?{hand:{handId:'ring:seats',status:'COMPLETED',participants:[{playerId:0,seatNumber:1,username:'One'},{playerId:1,seatNumber:6,username:'Six'}]},movements:[{eventType:'TIME_BANK',sequence:1,secondsAdded:20,street:'preflop',deadlineAfter:'2026-10-05T10:00:20Z'}]}:{hands:[]}}}));
+ const ui=render(<HandHistory location={{search:'?hand=ring%3Aseats'}}/>);
+ await waitFor(()=>expect(ui.getByText('Seat 6')).toBeTruthy());
+ expect(ui.getByText('Seat 1')).toBeTruthy();
+ expect(ui.queryByText('Seat 7')).toBeNull();
+ expect(ui.getByText('+20 seconds')).toBeTruthy();
+});

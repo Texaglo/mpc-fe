@@ -952,3 +952,7 @@
 .profile-transaction code { color: #aeb2bd; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 800px) { .profile-balance-grid, .profile-columns { grid-template-columns: 1fr 1fr; } .profile-transaction { grid-template-columns: 1fr auto; } .admin-role-options { grid-template-columns: 1fr; } .permission-groups section { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .profile-balance-grid, .profile-columns { grid-template-columns: 1fr; } .profile-hero { align-items: flex-start; flex-direction: column; gap: 12px; } }
+
+.profile-stat-filters { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+.profile-stat-filters label { display: flex; flex-direction: column; gap: 5px; }
+.profile-stat-filters select { background: #172337; color: #fff; border: 1px solid #354358; border-radius: 5px; padding: 8px 12px; }

@@ -7,6 +7,7 @@ import { getUsers, toggleFreezeUser, getUserTransactions, adjustUserBalance, for
 import { setLoader, toggleModal } from "../../store/actions/Auth";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { canAccess } from '../../utils/adminAccess';
+import PokerStatistics from './PokerStatistics';
 
 import './index.css';
 
@@ -683,7 +684,6 @@ class Users extends React.Component {
                         {profileLoading && <div className="profile-loading">Loading player operations…</div>}
                         {!profileLoading && profileData && (() => {
                             const player = profileData.user || profileUser || {};
-                            const stats = profileData.handStats || [];
                             return <Fragment>
                                 <section className="profile-hero">
                                     <div><small>Player</small><h4>{player.username || 'Unnamed player'}</h4><span>{player.email || 'No email'} · {player._id}</span></div>
@@ -699,9 +699,9 @@ class Users extends React.Component {
                                 <div className="profile-columns">
                                     <section className="profile-panel"><h5>Connected wallets & payout methods</h5>{(profileData.connectedWallets || []).map((wallet, index) => <div className="profile-record" key={`${wallet.address}-${index}`}><strong>{wallet.source === 'primary' ? 'Primary wallet' : 'Saved payout wallet'}</strong><span title={wallet.address}>{wallet.address}</span><small>{wallet.status || 'saved'}{wallet.linkedAt || wallet.addedAt ? ` · ${new Date(wallet.linkedAt || wallet.addedAt).toLocaleDateString()}` : ''}</small></div>)}{!(profileData.connectedWallets || []).length && <p className="profile-empty">No wallet connected.</p>}</section>
                                     <section className="profile-panel"><h5>Current table / session</h5>{(profileData.currentSessions || []).map(session => <div className="profile-record" key={session.gameId}><strong>{session.name || session.gameId}</strong><span>{session.gameType} · {session.economy}</span><small>{session.status || 'Active'}{session.connectionStatus ? ` · ${session.connectionStatus}` : ''}</small></div>)}{!(profileData.currentSessions || []).length && <p className="profile-empty">Not currently seated.</p>}</section>
-                                    <section className="profile-panel"><h5>Hand performance</h5>{stats.map(row => <div className="profile-stat-row" key={row.economy}><strong>{row.economy}</strong><span>{row.handsWon}/{row.handsPlayed} wins</span><span>{Number(row.netWon || 0).toLocaleString()} net</span></div>)}{!stats.length && <p className="profile-empty">No completed authoritative hands.</p>}</section>
                                     <section className="profile-panel"><h5>Inventory lifecycle</h5>{(profileData.inventorySummary || []).map(row => <div className="profile-stat-row" key={row._id}><strong>{row._id || 'unknown'}</strong><span>{row.count} records</span><span>{row.quantity} items</span></div>)}{!(profileData.inventorySummary || []).length && <p className="profile-empty">No inventory records.</p>}</section>
                                 </div>
+                                {canAccess(access, 'hand_history.view') && <PokerStatistics userId={player._id} onOpenHand={handId => { this.closeProfileModal(); this.props.history.push(`/home/hand-history?hand=${encodeURIComponent(handId)}`); }} />}
                                 <section className="profile-panel profile-transactions"><h5>Recent transactions</h5><div className="profile-transaction-list">{(profileData.recentTransactions || []).map(tx => <div className="profile-transaction" key={tx._id}><div><strong>{String(tx.type || 'transaction').replaceAll('_', ' ')}</strong><small>{new Date(tx.createdAt).toLocaleString()}</small></div><span>{Number(tx.paidAmount || tx.cashAmountUsd || 0).toLocaleString()} {tx.paidCoinType || tx.asset || ''}</span><span className={`tx-status ${String(tx.status || '').toLowerCase()}`}>{tx.status || '—'}</span><code title={tx.solanaDepositHash || tx.cryptoWithdrawalHash || tx.hotWalletPayoutHash || ''}>{tx.solanaDepositHash || tx.cryptoWithdrawalHash || tx.hotWalletPayoutHash || tx.reasonCode || '—'}</code></div>)}</div>{!(profileData.recentTransactions || []).length && <p className="profile-empty">No transactions recorded.</p>}</section>
                             </Fragment>;
                         })()}
