@@ -26,7 +26,7 @@ const ERC721_TRANSFER_ABI = [{
     outputs: [],
 }];
 
-class Bridge extends Component {
+export class Bridge extends Component {
     constructor(props) {
         super(props);
         this.state = {

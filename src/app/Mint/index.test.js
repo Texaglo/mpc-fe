@@ -6,6 +6,13 @@ jest.mock('../../components/navbar', () => () => null);
 jest.mock('../../components/footer', () => () => null);
 beforeEach(() => { sessionStorage.clear(); window.solana = undefined; window.phantom = undefined; });
 const config = { enabled: true, firstTokenId: 1207, lastTokenId: 1231, perWalletLimit: 3, migration: { firstEligibleTokenId: 0, lastEligibleTokenId: 1206, firstNativeTokenId: 1207 } };
+test('missing wallet explains the requirement without sending a mint request', async () => {
+  global.fetch = jest.fn(async () => ({ ok: true, json: async () => config }));
+  const ui = render(<MemoryRouter><Mint /></MemoryRouter>);
+  fireEvent.click(await waitForElement(() => ui.getByText('Connect wallet & mint')));
+  await waitForElement(() => ui.getByText('Open this page with a Solana wallet such as Phantom installed.'));
+  expect(global.fetch).toHaveBeenCalledTimes(1);
+});
 test('shows test-only mint range and migration boundary', async () => {
   global.fetch = jest.fn(async () => ({ ok: true, json: async () => config }));
   const ui = render(<MemoryRouter><Mint /></MemoryRouter>);
