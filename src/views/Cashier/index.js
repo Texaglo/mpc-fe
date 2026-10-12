@@ -1,3 +1,4 @@
+import { CurrencyAmount } from '../../components/ConsoleIcon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import EventBus from 'eventing-bus';
@@ -173,7 +174,7 @@ const Cashier = () => {
                                         <td><strong>{tx.userId?.username || 'Unknown player'}</strong><small>{tx.userId?.email || tx.userId?._id || '—'}</small></td>
                                         <td>{categoryLabel[tx.type] || tx.type}</td>
                                         <td>${formatNumber(tx.cashAmountUsd ?? (tx.type === 'timePurchase' || tx.type === 'withdraw' ? tx.paidAmount : tx.receivedAmount))}</td>
-                                        <td>{formatNumber(tx.paidAmount)} {String(tx.paidCoinType || '').toUpperCase()} → {formatNumber(tx.receivedAmount)} {String(tx.receivedCoinType || '').toUpperCase()}</td>
+                                        <td><span className="cashier-movement"><CurrencyAmount asset={tx.paidCoinType}>{formatNumber(tx.paidAmount)} {String(tx.paidCoinType || '').toUpperCase()}</CurrencyAmount> → <CurrencyAmount asset={tx.receivedCoinType}>{formatNumber(tx.receivedAmount)} {String(tx.receivedCoinType || '').toUpperCase()}</CurrencyAmount></span></td>
                                         <td><span className={`cashier-status ${tx.status}`}>{tx.status}</span></td>
                                         <td title={reference}>{reference ? `${String(reference).slice(0, 8)}…${String(reference).slice(-6)}` : '—'}</td>
                                     </tr>;

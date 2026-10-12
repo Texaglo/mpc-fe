@@ -1,3 +1,4 @@
+import ConsoleIcon from '../ConsoleIcon';
 import EventBus from 'eventing-bus';
 import React from "react";
 import { connect } from 'react-redux';
@@ -124,18 +125,17 @@ class AdminNavbar extends React.Component {
                 </li>
                 <UncontrolledDropdown nav>
                   <DropdownToggle
+                    className="mpc-admin-toggle"
                     caret
                     color="default"
                     data-toggle="dropdown"
                     nav
                     onClick={e => e.preventDefault()}
                   >
-                    <div className="photo mpc-admin-avatar" aria-hidden="true">
-                      <i className="tim-icons icon-single-02" />
+                    <div className="mpc-admin-avatar" aria-hidden="true">
+                      <ConsoleIcon name="user" />
                     </div>
                     <span className="mpc-admin-label">Authenticated admin</span>
-                    <b className="caret d-none d-lg-block d-xl-block" />
-                    <p className="d-lg-none">Logout</p>
                   </DropdownToggle>
                   <DropdownMenu className="dropdown-navbar" end tag="ul">
                     {/* <DropdownItem divider tag="li" /> */}

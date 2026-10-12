@@ -1,3 +1,4 @@
+import ConsoleIcon from '../../components/ConsoleIcon';
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAuditLogs } from '../../store/actions/Dashboard';
@@ -109,17 +110,17 @@ const AuditLog = () => {
                         <h2>Audit Log</h2>
                         <p>Permanent operational history showing who changed what, who was affected, and why.</p>
                     </div>
-                    <div className="audit-total">
+                    <div className="audit-total"><ConsoleIcon name="clock" />
                         <span>Newest activity</span>
                         <strong>{auditLogs[0]?.createdAt ? new Date(auditLogs[0].createdAt).toLocaleString() : '—'}</strong>
                     </div>
                 </div>
 
                 <div className="console-metric-grid audit-metric-grid" aria-label="Audit record summary">
-                    <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-notes" /></span><div><small>Total Records</small><strong>{Number(auditLogsPagination.totalLogs || 0).toLocaleString()}</strong></div></div>
-                    <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-alert-circle-exc" /></span><div><small>Critical · This Page</small><strong>{auditLogs.filter(log => ['FREEZE_USER', 'REJECT_WITHDRAWAL', 'FORCE_LOGOUT'].includes(log.action)).length}</strong></div></div>
-                    <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-single-02" /></span><div><small>Player Changes · This Page</small><strong>{auditLogs.filter(log => Boolean(log.targetUserId)).length}</strong></div></div>
-                    <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-controller" /></span><div><small>Table Changes · This Page</small><strong>{auditLogs.filter(log => /RING|TABLE|TOURNAMENT|SNG/i.test(String(log.action || ''))).length}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="clipboard" /></span><div><small>Total Records</small><strong>{Number(auditLogsPagination.totalLogs || 0).toLocaleString()}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon red"><ConsoleIcon name="shield-alert" /></span><div><small>Critical · This Page</small><strong>{auditLogs.filter(log => ['FREEZE_USER', 'REJECT_WITHDRAWAL', 'FORCE_LOGOUT'].includes(log.action)).length}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="users" /></span><div><small>Player Changes · This Page</small><strong>{auditLogs.filter(log => Boolean(log.targetUserId)).length}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="database" /></span><div><small>Table Changes · This Page</small><strong>{auditLogs.filter(log => /RING|TABLE|TOURNAMENT|SNG/i.test(String(log.action || ''))).length}</strong></div></div>
                 </div>
 
                 <form className="audit-filters" onSubmit={submitSearch}>
@@ -203,7 +204,7 @@ const AuditLog = () => {
                                                     <strong>{log.adminId?.username || 'Admin'}</strong>
                                                     <small>{log.adminId?.email || log.adminId?._id || ''}</small>
                                                 </td>
-                                                <td className="audit-module">{getModule(log)}</td>
+                                                <td className="audit-module"><span><ConsoleIcon name={({ Games: "controller", Operations: "settings", Commerce: "wallet", Players: "user", System: "settings" })[getModule(log)]} />{getModule(log)}</span></td>
                                                 <td><span className={`audit-action audit-${String(log.action || '').toLowerCase()}`}>{readableAction(log.action)}</span></td>
                                                 <td>
                                                     <strong>{log.targetUserId?.username || details.username || 'System / global'}</strong>

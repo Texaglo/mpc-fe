@@ -1,3 +1,4 @@
+import ConsoleIcon from '../../components/ConsoleIcon';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import './index.css';
@@ -269,49 +270,49 @@ const AdminHomePage = () => {
                     label: 'Players Online',
                     value: stats?.live?.playersOnline?.toLocaleString() || '0',
                     detail: `${stats?.live?.socketConnections || 0} socket connections`,
-                    icon: 'icon-single-02', iconClass: 'online-icon', to: '/home/users',
+                    icon: 'users', iconClass: 'online-icon tone-blue', to: '/home/users',
                 },
                 {
                     label: 'Cash Players Online',
                     value: stats?.live?.cashPlayersOnline?.toLocaleString() ?? '—',
                     detail: 'Cash presence',
-                    icon: 'icon-money-coins', iconClass: 'cash-players-icon', to: '/home/users',
+                    icon: 'coin', iconClass: 'cash-players-icon tone-gold', to: '/home/users',
                 },
                 {
                     label: 'Free Play Players Online',
                     value: stats?.live?.freePlayPlayersOnline?.toLocaleString() ?? '—',
                     detail: 'Free Play presence',
-                    icon: 'icon-controller', iconClass: 'free-players-icon', to: '/home/users',
+                    icon: 'gamepad', iconClass: 'free-players-icon tone-blue', to: '/home/users',
                 },
                 {
                     label: 'Active Cash Tables',
                     value: stats?.live?.breakdown?.cash?.activeTables?.toLocaleString() ?? '—',
                     detail: 'Cash ring tables',
-                    icon: 'icon-controller', iconClass: 'active-tables-icon', to: '/home/games',
+                    icon: 'users', iconClass: 'active-tables-icon tone-gold', to: '/home/games',
                 },
                 {
                     label: 'Active Free Play Tables',
                     value: stats?.live?.breakdown?.freePlay?.activeTables?.toLocaleString() ?? '—',
                     detail: 'Free Play ring tables',
-                    icon: 'icon-controller', iconClass: 'free-tables-icon', to: '/home/games',
+                    icon: 'gamepad', iconClass: 'free-tables-icon tone-blue', to: '/home/games',
                 },
                 {
                     label: 'Players Seated',
                     value: stats?.live?.playersSeated?.toLocaleString() || '0',
                     detail: 'At live tables',
-                    icon: 'icon-single-02', iconClass: 'seated-icon', to: '/home/games',
+                    icon: 'users', iconClass: 'seated-icon tone-blue', to: '/home/games',
                 },
                 {
                     label: 'New Users Today',
                     value: stats?.users?.newToday?.toLocaleString() || '0',
                     detail: 'Player registrations',
-                    icon: 'icon-simple-add', iconClass: 'new-accounts-icon', to: '/home/users',
+                    icon: 'user-add', iconClass: 'new-accounts-icon tone-blue', to: '/home/users',
                 },
                 {
                     label: 'Pending KYC Reviews',
                     value: stats?.users?.pendingKyc?.toLocaleString() ?? '—',
                     detail: 'Awaiting review',
-                    icon: 'icon-lock-circle', iconClass: 'pending-icon', to: '/home/users',
+                    icon: 'shield-check', iconClass: 'pending-icon tone-gold', to: '/home/users',
                 },
             ],
         },
@@ -324,37 +325,37 @@ const AdminHomePage = () => {
                     label: 'Deposits Today',
                     value: formatUsd(stats?.today?.deposits?.amount),
                     detail: `${stats?.today?.deposits?.count || 0} completed deposits`,
-                    icon: 'icon-coins', iconClass: 'deposits-icon', to: '/home/cashier',
+                    icon: 'deposit', iconClass: 'deposits-icon tone-gold', to: '/home/cashier',
                 },
                 {
                     label: 'Pending Withdrawals',
                     value: stats?.withdrawals?.pendingCount?.toLocaleString() || '0',
                     detail: `${formatUsd(stats?.withdrawals?.pendingAmount)} awaiting review`,
-                    icon: 'icon-credit-card', iconClass: 'pending-icon', to: '/home/pending-withdrawals',
+                    icon: 'withdrawal', iconClass: 'pending-icon tone-red', to: '/home/pending-withdrawals',
                 },
                 {
                     label: 'Approved Withdrawals Today',
                     value: formatUsd(stats?.today?.withdrawals?.amount),
                     detail: `${stats?.today?.withdrawals?.count || 0} approved requests`,
-                    icon: 'icon-check-2', iconClass: 'withdrawals-icon', to: '/home/pending-withdrawals',
+                    icon: 'approved', iconClass: 'withdrawals-icon tone-green', to: '/home/pending-withdrawals',
                 },
                 {
                     label: 'Play Time Sold Today',
                     value: formatUsd(stats?.today?.timePurchases?.cashUsd),
                     detail: `${formatMinutes(stats?.today?.timePurchases?.timeMinutes)} minutes`,
-                    icon: 'icon-time-alarm', iconClass: 'time-purchased-icon', to: '/home/cashier', valueClass: 'treasury-value',
+                    icon: 'clock', iconClass: 'time-purchased-icon tone-blue', to: '/home/cashier', valueClass: 'treasury-value',
                 },
                 {
                     label: 'FP Chip Sales Today',
                     value: stats?.today?.fpChipSales?.amountUsd == null ? '—' : formatUsd(stats.today.fpChipSales.amountUsd),
                     detail: 'Free Play purchases',
-                    icon: 'icon-controller', iconClass: 'free-players-icon', to: '/home/free-play',
+                    icon: 'gamepad', iconClass: 'free-players-icon tone-blue', to: '/home/free-play',
                 },
                 {
                     label: 'Revenue Today',
                     value: formatUsd(stats?.revenueToday?.estimatedUsd),
                     detail: `${formatMpce(stats?.revenueToday?.mpce)} MPCE earned`,
-                    icon: 'icon-coins', iconClass: 'revenue-today-icon', to: '/home/mpce-ledger', valueClass: 'treasury-value',
+                    icon: 'chart', iconClass: 'revenue-today-icon tone-green', to: '/home/mpce-ledger', valueClass: 'treasury-value',
                 },
             ],
         },
@@ -367,37 +368,37 @@ const AdminHomePage = () => {
                     label: 'Treasury USDC',
                     value: walletBalance?.treasuryWallet?.balanceUSDC == null ? '—' : Number(walletBalance.treasuryWallet.balanceUSDC).toLocaleString(),
                     detail: 'Deposit custody',
-                    icon: 'icon-money-coins', iconClass: 'treasury-usdc-icon', to: '/home/pending-withdrawals', valueClass: 'treasury-value',
+                    icon: 'usdc', iconClass: 'treasury-usdc-icon tone-blue', to: '/home/pending-withdrawals', valueClass: 'treasury-value',
                 },
                 {
                     label: 'Treasury SOL',
                     value: walletBalance?.treasuryWallet?.balanceSOL == null ? '—' : Number(walletBalance.treasuryWallet.balanceSOL).toLocaleString(),
                     detail: 'Network balance',
-                    icon: 'icon-wallet-43', iconClass: 'treasury-icon', to: '/home/pending-withdrawals', valueClass: 'treasury-value',
+                    icon: 'solana', iconClass: 'treasury-icon tone-solana', to: '/home/pending-withdrawals', valueClass: 'treasury-value',
                 },
                 {
                     label: 'Player Cash Liabilities',
                     value: formatUsd(stats?.liabilities?.mainnetCashUsd ?? stats?.liabilities?.cashUsd),
                     detail: 'Player cash balance',
-                    icon: 'icon-bank', iconClass: 'liabilities-icon', to: '/home/users', valueClass: 'treasury-value',
+                    icon: 'bank', iconClass: 'liabilities-icon tone-gold', to: '/home/users', valueClass: 'treasury-value',
                 },
                 {
                     label: 'Free Play Chips Outstanding',
                     value: formatMpce(stats?.liabilities?.fp),
                     detail: 'Non-withdrawable FP',
-                    icon: 'icon-controller', iconClass: 'free-tables-icon', to: '/home/free-play',
+                    icon: 'chip', iconClass: 'free-tables-icon tone-green', to: '/home/free-play',
                 },
                 {
                     label: 'House MPCE Balance',
                     value: formatMpce(stats?.houseMpce?.availableBalance),
                     detail: `+${formatMpce(stats?.houseMpce?.periodEarned)} this period`,
-                    icon: 'icon-wallet-43', iconClass: 'house-mpce-icon', to: '/home/mpce-ledger',
+                    icon: 'wallet', iconClass: 'house-mpce-icon tone-blue', to: '/home/mpce-ledger',
                 },
                 {
                     label: 'Fraud / Risk Alerts',
                     value: stats?.users?.frozen?.toLocaleString() || '0',
                     detail: 'Restricted accounts',
-                    icon: 'icon-lock-circle', iconClass: 'frozen-icon', to: '/home/users',
+                    icon: 'warning', iconClass: 'frozen-icon tone-red', to: '/home/users',
                 },
             ],
         },
@@ -428,7 +429,7 @@ const AdminHomePage = () => {
                     </div>
                     <div className="period-filter-container">
                         <div className="period-filter">
-                            <label>Period:</label>
+                            <label><ConsoleIcon name="calendar" />Period:</label>
                             <select value={selectedPeriod} onChange={handlePeriodChange}>
                                 <option value="all">All Time</option>
                                 <option value="week">This Week</option>
@@ -485,7 +486,7 @@ const AdminHomePage = () => {
                     {dashboardKpiGroups.map((group) => (
                         <section className="dashboard-kpi-group" aria-labelledby={`${group.id}-title`} key={group.id}>
                             <div className="dashboard-kpi-group-header">
-                                <h3 id={`${group.id}-title`}>{group.title}</h3>
+                                <h3 id={`${group.id}-title`}><ConsoleIcon name={group.id === "live-floor" ? "chart" : group.id === "cash-flow" ? "coins" : "pie"} />{group.title}</h3>
                                 <span>{group.caption}</span>
                             </div>
                             <div className="stats-grid">
@@ -497,7 +498,7 @@ const AdminHomePage = () => {
                                         aria-label={`${item.label}: ${item.value}. ${item.detail}`}
                                         key={item.label}
                                     >
-                                        <div className={`stat-icon ${item.iconClass}`}><i className={`tim-icons ${item.icon}`} /></div>
+                                        <div className={`stat-icon ${item.iconClass}`}><ConsoleIcon name={item.icon} /></div>
                                         <div className="stat-content">
                                             <span className={`stat-value ${item.valueClass || ''}`}>{item.value}</span>
                                             <span className="stat-label">{item.label}</span>

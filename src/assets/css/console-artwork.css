@@ -1,0 +1,137 @@
+/* Shared artwork for the client's dark navy operations console. */
+:root { --icon-blue: #32b7f6; --icon-gold: #f5bd27; --icon-green: #46dc73; --icon-red: #fb7077; --icon-purple: #ba88ff; }
+.tone-blue { color: var(--icon-blue); }
+.tone-gold { color: var(--icon-gold); }
+.tone-green { color: var(--icon-green); }
+.tone-red { color: var(--icon-red); }
+.tone-purple { color: var(--icon-purple); }
+.sidebar .nav .console-icon { width: 22px; height: 22px; margin: 0 14px 0 0; color: #b9ccdd; }
+.sidebar .nav a.active .console-icon { color: #f4c02f; filter: drop-shadow(0 0 5px #eeb32344); }
+.sidebar .nav .nav-link { display: flex; align-items: center; }
+/* Keep the account mark centered and its single caret in the text flow. */
+.navbar .mpc-admin-toggle.nav-link { display: flex; align-items: center; gap: 8px; }
+.navbar .mpc-admin-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #d5a211;
+  border-radius: 50%;
+  line-height: 1;
+}
+.navbar .mpc-admin-avatar .console-icon { display: block; width: 20px; height: 20px; margin: 0; font-size: 20px; color: #f1be2c; }
+.navbar .mpc-admin-toggle .mpc-admin-label { line-height: 1.2; }
+.navbar .mpc-admin-toggle.dropdown-toggle::after {
+  content: '';
+  position: static;
+  display: block;
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  margin: 0 0 0 2px;
+  border: 0;
+  background: url('../img/admin-console/icons/chevron-down.svg') center / contain no-repeat;
+}
+.console-metric-icon { --icon-tint: 35,166,239; width: 41px; height: 41px; flex-basis: 41px; border: 1px solid rgba(var(--icon-tint),.16); border-radius: 9px; background: radial-gradient(ellipse at 45% 38%,rgba(var(--icon-tint),.16),rgba(var(--icon-tint),.045)); color: var(--icon-blue); }
+.console-metric-icon.gold { --icon-tint: 241,185,26; color: var(--icon-gold); }
+.console-metric-icon.green { --icon-tint: 40,209,96; color: var(--icon-green); }
+.console-metric-icon.red { --icon-tint: 248,78,91; color: var(--icon-red); }
+.console-metric-icon.purple { --icon-tint: 151,93,240; color: var(--icon-purple); }
+.console-metric-icon.solana { --icon-tint: 20,60,90; background: #001421; color: #b584ff; }
+.console-metric-icon > .console-icon, .console-metric-icon > .tim-icons { font-size: 26px; filter: drop-shadow(0 0 7px rgba(var(--icon-tint),.3)); }
+.console-metric-icon > .console-brand-icon { font-size: 30px; filter: none; }
+.console-metric-icon > .brand-solana { font-size: 27px; }
+.dashboard-link-card .stat-icon { --icon-tint: 35,166,239; width: 34px; height: 34px; flex: 0 0 34px; border: 1px solid rgba(var(--icon-tint),.15); background: radial-gradient(ellipse at 45% 30%,rgba(var(--icon-tint),.2),rgba(var(--icon-tint),.05)); color: var(--icon-blue); }
+.dashboard-link-card .stat-icon.tone-gold { --icon-tint: 239,181,28; color: var(--icon-gold); }
+.dashboard-link-card .stat-icon.tone-green { --icon-tint: 39,207,96; color: var(--icon-green); }
+.dashboard-link-card .stat-icon.tone-red { --icon-tint: 247,84,97; color: var(--icon-red); }
+.dashboard-link-card .stat-icon.tone-solana { background: #00121e; }
+.dashboard-link-card .stat-icon .console-icon { font-size: 24px; }
+.dashboard-link-card .stat-icon .console-glyph { filter: drop-shadow(0 0 5px rgba(var(--icon-tint),.32)); }
+.dashboard-link-card .stat-icon .console-brand-icon { font-size: 26px; }
+.dashboard-link-card .stat-icon .brand-solana { font-size: 23px; }
+.dashboard-kpi-group:first-child .stat-icon { width: 25px; height: 28px; flex-basis: 25px; background: none; border: 0; }
+.dashboard-kpi-group:first-child .stat-icon .console-icon { font-size: 22px; }
+.dashboard-kpi-group-header h3 { display: flex; align-items: center; gap: 8px; }
+.dashboard-kpi-group-header h3::before, .commerce-featured-panel h2::before { content: none; }
+.dashboard-kpi-group-header h3 .console-icon { color: var(--icon-gold); font-size: 16px; }
+.dashboard-operations-panel h3 .tim-icons { font-size: 17px; }
+.dashboard-list-icon { width: 23px; height: 23px; flex-basis: 23px; }
+.dashboard-list-icon .tim-icons { font-size: 16px; }
+.dashboard-list-icon.icon-freeze, .dashboard-list-icon.icon-reject { color: var(--icon-red); background: #ef55632a; }
+.dashboard-list-icon.icon-approve, .dashboard-list-icon.icon-unfreeze { color: var(--icon-green); background: #3ddd6d20; }
+.dashboard-list-icon.icon-adjust { color: var(--icon-gold); background: #e8b22320; }
+.period-filter label { display: inline-flex; align-items: center; gap: 9px; }
+.period-filter label .console-icon { font-size: 18px; color: #b7c9d9; }
+.add-btn .console-icon, .ring-create-cash .console-icon { margin-right: 9px; font-size: 19px; }
+.ring-list-controls button { display: inline-flex; align-items: center; justify-content: center; }
+.ring-section-icon { width: 36px; height: 36px; flex: 0 0 36px; margin-right: 9px; filter: drop-shadow(0 0 8px #17a9ec55); }
+.ring-section-icon.tone-green { filter: drop-shadow(0 0 8px #21d16755); }
+.ring-table-section-header > div:first-of-type { flex: 1; }
+.ring-modal-brand-mark { background: none; border: 0; color: #f6be2d; }
+.ring-modal-brand-mark .console-icon { font-size: 44px; }
+.ring-economy-choices .console-icon { font-size: 23px; margin: 0 10px 0 0; color: var(--icon-gold); }
+.ring-economy-choices button:nth-of-type(2) .console-icon { color: var(--icon-blue); }
+.ring-form-section__heading h3 { display: flex; align-items: center; gap: 8px; }
+.ring-form-section__heading h3 .console-icon { color: var(--icon-gold); font-size: 21px; }
+.ring-form-section--game .ring-form-section__heading h3 .console-icon { color: var(--icon-blue); }
+.commerce-category-tabs button { display: inline-flex; align-items: center; gap: 13px; }
+.commerce-category-tabs .console-icon { font-size: 21px; }
+.commerce-audience, .commerce-type, .commerce-includes, .login-provider, .currency-amount, .console-person-cell { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.commerce-audience .console-icon { color: var(--icon-blue); font-size: 19px; }
+.commerce-type .console-icon { color: var(--icon-gold); font-size: 20px; }
+.commerce-includes .console-icon { color: #afc5d6; font-size: 17px; }
+.commerce-featured-panel h2, .commerce-flow-panel h2 { display: flex; align-items: center; gap: 10px; }
+.commerce-featured-panel h2 .console-icon { color: var(--icon-gold); font-size: 25px; }
+.commerce-flow-panel h2 .console-icon { color: var(--icon-blue); font-size: 20px; }
+.commerce-flow-panel > div > .console-icon, .commerce-flow-panel > div > .tim-icons { font-size: 29px; width: 32px; height: 32px; margin: 5px; color: var(--icon-gold); }
+.commerce-flow-panel > div:nth-of-type(2) > .console-icon { color: var(--icon-blue); }
+.commerce-flow-panel > div:nth-of-type(3) > .console-icon { color: #b9ccdb; }
+.commerce-pack-art { width: 88px; height: 60px; object-fit: contain; }
+.commerce-pack-art[class*="variant-"] { filter: none; }
+.console-person-cell .console-icon { color: #aac3d8; font-size: 14px; }
+.currency-amount .console-icon { font-size: 17px; }
+.wallet-label { display: inline-flex; gap: 8px; align-items: center; }
+.wallet-label .console-icon { font-size: 22px; }
+.audit-module > span { display: inline-flex; align-items: center; gap: 8px; color: #c7d9e8; white-space: nowrap; }
+.audit-module .console-icon { font-size: 20px; color: #19b2f9; }
+.audit-total { position: relative; padding-left: 48px; }
+.audit-total > .console-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--icon-gold); font-size: 25px; }
+.user-identity-with-avatar { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.user-initial-avatar { display: grid; place-items: center; flex: 0 0 29px; height: 29px; border: 1px solid #b6891e; border-radius: 50%; background: radial-gradient(circle at 35% 20%,#796023,#1d271f); color: #fff; font-size: 10px; font-weight: 650; box-shadow: 0 0 9px #dca11d16; }
+.user-initial-avatar.avatar-1 { border-color: #8c55d9; background: radial-gradient(circle at 35% 20%,#553683,#1b1540); }
+.user-initial-avatar.avatar-2 { border-color: #20a476; background: radial-gradient(circle at 35% 20%,#1b5944,#072d2b); }
+.user-initial-avatar.avatar-3 { border-color: #168bd7; background: radial-gradient(circle at 35% 20%,#144f79,#08233e); }
+.user-initial-avatar.avatar-4 { border-color: #e05460; background: radial-gradient(circle at 35% 20%,#703a49,#321b2b); }
+.login-provider { font-size: 10px; color: #e7eef5; }
+.login-provider .console-icon { font-size: 19px; }
+.login-provider.is-unknown { color: #879eaf; }
+.user-wallet-cell { display: grid; gap: 4px; }
+.user-wallet-cell > span { display: flex; align-items: center; gap: 4px; }
+.user-wallet-cell .console-icon { color: var(--icon-blue); font-size: 11px; }
+.user-wallet-cell small { color: #37d976; font-size: 8px; }
+.user-wallet-cell small i, .user-wallet-empty i { display: inline-block; width: 6px; height: 6px; margin-right: 4px; border-radius: 50%; background: #39d779; }
+.user-wallet-empty { font-size: 8px; color: #96aec1; }
+.user-wallet-empty i { background: #6f8ca6; }
+.user-balance-stack .console-icon { font-size: 11px; margin-right: 3px; }
+.users-access-notice button .console-icon { font-size: 12px; margin-left: 5px; }
+.cashier-movement { display: flex; gap: 5px; align-items: center; }
+@media (max-width:700px) { .console-metric-icon { width: 34px; height: 34px; flex-basis: 34px; } .console-metric-icon > .console-icon { font-size: 24px; } }
+
+.ring-live-summary h3 { display:flex; align-items:center; gap:8px; }
+.ring-live-summary h3 .console-icon { color:var(--icon-gold); font-size:20px; }
+.ring-live-summary dt { display:flex; align-items:center; gap:7px; }
+.ring-live-summary dt .console-icon { font-size:13px; }
+
+.balance-btn .console-icon, .users-table-toolbar button .console-icon { font-size:16px; margin-right:7px; }
+
+.commerce-audience, .commerce-type { padding:0; border:0; background:transparent; color:#d3e0eb; border-radius:0; }
+
+/* Reactstrap emits the Bootstrap 5 close control; supply matching local artwork. */
+.modal-header .btn-close { display:grid; place-items:center; width:28px; height:28px; flex:0 0 28px; margin:0; padding:5px; border:0; border-radius:4px; color:#c6d7e3; background:transparent; cursor:pointer; }
+.modal-header .btn-close::before { content:""; display:block; width:16px; height:16px; background:currentColor; -webkit-mask:url('../img/admin-console/icons/close.svg') center / contain no-repeat; mask:url('../img/admin-console/icons/close.svg') center / contain no-repeat; }
+.modal-header .btn-close:hover { color:#fff; background:#193749; }
+.modal-header .btn-close:focus-visible { outline:2px solid #eeb82d; outline-offset:2px; }

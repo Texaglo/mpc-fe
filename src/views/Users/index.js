@@ -1,3 +1,4 @@
+import ConsoleIcon, { LoginProvider } from '../../components/ConsoleIcon';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
@@ -474,8 +475,15 @@ class Users extends React.Component {
             {
                 accessor: 'username',
                 Header: 'Player',
-                Cell: ({ original }) => <div className="user-identity-cell"><strong>{original.username || 'N/A'}</strong><span>{original.email || 'No email'}</span>{original.role && original.role !== 'user' && <small className={`admin-role-badge is-${original.role}`}>{original.role === 'sub_admin' ? 'Sub-admin' : 'Full admin'}</small>}</div>,
+                Cell: ({ original }) => <div className="user-identity-with-avatar"><span className={`user-initial-avatar avatar-${String(original.username || "").charCodeAt(0) % 5}`} aria-hidden="true">{String(original.username || "?").slice(0, 2).toUpperCase()}</span><div className="user-identity-cell"><strong>{original.username || 'N/A'}</strong><span>{original.email || 'No email'}</span>{original.role && original.role !== 'user' && <small className={`admin-role-badge is-${original.role}`}>{original.role === 'sub_admin' ? 'Sub-admin' : 'Full admin'}</small>}</div></div>,
                 width: 150
+            },
+            {
+                accessor: 'authProvider',
+                Header: 'Login Method',
+                Cell: ({ value }) => <LoginProvider provider={value} />,
+                filterable: false,
+                width: 118
             },
             {
                 accessor: 'publicAddress',
@@ -483,11 +491,11 @@ class Users extends React.Component {
                 Cell: ({ value }) => {
                     if (value) {
                         if (value.length > 16) {
-                            return `${value.substring(0, 6)}...${value.substring(value.length - 6)}`;
+                            return <span className="user-wallet-cell"><span><ConsoleIcon name="wallet" />{value.substring(0, 4)}…{value.substring(value.length - 4)}</span><small><i />Connected</small></span>;
                         }
                         return value;
                     }
-                    return 'N/A';
+                    return <span className="user-wallet-empty"><i />Not connected</span>;
                 },
                 filterable: false,
                 width: 100
@@ -495,7 +503,7 @@ class Users extends React.Component {
             {
                 id: 'balances',
                 Header: 'Balances',
-                Cell: ({ original }) => <div className="user-balance-stack"><span>Mainnet <strong>${Number(original.mainnetCashBalance ?? original.cashBalance ?? 0).toLocaleString()}</strong></span><span>Devnet <strong>${Number(original.devnetCashBalance || 0).toLocaleString()}</strong></span><span>MPCE <strong>{Number(original.mpceCredit || 0).toLocaleString()}</strong></span><span>FP <strong>{Number(original.fpBalance || 0).toLocaleString()}</strong></span></div>,
+                Cell: ({ original }) => <div className="user-balance-stack"><span>Mainnet <strong>${Number(original.mainnetCashBalance ?? original.cashBalance ?? 0).toLocaleString()}</strong></span><span>Devnet <strong>${Number(original.devnetCashBalance || 0).toLocaleString()}</strong></span><span><ConsoleIcon className="tone-gold" name="clock" />MPCE <strong>{Number(original.mpceCredit || 0).toLocaleString()}</strong></span><span><ConsoleIcon className="tone-gold" name="chip" />FP <strong>{Number(original.fpBalance || 0).toLocaleString()}</strong></span></div>,
                 filterable: false,
                 width: 125
             },
@@ -528,13 +536,6 @@ class Users extends React.Component {
                 ),
                 filterable: false,
                 width: 90
-            },
-            {
-                accessor: 'createdAt',
-                Header: 'Joined',
-                Cell: ({ value }) => value ? new Date(value).toLocaleDateString() : 'N/A',
-                filterable: false,
-                width: 75
             },
             {
                 Cell: item => (
@@ -574,12 +575,12 @@ class Users extends React.Component {
                     </div>
 
                     <div className="console-metric-grid users-stats" aria-label="Player summary">
-                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-single-02" /></span><div><small>Total Users</small><strong>{Number(pagination?.totalUsers || 0).toLocaleString()}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-coins" /></span><div><small>Cash Balance Holders · This Page</small><strong>{usersData.filter(user => Number(user.mainnetCashBalance ?? user.cashBalance ?? 0) > 0).length}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-controller" /></span><div><small>Free Play Balance Holders · This Page</small><strong>{usersData.filter(user => Number(user.fpBalance || 0) > 0).length}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-link-72" /></span><div><small>Wallet Connected · This Page</small><strong>{usersData.filter(user => Boolean(user.publicAddress)).length}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>KYC Verified · This Page</small><strong>{usersData.filter(user => String(user.KYCStatus || '').toLowerCase() === 'verified').length}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-lock-circle" /></span><div><small>Banned · This Page</small><strong>{usersData.filter(user => user.isFrozen).length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="user" /></span><div><small>Total Users</small><strong>{Number(pagination?.totalUsers || 0).toLocaleString()}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon gold"><ConsoleIcon name="crown" /></span><div><small>Cash Balance Holders · This Page</small><strong>{usersData.filter(user => Number(user.mainnetCashBalance ?? user.cashBalance ?? 0) > 0).length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="controller" /></span><div><small>Free Play Balance Holders · This Page</small><strong>{usersData.filter(user => Number(user.fpBalance || 0) > 0).length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="link" /></span><div><small>Wallet Connected · This Page</small><strong>{usersData.filter(user => Boolean(user.publicAddress)).length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon green"><ConsoleIcon name="shield-check" /></span><div><small>KYC Verified · This Page</small><strong>{usersData.filter(user => String(user.KYCStatus || '').toLowerCase() === 'verified').length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon red"><ConsoleIcon name="shield-alert" /></span><div><small>Banned · This Page</small><strong>{usersData.filter(user => user.isFrozen).length}</strong></div></div>
                         {selectedUsers.length > 0 && (
                             <div className="bulk-actions">
                                 <span className="selected-count">{selectedUsers.length} selected</span>
@@ -590,11 +591,11 @@ class Users extends React.Component {
                         )}
                     </div>
 
-                    <div className="users-access-notice"><i className="tim-icons icon-alert-circle-exc" /><span><strong>Free Play and cash access are separate.</strong> FP is non-withdrawable and cannot be converted into cash, USDC, SOL, or MPCE. Review each player's verification status before cash operations.</span><button type="button" onClick={() => this.props.history.push('/home/free-play')}>Learn More ↗</button></div>
+                    <div className="users-access-notice"><i className="tim-icons icon-alert-circle-exc" /><span><strong>Free Play and cash access are separate.</strong> FP is non-withdrawable and cannot be converted into cash, USDC, SOL, or MPCE. Review each player's verification status before cash operations.</span><button type="button" onClick={() => this.props.history.push('/home/free-play')}>Learn More <ConsoleIcon name="external" /></button></div>
 
                     <Fragment>
                         <div className='main-container-head mb-3'>
-                            <div className="users-table-toolbar"><h2>Players ({Number(pagination?.totalUsers || 0).toLocaleString()})</h2><div><select aria-label="Filter players on this page" value={this.state.playerViewFilter} onChange={event => this.setState({ playerViewFilter: event.target.value })}><option value="all">Filters · All</option><option value="cash">Cash balance · This page</option><option value="freePlay">Free Play balance · This page</option><option value="verified">KYC verified · This page</option><option value="banned">Banned · This page</option></select><button type="button" onClick={this.exportToCSV} disabled={!selectedUsers.length}>Export selected</button></div></div>
+                            <div className="users-table-toolbar"><h2>Players ({Number(pagination?.totalUsers || 0).toLocaleString()})</h2><div><select aria-label="Filter players on this page" value={this.state.playerViewFilter} onChange={event => this.setState({ playerViewFilter: event.target.value })}><option value="all">Filters · All</option><option value="cash">Cash balance · This page</option><option value="freePlay">Free Play balance · This page</option><option value="verified">KYC verified · This page</option><option value="banned">Banned · This page</option></select><button type="button" onClick={this.exportToCSV} disabled={!selectedUsers.length}><ConsoleIcon name="download" />Export selected</button></div></div>
                             <ReactTable
                                 minRows={Math.min(Math.max(displayedUsers.length, 1), 10)}
                                 className="table"
@@ -674,7 +675,7 @@ class Users extends React.Component {
                             return <Fragment>
                                 <section className="profile-hero">
                                     <div><small>Player</small><h4>{player.username || 'Unnamed player'}</h4><span>{player.email || 'No email'} · {player._id}</span></div>
-                                    <div className="profile-state"><span className={`status-badge ${player.isFrozen ? 'frozen' : 'active'}`}>{player.isFrozen ? 'Banned' : 'Active'}</span><small>Last login {player.lastLoginAt ? new Date(player.lastLoginAt).toLocaleString() : 'Never recorded'}</small></div>
+                                    <div className="profile-state"><span className={`status-badge ${player.isFrozen ? 'frozen' : 'active'}`}>{player.isFrozen ? 'Banned' : 'Active'}</span><LoginProvider provider={player.authProvider} /><small>Last login {player.lastLoginAt ? new Date(player.lastLoginAt).toLocaleString() : 'Never recorded'}</small></div>
                                 </section>
                                 <section className="profile-balance-grid">
                                     <article><span>Mainnet Cash</span><strong>${Number(player.mainnetCashBalance ?? player.cashBalance ?? 0).toLocaleString()}</strong><small>Withdrawable production liability</small></article>

@@ -1,3 +1,4 @@
+import ConsoleIcon from '../ConsoleIcon';
 import React from "react";
 import { connect } from 'react-redux';
 import { NavLink } from "react-router-dom";
@@ -14,11 +15,6 @@ class Sidebar extends React.Component {
   constructor(props) {
     super(props);
     this.sidebarRef = React.createRef();
-    this.activeRoute.bind(this);
-  }
-  // verifies if routeName is the one active (in browser input)
-  activeRoute(routeName) {
-    return this.props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
   }
   componentDidMount() {
     if (navigator.platform.indexOf("Win") > -1) {
@@ -59,10 +55,7 @@ class Sidebar extends React.Component {
                 <React.Fragment key={`${prop.layout}${prop.path}`}>
                   {(!prop['hidden'] || (['/achievement', '/tournament'].includes(prop.path) && !canAccess(access, 'games.view'))) &&
                     <li
-                      className={
-                        this.activeRoute(prop.path) +
-                        (prop.pro ? "active-pro" : "")
-                      }
+                      className={prop.pro ? "active-pro" : ""}
                     >
                       <NavLink
                         to={prop.layout + prop.path}
@@ -70,7 +63,7 @@ class Sidebar extends React.Component {
                         activeClassName="active"
                       // onClick={() => this.props.toggleSidebar(prop.name)}
                       >
-                        <i className={prop.icon} />
+                        <ConsoleIcon name={({ "/dashboard": "home", "/games": "controller", "/game-store": "wallet", "/pending-withdrawals": "settings", "/users": "user", "/audit-log": "clipboard", "/achievement": "trophy", "/tournament": "trophy" })[prop.path] || "settings"} />
                         {rtlActive ? prop.rtlName : (prop.sidebarName || prop.name)}
                       </NavLink>
                     </li>}

@@ -68,7 +68,10 @@ class Admin extends React.Component {
 
   getRoutes = routes => {
     const allowedRoutes = routes.filter((route) => canAccess({ role: this.props.role, permissions: this.props.permissions }, route.permission));
-    const firstAllowedRoute = allowedRoutes[0] || routes[0];
+    const firstAllowedRoute = allowedRoutes.find((route) => route.layout === "/home" && route.path === "/dashboard")
+      || allowedRoutes.find((route) => !route.hidden)
+      || allowedRoutes[0]
+      || routes[0];
     const firstAllowedPath = firstAllowedRoute.layout + firstAllowedRoute.path;
     return (
       <Router>

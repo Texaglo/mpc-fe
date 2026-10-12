@@ -1,3 +1,4 @@
+import ConsoleIcon from '../../components/ConsoleIcon';
 import React, { useState, useEffect, Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -9,8 +10,13 @@ import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { createGameStore, updateGameStore, getGameStores, toggleStoreItem } from "../../store/actions/GameStore";
 import { getMarketplaceItems } from '../../store/actions/Marketplace';
-import fpChips from '../../assets/img/admin-console/fp-chip-stack-blue.png';
+import fpChips0 from '../../assets/img/admin-console/fp-chip-stack-blue-v2.png';
+import fpChips1 from '../../assets/img/admin-console/fp-chip-stack-green-v2.png';
+import fpChips2 from '../../assets/img/admin-console/fp-chip-stack-red-v2.png';
+import fpChips3 from '../../assets/img/admin-console/fp-chip-stack-purple-v2.png';
 import './index.css';
+
+const fpChipArtwork = [fpChips0, fpChips1, fpChips2, fpChips3];
 
 const CustomTextField = withStyles({
     root: {
@@ -114,9 +120,9 @@ const GameStore = () => {
                 return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
             },
         },
-        { Header: 'Audience', Cell: () => <span className="commerce-audience">Cash Users</span>, filterable: false },
-        { Header: 'Type', Cell: () => <span className="commerce-type">Time Bundle</span>, filterable: false },
-        { Header: 'Includes', Cell: ({ original }) => original.name, filterable: false },
+        { Header: 'Audience', Cell: () => <span className="commerce-audience"><ConsoleIcon name="users" />Cash Users</span>, filterable: false },
+        { Header: 'Type', Cell: () => <span className="commerce-type"><ConsoleIcon name="coins" />Time Bundle</span>, filterable: false },
+        { Header: 'Includes', Cell: ({ original }) => <span className="commerce-includes"><ConsoleIcon name="clock" />{original.name}</span>, filterable: false },
         {
             accessor: 'price',
             Header: 'Price',
@@ -161,19 +167,19 @@ const GameStore = () => {
                 <div><h1>Commerce / Products</h1><p>Manage products and availability in the player store.</p></div>
                 <button onClick={() => {
                     dispatch(toggleModal(true));
-                }} className="add-btn">Create Product</button>
+                }} className="add-btn"><ConsoleIcon name="plus-circle" />Create Product</button>
             </div>
             <div className="console-metric-grid commerce-metric-grid" aria-label="Product summary">
                 <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-coins" /></span><div><small>Time Bundles</small><strong>{products.length}</strong></div></div>
-                <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-controller" /></span><div><small>FP Chip Packs</small><strong>{fpCatalogProducts.length}</strong></div></div>
-                <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Active Products</small><strong>{activeCatalogProducts}</strong></div></div>
-                <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-simple-remove" /></span><div><small>Disabled Products</small><strong>{products.length + fpCatalogProducts.length - activeCatalogProducts}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="chip" /></span><div><small>FP Chip Packs</small><strong>{fpCatalogProducts.length}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon green"><ConsoleIcon name="tag" /></span><div><small>Active Products</small><strong>{activeCatalogProducts}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon red"><ConsoleIcon name="ban" /></span><div><small>Disabled Products</small><strong>{products.length + fpCatalogProducts.length - activeCatalogProducts}</strong></div></div>
                 <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-trophy" /></span><div><small>Highest Priced Bundle</small><strong>{products.length ? `$${Math.max(...products.map(item => Number(item.price || 0))).toFixed(2)}` : '—'}</strong></div></div>
             </div>
             <div className="commerce-category-tabs" aria-label="Product categories">
-                <button type="button" className="active">▤ &nbsp; Time Bundles</button>
-                <button type="button" onClick={() => history.push('/home/marketplace?type=currency_bundle')}>◉ &nbsp; FP Chip Packs</button>
-                <button type="button" onClick={() => history.push('/home/marketplace?type=cosmetic')}>♧ &nbsp; Cosmetics</button>
+                <button type="button" className="active"><ConsoleIcon name="coins" /> Time Bundles</button>
+                <button type="button" onClick={() => history.push('/home/marketplace?type=currency_bundle')}><ConsoleIcon name="chip" /> FP Chip Packs</button>
+                <button type="button" onClick={() => history.push('/home/marketplace?type=cosmetic')}><ConsoleIcon name="shirt" /> Cosmetics</button>
             </div>
             <Fragment>
                 <div className='main-container-head mb-3'>
@@ -191,10 +197,10 @@ const GameStore = () => {
             </Fragment>
             <div className="commerce-lower-grid">
                 <section className="commerce-featured-panel">
-                    <header><div><h2>Featured FP Chip Packs</h2><p>Free Play chips for practice and social play.</p></div><button type="button" onClick={() => history.push('/home/marketplace?type=currency_bundle')}>View all FP chip packs →</button></header>
-                    {fpProducts.length ? <div className="commerce-pack-grid">{fpProducts.map((item, index) => <div className="commerce-pack-card" key={item._id}><img className={`commerce-pack-art variant-${index % 4}`} src={fpChips} alt="" /><strong>{item.name}</strong><span>${Number(item.price || 0).toFixed(2)}</span><button type="button" onClick={() => history.push('/home/marketplace?type=currency_bundle')}>View Product</button></div>)}</div> : <div className="commerce-pack-empty">No Free Play chip packs are configured in the catalog yet.</div>}
+                    <header><div><h2><ConsoleIcon name="chip" />Featured FP Chip Packs</h2><p>Free Play chips for practice and social play.</p></div><button type="button" onClick={() => history.push('/home/marketplace?type=currency_bundle')}>View all FP chip packs →</button></header>
+                    {fpProducts.length ? <div className="commerce-pack-grid">{fpProducts.map((item, index) => <div className="commerce-pack-card" key={item._id}><img className={`commerce-pack-art variant-${index % 4}`} src={fpChipArtwork[index % fpChipArtwork.length]} alt="" /><strong>{item.name}</strong><span>${Number(item.price || 0).toFixed(2)}</span><button type="button" onClick={() => history.push('/home/marketplace?type=currency_bundle')}>View Product</button></div>)}</div> : <div className="commerce-pack-empty">No Free Play chip packs are configured in the catalog yet.</div>}
                 </section>
-                <aside className="commerce-flow-panel"><h2>Purchase Flow Information</h2><div><i className="tim-icons icon-coins" /><span><strong>Cash Users</strong><small>Purchase play time bundles here or deposit funds directly through the cashier.</small></span></div><div><i className="tim-icons icon-controller" /><span><strong>Free Play Users</strong><small>Purchase FP chip packs in the catalog to play on Free Play tables.</small></span></div><div><i className="tim-icons icon-bag-16" /><span><strong>Cosmetic Items</strong><small>Available for player customization and in-game appearance.</small></span></div></aside>
+                <aside className="commerce-flow-panel"><h2><ConsoleIcon name="info" />Purchase Flow Information</h2><div><i className="tim-icons icon-coins" /><span><strong>Cash Users</strong><small>Purchase play time bundles here or deposit funds directly through the cashier.</small></span></div><div><ConsoleIcon name="chip" /><span><strong>Free Play Users</strong><small>Purchase FP chip packs in the catalog to play on Free Play tables.</small></span></div><div><ConsoleIcon name="shirt" /><span><strong>Cosmetic Items</strong><small>Available for player customization and in-game appearance.</small></span></div></aside>
             </div>
         </div>
 

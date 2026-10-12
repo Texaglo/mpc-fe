@@ -1,3 +1,4 @@
+import ConsoleIcon, { CurrencyAmount } from '../../components/ConsoleIcon';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
@@ -273,7 +274,7 @@ class PendingWithdrawals extends React.Component {
                 filterMethod: (filter, row) => {
                     return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
                 },
-                Cell: ({ value }) => value || 'N/A'
+                Cell: ({ value }) => <span className="console-person-cell"><ConsoleIcon name="user" />{value || 'N/A'}</span>
             },
             {
                 accessor: 'paidAmount',
@@ -281,7 +282,7 @@ class PendingWithdrawals extends React.Component {
                 width: 80,
                 Cell: ({ original }) => {
                     if (original.paidAmount && original.paidCoinType) {
-                        return `${original.paidAmount} ${original.paidCoinType.toUpperCase()}`;
+                        return <CurrencyAmount asset={original.paidCoinType}>{original.paidAmount} {original.paidCoinType.toUpperCase()}</CurrencyAmount>;
                     }
                     return 'N/A';
                 },
@@ -293,7 +294,7 @@ class PendingWithdrawals extends React.Component {
                 width: 88,
                 Cell: ({ original }) => {
                     if (original.receivedAmount && original.receivedCoinType) {
-                        return `${original.receivedAmount} ${original.receivedCoinType.toUpperCase()}`;
+                        return <CurrencyAmount asset={original.receivedCoinType}>{original.receivedAmount} {original.receivedCoinType.toUpperCase()}</CurrencyAmount>;
                     }
                     return 'N/A';
                 },
@@ -303,7 +304,7 @@ class PendingWithdrawals extends React.Component {
                 accessor: 'withdrawalMethod',
                 Header: 'Method',
                 width: 77,
-                Cell: ({ value }) => value || 'N/A',
+                Cell: ({ value }) => <span className="console-person-cell"><ConsoleIcon name="user" />{value || 'N/A'}</span>,
                 filterMethod: (filter, row) => {
                     return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
                 }
@@ -371,14 +372,14 @@ class PendingWithdrawals extends React.Component {
                 filterMethod: (filter, row) => {
                     return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
                 },
-                Cell: ({ value }) => value || 'N/A'
+                Cell: ({ value }) => <span className="console-person-cell"><ConsoleIcon name="user" />{value || 'N/A'}</span>
             },
             {
                 accessor: 'paidAmount',
                 Header: 'Paid Amount',
                 Cell: ({ original }) => {
                     if (original.paidAmount && original.paidCoinType) {
-                        return `${original.paidAmount} ${original.paidCoinType.toUpperCase()}`;
+                        return <CurrencyAmount asset={original.paidCoinType}>{original.paidAmount} {original.paidCoinType.toUpperCase()}</CurrencyAmount>;
                     }
                     return 'N/A';
                 },
@@ -389,7 +390,7 @@ class PendingWithdrawals extends React.Component {
                 Header: 'Received Amount',
                 Cell: ({ original }) => {
                     if (original.receivedAmount && original.receivedCoinType) {
-                        return `${original.receivedAmount} ${original.receivedCoinType.toUpperCase()}`;
+                        return <CurrencyAmount asset={original.receivedCoinType}>{original.receivedAmount} {original.receivedCoinType.toUpperCase()}</CurrencyAmount>;
                     }
                     return 'N/A';
                 },
@@ -398,7 +399,7 @@ class PendingWithdrawals extends React.Component {
             {
                 accessor: 'withdrawalMethod',
                 Header: 'Method',
-                Cell: ({ value }) => value || 'N/A',
+                Cell: ({ value }) => <span className="console-person-cell"><ConsoleIcon name="user" />{value || 'N/A'}</span>,
                 filterMethod: (filter, row) => {
                     return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
                 }
@@ -439,7 +440,7 @@ class PendingWithdrawals extends React.Component {
             {
                 accessor: 'processedBy',
                 Header: 'Processed By',
-                Cell: ({ value }) => value || 'N/A',
+                Cell: ({ value }) => <span className="console-person-cell"><ConsoleIcon name="user" />{value || 'N/A'}</span>,
                 filterable: false
             },
             {
@@ -478,19 +479,19 @@ class PendingWithdrawals extends React.Component {
                     <div className='console-page-header'>
                         <div><h1>Operations / Cashier</h1><p>Review withdrawals, wallet coverage, and payout operations.</p></div>
                         {canViewWallets && <button className="balance-btn" onClick={this.openBalanceModal}>
-                            Wallet Operations {pendingRefills.length > 0 ? `(${pendingRefills.length})` : ''}
+                            <ConsoleIcon name="wallet" /> Wallet Operations {pendingRefills.length > 0 ? `(${pendingRefills.length})` : ''}
                         </button>}
                     </div>
 
                     <nav className="operations-category-tabs" aria-label="Operations sections"><span className="active">Withdrawals</span><Link to="/home/cashier">Deposits</Link><Link to="/home/settings">Treasury</Link><Link to="/home/free-play">Free Play Economy</Link></nav>
 
                     <div className="console-metric-grid withdrawals-stats" aria-label="Withdrawal summary">
-                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-time-alarm" /></span><div><small>Pending Withdrawals</small><strong>{pendingWithdrawalsData.length}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Approved Records</small><strong>{approvedWithdrawalsData.length}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-coins" /></span><div><small>Pending Payout Total</small><strong>{pendingWithdrawalsData.reduce((sum, w) => sum + (parseFloat(w.receivedAmount) || 0), 0).toFixed(4)} SOL</strong></div></div>
-                        {canViewWallets && <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-money-coins" /></span><div><small>Hot Wallet USDC</small><strong>{Number(walletBalance?.hotWallet?.balanceUSDC || 0).toLocaleString()}</strong></div></div>}
-                        {canViewWallets && <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-wallet-43" /></span><div><small>Hot Wallet SOL</small><strong>{Number(walletBalance?.hotWallet?.balanceSOL ?? hotWalletSol).toLocaleString()}</strong></div></div>}
-                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-lock-circle" /></span><div><small>Pending Wallet Refills</small><strong>{pendingRefills.length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon red"><ConsoleIcon name="receipt" /></span><div><small>Pending Withdrawals</small><strong>{pendingWithdrawalsData.length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon green"><ConsoleIcon name="check-solid" /></span><div><small>Approved Records</small><strong>{approvedWithdrawalsData.length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon gold"><ConsoleIcon name="clock" /></span><div><small>Pending Payout Total</small><strong>{pendingWithdrawalsData.reduce((sum, w) => sum + (parseFloat(w.receivedAmount) || 0), 0).toFixed(4)} SOL</strong></div></div>
+                        {canViewWallets && <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="usdc" /></span><div><small>Hot Wallet USDC</small><strong>{Number(walletBalance?.hotWallet?.balanceUSDC || 0).toLocaleString()}</strong></div></div>}
+                        {canViewWallets && <div className="console-metric"><span className="console-metric-icon solana"><ConsoleIcon name="solana" /></span><div><small>Hot Wallet SOL</small><strong>{Number(walletBalance?.hotWallet?.balanceSOL ?? hotWalletSol).toLocaleString()}</strong></div></div>}
+                        <div className="console-metric"><span className="console-metric-icon gold"><ConsoleIcon name="shield-check" /></span><div><small>Pending Wallet Refills</small><strong>{pendingRefills.length}</strong></div></div>
                     </div>
 
                     <div className="withdrawals-main-grid">
@@ -531,10 +532,10 @@ class PendingWithdrawals extends React.Component {
                     <aside className="withdrawals-treasury-panel">
                         <h2><i className="tim-icons icon-bank" /> Treasury Snapshot</h2>
                         <p>Live balances and processing metrics.</p>
-                        <div className="withdrawals-treasury-item"><span className="console-metric-icon blue"><i className="tim-icons icon-money-coins" /></span><div><small>USDC Balance</small><strong>{canViewWallets ? `${Number(walletBalance?.hotWallet?.balanceUSDC || 0).toLocaleString()} USDC` : 'Restricted'}</strong></div><em>{walletBalance?.hotWallet?.status || '—'}</em></div>
-                        <div className="withdrawals-treasury-item"><span className="console-metric-icon blue"><i className="tim-icons icon-wallet-43" /></span><div><small>SOL Balance</small><strong>{canViewWallets ? `${Number(walletBalance?.hotWallet?.balanceSOL ?? hotWalletSol).toLocaleString()} SOL` : 'Restricted'}</strong></div><em>{walletBalance?.hotWallet?.status || '—'}</em></div>
-                        <div className="withdrawals-treasury-item"><span className="console-metric-icon gold"><i className="tim-icons icon-time-alarm" /></span><div><small>Pending Payout Total</small><strong>{pendingWithdrawalsData.reduce((sum, w) => sum + (parseFloat(w.receivedAmount) || 0), 0).toFixed(4)} SOL</strong></div></div>
-                        <div className="withdrawals-treasury-item"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Approved Records</small><strong>{approvedWithdrawalsData.length}</strong></div></div>
+                        <div className="withdrawals-treasury-item"><span className="console-metric-icon blue"><ConsoleIcon name="usdc" /></span><div><small>USDC Balance</small><strong>{canViewWallets ? `${Number(walletBalance?.hotWallet?.balanceUSDC || 0).toLocaleString()} USDC` : 'Restricted'}</strong></div><em>{walletBalance?.hotWallet?.status || '—'}</em></div>
+                        <div className="withdrawals-treasury-item"><span className="console-metric-icon solana"><ConsoleIcon name="solana" /></span><div><small>SOL Balance</small><strong>{canViewWallets ? `${Number(walletBalance?.hotWallet?.balanceSOL ?? hotWalletSol).toLocaleString()} SOL` : 'Restricted'}</strong></div><em>{walletBalance?.hotWallet?.status || '—'}</em></div>
+                        <div className="withdrawals-treasury-item"><span className="console-metric-icon gold"><ConsoleIcon name="clock" /></span><div><small>Pending Payout Total</small><strong>{pendingWithdrawalsData.reduce((sum, w) => sum + (parseFloat(w.receivedAmount) || 0), 0).toFixed(4)} SOL</strong></div></div>
+                        <div className="withdrawals-treasury-item"><span className="console-metric-icon green"><ConsoleIcon name="check-solid" /></span><div><small>Approved Records</small><strong>{approvedWithdrawalsData.length}</strong></div></div>
                         <div className="withdrawals-treasury-notice"><i className="tim-icons icon-alert-circle-exc" /><span>Cash withdrawals require an eligible, verified user and available distribution wallet funds.</span></div>
                     </aside>
                     </div>
@@ -658,9 +659,9 @@ class PendingWithdrawals extends React.Component {
                                         <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>Treasury Wallet</h5>
                                         <div className="wallet-info">
                                             <p><span className="wallet-label">Address:</span> {walletBalance.treasuryWallet?.address || 'N/A'}</p>
-                                            <p><span className="wallet-label">Native SOL:</span> {walletBalance.treasuryWallet?.balanceSOL || 'N/A'}</p>
-                                            <p><span className="wallet-label">Wrapped SOL:</span> {walletBalance.treasuryWallet?.balanceWSOL || 'N/A'}</p>
-                                            <p><span className="wallet-label">USDC:</span> {walletBalance.treasuryWallet?.balanceUSDC || 'N/A'}</p>
+                                            <p><span className="wallet-label"><ConsoleIcon name="solana" />Native SOL:</span> {walletBalance.treasuryWallet?.balanceSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label"><ConsoleIcon name="solana" />Wrapped SOL:</span> {walletBalance.treasuryWallet?.balanceWSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label"><ConsoleIcon name="usdc" />USDC:</span> {walletBalance.treasuryWallet?.balanceUSDC || 'N/A'}</p>
                                             <p><span className="wallet-label">Purpose:</span> {walletBalance.treasuryWallet?.purpose || 'Deposit custody'}</p>
                                             <p><span className="wallet-label">Direct user payouts:</span> No</p>
                                         </div>
@@ -672,11 +673,11 @@ class PendingWithdrawals extends React.Component {
                                         <h5 style={{ color: '#fa6634', marginBottom: '15px' }}>Distribution Hot Wallet</h5>
                                         <div className="wallet-info">
                                             <p><span className="wallet-label">Address:</span> {walletBalance.hotWallet?.address || 'N/A'}</p>
-                                            <p><span className="wallet-label">Native SOL:</span> {walletBalance.hotWallet?.balanceSOL || 'N/A'}</p>
-                                            <p><span className="wallet-label">Wrapped SOL:</span> {walletBalance.hotWallet?.balanceWSOL || 'N/A'}</p>
-                                            <p><span className="wallet-label">USDC:</span> {walletBalance.hotWallet?.balanceUSDC || 'N/A'}</p>
+                                            <p><span className="wallet-label"><ConsoleIcon name="solana" />Native SOL:</span> {walletBalance.hotWallet?.balanceSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label"><ConsoleIcon name="solana" />Wrapped SOL:</span> {walletBalance.hotWallet?.balanceWSOL || 'N/A'}</p>
+                                            <p><span className="wallet-label"><ConsoleIcon name="usdc" />USDC:</span> {walletBalance.hotWallet?.balanceUSDC || 'N/A'}</p>
                                             <p><span className="wallet-label">Purpose:</span> {walletBalance.hotWallet?.purpose || 'Approved withdrawals'}</p>
-                                            <p><span className="wallet-label">Min Balance:</span> {walletBalance.hotWallet?.minBalance || 0} SOL</p>
+                                            <p><span className="wallet-label"><ConsoleIcon name="solana" />Min Balance:</span> {walletBalance.hotWallet?.minBalance || 0} SOL</p>
                                             <p><span className="wallet-label">Alert Threshold:</span> {walletBalance.hotWallet?.alertThreshold || 0} SOL</p>
                                             <p><span className="wallet-label">Operating Target:</span> {walletBalance.hotWallet?.targetBalance || 0} SOL</p>
                                             <p>

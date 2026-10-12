@@ -1,3 +1,4 @@
+import ConsoleIcon from '../../components/ConsoleIcon';
 import React, { useState, useEffect, Fragment } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -250,13 +251,13 @@ const Marketplace = () => {
                 </div>
                 <div className="console-metric-grid commerce-metric-grid" aria-label="Marketplace product summary">
                     <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-bag-16" /></span><div><small>Catalog Products</small><strong>{pagination.totalItems || items.length}</strong></div></div>
-                    <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Active · This Page</small><strong>{items.filter(item => item.isActive !== false).length}</strong></div></div>
-                    <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-simple-remove" /></span><div><small>Disabled · This Page</small><strong>{items.filter(item => item.isActive === false).length}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon green"><ConsoleIcon name="tag" /></span><div><small>Active · This Page</small><strong>{items.filter(item => item.isActive !== false).length}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon red"><ConsoleIcon name="ban" /></span><div><small>Disabled · This Page</small><strong>{items.filter(item => item.isActive === false).length}</strong></div></div>
                 </div>
                 <div className="commerce-category-tabs" aria-label="Product categories">
-                    <button type="button" onClick={() => history.push('/home/game-store')}>▤ &nbsp; Time Bundles</button>
-                    <button type="button" className={selectedItemType === 'currency_bundle' ? 'active' : ''} onClick={() => history.push('/home/marketplace?type=currency_bundle')}>◉ &nbsp; FP Chip Packs</button>
-                    <button type="button" className={selectedItemType === 'cosmetic' ? 'active' : ''} onClick={() => history.push('/home/marketplace?type=cosmetic')}>♧ &nbsp; Cosmetics</button>
+                    <button type="button" onClick={() => history.push('/home/game-store')}><ConsoleIcon name="coins" /> Time Bundles</button>
+                    <button type="button" className={selectedItemType === 'currency_bundle' ? 'active' : ''} onClick={() => history.push('/home/marketplace?type=currency_bundle')}><ConsoleIcon name="chip" /> FP Chip Packs</button>
+                    <button type="button" className={selectedItemType === 'cosmetic' ? 'active' : ''} onClick={() => history.push('/home/marketplace?type=cosmetic')}><ConsoleIcon name="shirt" /> Cosmetics</button>
                     <button type="button" className={!selectedItemType ? 'active' : ''} onClick={() => history.push('/home/marketplace')}>All Products</button>
                 </div>
                 <div className='filters-container mb-3'>

@@ -1,3 +1,5 @@
+import ConsoleIcon from '../../components/ConsoleIcon';
+import ringGameChip from '../../assets/img/admin-console/ring-game-chip.svg';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React from 'react';
@@ -85,6 +87,14 @@ const Toggle = ({ name, checked, onChange, title, description }) => (
             <span className="ring-switch__track" />
         </span>
     </label>
+);
+
+const SectionLead = ({ icon, title, description, tone = 'gold' }) => (
+    <div className={`ring-section-lead tone-${tone}`}><ConsoleIcon name={icon} /><div><h3>{title}</h3><p>{description}</p></div></div>
+);
+
+const SwitchField = ({ name, checked, onChange, title, description }) => (
+    <label className="ring-field ring-switch-field"><span className="ring-field__label">{title}</span><span className="ring-inline-switch-row"><span className="ring-switch"><input aria-label={title} type="checkbox" name={name} checked={checked} onChange={onChange} /><span className="ring-switch__track" /></span><span>{checked ? 'Enabled' : 'Disabled'}</span></span><span className="ring-field__hint">{description}</span></label>
 );
 
 export class Ring extends React.Component {
@@ -320,6 +330,13 @@ export class Ring extends React.Component {
         const effectiveCustomMinutesPerHour = Number(customBurnRateMpcePerHour || 0) * minutesPerMpce;
         const customMultiplier = standardMinutesPerHour > 0 ? effectiveCustomMinutesPerHour / standardMinutesPerHour : 0;
         const newGamesPaused = this.getSettingValue('newGamesPaused', 0) === 1;
+        const economyLabel = balanceType === 'FP' ? 'Free Play' : balanceType === 'CASH' ? 'Cash' : 'Time';
+        const economyUnit = balanceType === 'CASH' ? 'USD' : balanceType === 'FP' ? 'FP' : 'MPCE';
+        const regionLabel = REGION_OPTIONS.find(([value]) => value === region)?.[1] || 'Not set';
+        const gameLabel = gameVariant === "Texas Hold'em" ? `${formatLimit || 'No Limit'} Hold'em` : gameVariant === 'Omaha' ? 'Pot-Limit Omaha' : 'Select game type';
+        const displayAmount = value => value === '' || value == null ? '—' : `${balanceType === 'CASH' ? '$' : ''}${Number(value).toLocaleString()}`;
+        const rateLabel = balanceType === 'FP' || timeChargeTier === 'NONE' ? 'Free' : `${timeChargeTier === 'CUSTOM' ? customBurnRateMpcePerHour : standardMpcePerHour.toFixed(2)} MPCE / hour`;
+
 
         const canManage = canAccess({ role: this.props.role, permissions: this.props.permissions }, 'games.manage');
         const columns = [
@@ -366,17 +383,17 @@ export class Ring extends React.Component {
                     <div className="console-page-header ring-list-header">
                         <div><h1>Games / Ring Games</h1><p>Manage No-Limit Hold'em cash and free play tables.</p></div>
                         <div className="ring-list-controls">
-                            {canManage && <button onClick={() => this.createRing('CASH')} className="ring-create-cash">Create Cash Table</button>}
-                            {canManage && <button onClick={() => this.createRing('FP')} className="add-btn">Create Free Play Table</button>}
+                            {canManage && <button onClick={() => this.createRing('CASH')} className="ring-create-cash"><ConsoleIcon name="cash-bag" />Create Cash Table</button>}
+                            {canManage && <button onClick={() => this.createRing('FP')} className="add-btn"><ConsoleIcon name="users" />Create Free Play Table</button>}
                         </div>
                     </div>
                     <div className="console-metric-grid ring-metric-grid" aria-label="Ring table summary">
-                        <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-controller" /></span><div><small>Active Cash Tables</small><strong>{cashGames.filter(game => String(game.tableStatus || 'ACTIVE').toUpperCase() === 'ACTIVE').length}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-controller" /></span><div><small>Active Free Play Tables</small><strong>{freePlayGames.filter(game => String(game.tableStatus || 'ACTIVE').toUpperCase() === 'ACTIVE').length}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-single-02" /></span><div><small>Players Seated</small><strong>{seatedPlayers}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-simple-add" /></span><div><small>Open Seats</small><strong>{openSeats}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-coins" /></span><div><small>Active Tables Total</small><strong>{activeGames.length}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-simple-remove" /></span><div><small>Closed / Paused Tables</small><strong>{allRingGamesArray.length - activeGames.length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon green"><ConsoleIcon name="table" /></span><div><small>Active Cash Tables</small><strong>{cashGames.filter(game => String(game.tableStatus || 'ACTIVE').toUpperCase() === 'ACTIVE').length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="users" /></span><div><small>Active Free Play Tables</small><strong>{freePlayGames.filter(game => String(game.tableStatus || 'ACTIVE').toUpperCase() === 'ACTIVE').length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><ConsoleIcon name="user" /></span><div><small>Players Seated</small><strong>{seatedPlayers}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon gold"><ConsoleIcon name="user-add" /></span><div><small>Open Seats</small><strong>{openSeats}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon green"><ConsoleIcon name="table" /></span><div><small>Active Tables Total</small><strong>{activeGames.length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon purple"><ConsoleIcon name="pause" /></span><div><small>Closed / Paused Tables</small><strong>{allRingGamesArray.length - activeGames.length}</strong></div></div>
                     </div>
                     <div className="ring-collection-tabs" aria-label="Ring game sections">
                         <button type="button" aria-pressed={this.state.focusedTableGroup === 'cash'} className={this.state.focusedTableGroup === 'cash' ? 'active' : ''} onClick={() => { this.setState({ focusedTableGroup: 'cash' }); document.getElementById('ring-cash-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>Cash Tables</button>
@@ -399,7 +416,7 @@ export class Ring extends React.Component {
                         const setFilter = (field, value) => this.setState(({ tableFilters }) => ({ tableFilters: { ...tableFilters, [group.id]: { ...filters, [field]: value } } }));
                         return (
                         <section className="ring-table-section" id={`ring-${group.id}-section`} key={group.id}>
-                            <div className="ring-table-section-header"><div><h3>{group.title}</h3><p>{group.description}</p></div><div className="ring-section-filters"><label>Status <select aria-label={`${group.title} status`} value={filters.status} onChange={event => setFilter('status', event.target.value)}><option value="all">All</option><option value="ACTIVE">Active</option><option value="MAINTENANCE">Paused</option><option value="DISABLED">Closed</option></select></label><input type="search" aria-label={`Search ${group.title.toLowerCase()}`} placeholder="Search tables..." value={filters.search} onChange={event => setFilter('search', event.target.value)} /></div></div>
+                            <div className="ring-table-section-header"><ConsoleIcon className={`ring-section-icon tone-${group.id === "cash" ? "green" : "blue"}`} name={group.id === "cash" ? "cash-bag" : group.id === "fp" ? "users" : "clock"} /><div><h3>{group.title}</h3><p>{group.description}</p></div><div className="ring-section-filters"><label>Status <select aria-label={`${group.title} status`} value={filters.status} onChange={event => setFilter('status', event.target.value)}><option value="all">All</option><option value="ACTIVE">Active</option><option value="MAINTENANCE">Paused</option><option value="DISABLED">Closed</option></select></label><input type="search" aria-label={`Search ${group.title.toLowerCase()}`} placeholder="Search tables..." value={filters.search} onChange={event => setFilter('search', event.target.value)} /></div></div>
                             <div className="ring-table-shell">
                             <ReactTable
                                 minRows={Math.min(filteredGames.length, 1)}
@@ -416,118 +433,126 @@ export class Ring extends React.Component {
                     })}
                 </div>
 
-                <Modal isOpen={isModal} toggle={this.cancelModal} className="main-modal reward-modal ring-management-modal">
-                    <ModalHeader toggle={this.cancelModal}><div className="ring-modal-brand-mark" aria-hidden="true">♠</div><div className="reward-modal-title"><p>{selectedGame ? `${selectedGame.name || 'Ring Game'} Setup` : 'Create Ring Game'}</p><small>{selectedGame ? 'Configure table settings and lobby visibility.' : 'Set up a new table and get players in the game.'}</small></div></ModalHeader>
+                <Modal isOpen={isModal} toggle={this.cancelModal} className="main-modal reward-modal ring-management-modal ring-reference-dialog">
+                    <ModalHeader toggle={this.cancelModal}>
+                        <img className="ring-dialog-emblem" src={ringGameChip} alt="" />
+                        <div className="reward-modal-title"><p>{selectedGame ? `${selectedGame.name || 'Ring Game'} Setup` : 'Create Ring Game'}</p><small>{selectedGame ? 'Configure your table and review the settings below.' : 'Set up a new table and get players in the game.'}</small></div>
+                    </ModalHeader>
                     <ModalBody className="modal-body reward-modal-body">
-                        <form className="ring-form" onSubmit={event => { event.preventDefault(); this.submitRing(); }}>
-                            {!selectedGame && (
-                                <Field label="Start from template" className="ring-field--full">
-                                    <select className="ring-control" name="template" value={template} onChange={this.handleTemplateChange}>
-                                        <option value="">Blank table</option>
+                        <form className="ring-form ring-reference-form" onSubmit={event => { event.preventDefault(); this.submitRing(); }}>
+                            <div className="ring-main-fields">
+                                {!selectedGame && <section className="ring-reference-section ring-template-section">
+                                    <SectionLead icon="document" title="Start from Template" description="Use a template to quickly prefill common settings." tone="blue" />
+                                    <select className="ring-control" name="template" aria-label="Start from Template" value={template} onChange={this.handleTemplateChange}>
+                                        <option value="">Blank Table (Custom)</option>
                                         {allTemplates.filter(item => item.gameType === 'RING').map(item => <option key={item._id} value={item._id}>{item.name}</option>)}
                                     </select>
-                                </Field>
-                            )}
+                                </section>}
 
-                            <div className="ring-economy-choices ring-field--full" role="group" aria-label="Table economy">
-                                <span>Economy Type</span>
-                                <button type="button" className={balanceType === 'CASH' ? 'active' : ''} onClick={() => this.handleFormChange({ target: { name: 'balanceType', value: 'CASH' } })}>Cash <small>Real money tables</small></button>
-                                <button type="button" className={balanceType === 'FP' ? 'active' : ''} onClick={() => this.handleFormChange({ target: { name: 'balanceType', value: 'FP' } })}>Free Play <small>Virtual chips</small></button>
-                                <button type="button" className={balanceType === 'TIME' ? 'active' : ''} onClick={() => this.handleFormChange({ target: { name: 'balanceType', value: 'TIME' } })}>Time <small>MPCE economy</small></button>
+                                <section className="ring-reference-section ring-economy-section" role="group" aria-label="Table economy">
+                                    <SectionLead icon="coins" title="Economy Type" description="Choose the in-game currency for this table." />
+                                    <div className={`ring-economy-options ${balanceType === 'TIME' ? 'has-time' : ''}`}>
+                                        {[['CASH', 'coins', 'Cash', 'Real money tables'], ['FP', 'chip', 'Free Play', 'Play with virtual chips'], ...(balanceType === 'TIME' ? [['TIME', 'clock', 'Time', 'MPCE economy']] : [])].map(([value, icon, title, description]) => <button key={value} type="button" aria-pressed={balanceType === value} className={`ring-economy-option is-${value.toLowerCase()} ${balanceType === value ? 'active' : ''}`} onClick={() => this.handleFormChange({ target: { name: 'balanceType', value } })}><ConsoleIcon name={icon} /><span><strong>{title}</strong><small>{description}</small></span></button>)}
+                                    </div>
+                                </section>
+
+                                <section className="ring-reference-section ring-setup-section">
+                                    <SectionLead icon="settings" title="Game Setup" description="Basic information about the table." tone="blue" />
+                                    <div className="ring-setup-fields">
+                                        <Field label="Table Name" hint="This name will be visible to players."><input className="ring-control" name="name" value={name} onChange={this.handleFormChange} placeholder="e.g. Friday Night Live" required /></Field>
+                                        <Field label="Game Type" hint="Choose the poker variant."><div className="ring-control-with-icon"><ConsoleIcon name="controller" /><select className="ring-control" name="gameVariant" value={gameVariant} onChange={this.handleFormChange} required><option value="">Select game</option><option value="Texas Hold'em">Texas Hold'em</option><option value="Omaha">Omaha / PLO</option></select></div></Field>
+                                        <Field label="Betting Limit" hint="Set the betting structure."><select className="ring-control" name="formatLimit" value={formatLimit} onChange={this.handleFormChange} disabled={gameVariant === 'Omaha'} required><option value="">Select limit</option><option value="No Limit">No Limit</option><option value="Pot Limit">Pot Limit</option></select></Field>
+                                        <Field label="Seats"><select className="ring-control" name="seatLimit" value={seatLimit} onChange={this.handleFormChange}>{[2,3,4,5,6,7,8,9].map(value => <option key={value} value={value}>{value}</option>)}</select></Field>
+                                        <Field label="Region / Jurisdiction"><div className="ring-control-with-icon"><ConsoleIcon name="location" /><select className="ring-control" name="region" value={region} onChange={this.handleFormChange} required><option value="">Select region</option>{REGION_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div></Field>
+                                    </div>
+                                </section>
+
+                                <section className="ring-reference-section ring-economics-section">
+                                    <SectionLead icon="coins" title="Table Economics" description={balanceType === 'FP' ? 'Set blinds and buy-ins in virtual chips.' : 'Set blinds and buy-in parameters.'} />
+                                    <div className="ring-economics-fields">
+                                        <Field label="Small Blind"><div className="ring-control-with-unit"><input className="ring-control" name="smallBlinds" type="number" min="0" step="any" value={smallBlinds} onChange={this.handleFormChange} placeholder="1.00" required /><span>{economyUnit}</span></div></Field>
+                                        <Field label="Big Blind"><div className="ring-control-with-unit"><input className="ring-control" name="bigBlinds" type="number" min="0" step="any" value={bigBlinds} onChange={this.handleFormChange} placeholder="2.00" required /><span>{economyUnit}</span></div></Field>
+                                        <Field label="Buy-In Min" hint={minBuyInBb === null ? '' : `${minBuyInBb.toFixed(0)} BB`}><div className="ring-control-with-unit"><input className="ring-control" name="minBuyIn" type="number" min="0" step="any" value={minBuyIn} onChange={this.handleFormChange} placeholder="40" required /><span>{economyUnit}</span></div></Field>
+                                        <Field label="Buy-In Max" hint={maxBuyInBb === null ? '' : `${maxBuyInBb.toFixed(0)} BB`}><div className="ring-control-with-unit"><input className="ring-control" name="maxBuyIn" type="number" min="0" step="any" value={maxBuyIn} onChange={this.handleFormChange} placeholder="200" required /><span>{economyUnit}</span></div></Field>
+                                        <Field label="Time Rate per Hour" hint={balanceType === 'FP' ? 'Free Play never consumes time.' : 'Charged per seated hour.'}>
+                                            <select className="ring-control ring-rate-control" name="timeChargeTier" value={timeChargeTier} onChange={this.handleFormChange} disabled={balanceType === 'FP'}><option value="STANDARD">{standardMpcePerHour.toFixed(2)} MPCE</option><option value="CUSTOM">Custom rate</option><option value="NONE">Free</option></select>
+                                            {timeChargeTier === 'CUSTOM' && balanceType !== 'FP' && <div className="ring-control-with-unit"><input className="ring-control" aria-label="Custom time rate" name="customBurnRateMpcePerHour" type="number" min="0.01" step="0.01" value={customBurnRateMpcePerHour} onChange={this.handleFormChange} /><span>MPCE</span></div>}
+                                        </Field>
+                                    </div>
+                                </section>
+
+                                <section className="ring-reference-section ring-access-section">
+                                    <SectionLead icon="eye" title="Access & Visibility" description="Review who can join and table availability." />
+                                    <div className="ring-access-fields">
+                                        <Field label="Audience" hint="Players using this table's economy."><span className="ring-control ring-readonly-control"><ConsoleIcon name="users" />{balanceType === 'FP' ? 'Free Play Users' : balanceType === 'CASH' ? 'Cash Players' : 'Time Players'}</span></Field>
+                                        <Field label="Table Economy" hint="Determines the balance used to play."><span className="ring-control ring-readonly-control"><ConsoleIcon name="eye" />{economyLabel}</span></Field>
+                                        <SwitchField name="idleSeatClearEnabled" checked={idleSeatClearEnabled} onChange={this.handleFormChange} title="Clear Idle Seats" description="Release waiting seats after inactivity." />
+                                        <Field label="Table Availability" hint="Control whether players can join."><div className="ring-control-with-icon is-gold"><ConsoleIcon name="bolt" /><select className="ring-control" name="tableStatus" value={tableStatus} onChange={this.handleFormChange}><option value="ACTIVE">Open Table</option><option value="DISABLED">Disabled</option><option value="MAINTENANCE">Maintenance</option></select></div></Field>
+                                    </div>
+                                </section>
+
+                                <section className="ring-reference-section ring-rules-section">
+                                    <SectionLead icon="clipboard" title="Table Rules" description="Configure game behavior and player settings." />
+                                    <div className="ring-rules-fields">
+                                        <Field label="Time Bank" hint="Reserve decision time per player."><div className="ring-control-with-icon"><ConsoleIcon name="clock" /><select className="ring-control" aria-label="Time Bank" value={timeBankEnabled ? timeBankSeconds : 0} onChange={({ target }) => this.setState(({ formData }) => ({ formData: { ...formData, timeBankEnabled: Number(target.value) > 0, timeBankSeconds: Number(target.value) } }))}>{[...new Set([0, 10, 15, 30, 60, Number(timeBankSeconds || 0)])].sort((a,b) => a-b).map(seconds => <option key={seconds} value={seconds}>{seconds === 0 ? 'Disabled' : `${seconds} seconds`}</option>)}</select></div></Field>
+                                        <Field label="Action Timer" hint="Time allowed for each action."><div className="ring-control-with-icon ring-control-with-unit"><ConsoleIcon name="clock" /><input className="ring-control" name="actionTimerSeconds" type="number" min="1" max="300" value={actionTimerSeconds} onChange={this.handleFormChange} /><span>sec</span></div></Field>
+                                        <SwitchField name="allowTopUp" checked={allowTopUp} onChange={this.handleFormChange} title="Auto Top-Up" description="Allow stack refills between hands." />
+                                        <Field label="Min Players to Start" hint="Game starts when this many players are seated."><div className="ring-control-with-icon"><ConsoleIcon name="users" /><input className="ring-control" name="minPlayersToStart" type="number" min="2" max={seatLimit || 9} value={minPlayersToStart} onChange={this.handleFormChange} /></div></Field>
+                                    </div>
+                                </section>
+
+                                {this.state.showAdvancedRules && <section id="ring-advanced-settings" className="ring-reference-section ring-advanced-section">
+                                    <SectionLead icon="settings" title="Advanced Settings" description="Additional economy and game rules." tone="blue" />
+                                    <div className="ring-form-grid ring-form-grid--four">
+                                        <Field label="Table Economy"><select className="ring-control" name="balanceType" value={balanceType} onChange={this.handleFormChange}><option value="CASH">Cash / USD</option><option value="TIME">Time / MPCE</option><option value="FP">Free Play (FP)</option></select></Field>
+                                        {timeBankEnabled && <Field label="Custom Time Bank"><div className="ring-control-with-unit"><input className="ring-control" name="timeBankSeconds" type="number" min="1" max="3600" value={timeBankSeconds} onChange={this.handleFormChange} /><span>sec</span></div></Field>}
+                                        {idleSeatClearEnabled && <Field label="Clear Waiting Seats"><div className="ring-control-with-unit"><input className="ring-control" name="idleSeatClearMinutes" type="number" min="1" max="1440" step="1" value={idleSeatClearMinutes} onChange={this.handleFormChange} /><span>min</span></div></Field>}
+                                    </div>
+                                    <div className="ring-toggle-grid ring-advanced-toggle-grid">
+                                        <Toggle name="straddleEnabled" checked={straddleEnabled} onChange={this.handleFormChange} title="Straddle" description="Enable a voluntary blind raise" />
+                                        <Toggle name="anteEnabled" checked={anteEnabled} onChange={this.handleFormChange} title="Ante" description="Collect an ante before each hand" />
+                                    </div>
+                                    <div className="ring-form-grid ring-form-grid--four ring-conditional-rules">
+                                        {straddleEnabled && <Field label="Straddle Type"><select className="ring-control" name="straddleMode" value={straddleMode} onChange={this.handleFormChange}><option value="UTG">UTG only</option><option value="MISSISSIPPI">Mississippi</option></select></Field>}
+                                        {anteEnabled && <Field label="Ante Amount"><input className="ring-control" name="ante" type="number" min="0" step="any" value={ante} onChange={this.handleFormChange} /></Field>}
+                                    </div>
+                                    <p className="ring-advanced-rate-note">Standard time rate: {standardMpcePerHour.toFixed(2)} MPCE/hour · {minutesPerMpce} minutes/MPCE.{timeChargeTier === 'CUSTOM' ? ` Custom rate: ${effectiveCustomMinutesPerHour} minutes/hour (${customMultiplier.toFixed(2)}× standard).` : ''}</p>
+                                </section>}
+
+                                {this.state.showAdvancedRules && <section className={`ring-reference-section ring-randomness-section ${formData.randomnessProvider === 'ORAO' ? 'ring-oracle-enabled' : ''}`}>
+                                    <SectionLead icon="shield-check" title="Verifiable Shuffle" description="Applies to new hands." tone="blue" />
+                                    <Toggle name="oraoEnabled" checked={formData.randomnessProvider === 'ORAO'} onChange={e => this.handleFormChange({ target: { name: 'randomnessProvider', value: e.target.checked ? 'ORAO' : 'CSPRNG' } })} title="ORAO randomness" description="Treasury-funded oracle request for each hand" />
+                                    {formData.randomnessProvider === 'ORAO' && <><p>Full deck verification opens after the hand and pot settlement, including folded cards. Oracle delays pause dealing. Server setup and spending limits are required.</p><Field label="ORAO time rate (MPCE/hour)" hint={balanceType === 'FP' ? 'Free Play never burns MPCE. The treasury sponsors oracle costs.' : 'Replaces the ordinary rate while enabled; zero means treasury sponsored.'}><input className="ring-control" name="oraoTimeChargeMpcePerHour" type="number" min="0" step="any" value={formData.oraoTimeChargeMpcePerHour ?? ''} onChange={this.handleFormChange} required /></Field></>}
+                                </section>}
+                                {selectedGame && canAccess({ role: this.props.role, permissions: this.props.permissions }, 'hand_history.view') && formData.randomnessProvider === 'ORAO' && <RandomnessPanel tableId={selectedGame._id} canCancel={canManage} canRetry={canManage} canRecover={canAccess({ role: this.props.role, permissions: this.props.permissions }, 'cashier.manage')} />}
                             </div>
 
-                            <section className="ring-form-section ring-form-section--game ring-field--full">
-                                <div className="ring-form-section__heading"><h3>Game setup</h3><span>Identity, format and availability</span></div>
-                                <div className="ring-form-grid ring-form-grid--four">
-                                    <Field label="Table name" className="ring-field--span-2"><input className="ring-control" name="name" value={name} onChange={this.handleFormChange} placeholder="e.g. Friday Night 2/5" required /></Field>
-                                    <Field label="Status"><select className="ring-control" name="tableStatus" value={tableStatus} onChange={this.handleFormChange}><option value="ACTIVE">Active</option><option value="DISABLED">Disabled</option><option value="MAINTENANCE">Maintenance</option></select></Field>
-                                    <Field label="Region"><select className="ring-control" name="region" value={region} onChange={this.handleFormChange} required><option value="">Select region</option>{REGION_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
-                                    <Field label="Game type"><select className="ring-control" name="gameVariant" value={gameVariant} onChange={this.handleFormChange} required><option value="">Select game</option><option value="Texas Hold'em">Texas Hold’em (2 cards)</option><option value="Omaha">Omaha / PLO (4 cards)</option></select></Field>
-                                    <Field label="Betting limit"><select className="ring-control" name="formatLimit" value={formatLimit} onChange={this.handleFormChange} disabled={gameVariant === 'Omaha'} required><option value="">Select limit</option><option value="No Limit">No Limit</option><option value="Pot Limit">Pot Limit</option></select></Field>
-                                    <Field label="Seats"><input className="ring-control" name="seatLimit" type="number" min="2" max="9" value={seatLimit} onChange={this.handleFormChange} /></Field>
-                                </div>
-                            </section>
-
-                            <section className="ring-form-section ring-form-section--stakes ring-field--full">
-                                <div className="ring-form-section__heading"><h3>{balanceType === 'FP' ? 'Free Play stakes & access' : 'Stakes & access'}</h3><span>{balanceType === 'FP' ? 'Every amount below is FP, not Cash or MPCE' : 'Amounts are shown in the selected table balance'}</span></div>
-                                <div className="ring-form-grid ring-form-grid--five">
-                                    <Field label={`Small blind${balanceType === 'FP' ? ' (FP)' : ''}`}><input className="ring-control" name="smallBlinds" type="number" min="0" step="any" value={smallBlinds} onChange={this.handleFormChange} placeholder="2" required /></Field>
-                                    <Field label={`Big blind${balanceType === 'FP' ? ' (FP)' : ''}`}><input className="ring-control" name="bigBlinds" type="number" min="0" step="any" value={bigBlinds} onChange={this.handleFormChange} placeholder="5" required /></Field>
-                                    <Field label={`Minimum buy-in${balanceType === 'FP' ? ' (FP)' : ''}`} hint={minBuyInBb !== null ? `${minBuyInBb.toFixed(0)} BB` : (balanceType === 'FP' ? 'Non-withdrawable FP stack' : 'e.g. 40 BB / $200')}><input className="ring-control" name="minBuyIn" type="number" min="0" step="any" value={minBuyIn} onChange={this.handleFormChange} placeholder="200" required /></Field>
-                                    <Field label={`Maximum buy-in${balanceType === 'FP' ? ' (FP)' : ''}`} hint={maxBuyInBb !== null ? `${maxBuyInBb.toFixed(0)} BB` : (balanceType === 'FP' ? 'Non-withdrawable FP stack' : 'e.g. 100 BB / $500')}><input className="ring-control" name="maxBuyIn" type="number" min="0" step="any" value={maxBuyIn} onChange={this.handleFormChange} placeholder="500" required /></Field>
-                                    <Field label="Table economy"><select className="ring-control" name="balanceType" value={balanceType} onChange={this.handleFormChange}><option value="CASH">Cash / USD</option><option value="TIME">Time / MPCE</option><option value="FP">Free Play (FP)</option></select></Field>
-                                </div>
-                                {balanceType === 'FP' && <div className="ring-fp-notice"><strong>Free Play table</strong><span>Buy-ins, blinds, bets and payouts use FP only. FP cannot be withdrawn and this table never consumes MPCE time.</span></div>}
-                            </section>
-
-                            <section className={`ring-form-section ring-form-section--charge ${balanceType === 'FP' ? 'is-disabled-economy' : ''}`}>
-                                <div className="ring-form-section__heading"><h3>Time charge</h3><span>Master: {standardMpcePerHour.toFixed(2)} MPCE/hour · {minutesPerMpce} minutes/MPCE</span></div>
-                                <div className="ring-form-grid ring-form-grid--four">
-                                    <Field label="Fee tier" className="ring-field--span-2" hint={balanceType === 'FP' ? 'Free Play never uses MPCE time.' : ''}><select className="ring-control" name="timeChargeTier" value={timeChargeTier} onChange={this.handleFormChange} disabled={balanceType === 'FP'}><option value="STANDARD">Standard — inherit general rate</option><option value="CUSTOM">Custom — override for this table</option><option value="NONE">None — do not consume table time</option></select></Field>
-                                    {timeChargeTier === 'CUSTOM' && (
-                                        <Field label="Table burn rate" className="ring-field--span-2" hint={`${effectiveCustomMinutesPerHour} time minutes/hour · ${customMultiplier.toFixed(2)}× master rate`}>
-                                            <div className="ring-control-with-unit"><input className="ring-control" name="customBurnRateMpcePerHour" type="number" min="0.01" step="0.01" value={customBurnRateMpcePerHour} onChange={this.handleFormChange} /><span>MPCE / hour</span></div>
-                                        </Field>
-                                    )}
-                                </div>
-                            </section>
-
-                            <section className="ring-form-section ring-form-section--rules">
-                                <div className="ring-form-section__heading"><h3>Table rules</h3><span>Gameplay settings and optional rules</span><button type="button" onClick={() => this.setState(({ showAdvancedRules }) => ({ showAdvancedRules: !showAdvancedRules }))}>{this.state.showAdvancedRules ? 'Hide advanced' : 'Advanced settings'}</button></div>
-                                <div className="ring-rule-primary-grid">
-                                    <Toggle name="allowTopUp" checked={allowTopUp} onChange={this.handleFormChange} title="Auto-rebuy / top-up" description="Allow stack refills between hands" />
-                                    <Toggle name="timeBankEnabled" checked={timeBankEnabled} onChange={this.handleFormChange} title="Time bank" description="Give players reserve decision time" />
-                                    <Field label="Action timer"><div className="ring-control-with-unit"><input className="ring-control" name="actionTimerSeconds" type="number" min="1" max="300" value={actionTimerSeconds} onChange={this.handleFormChange} /><span>sec</span></div></Field>
-                                    <Field label="Players to start"><input className="ring-control" name="minPlayersToStart" type="number" min="2" max={seatLimit || 9} value={minPlayersToStart} onChange={this.handleFormChange} /></Field>
-                                </div>
-                                {this.state.showAdvancedRules && <><div className="ring-toggle-grid ring-advanced-toggle-grid">
-                                    <Toggle name="straddleEnabled" checked={straddleEnabled} onChange={this.handleFormChange} title="Straddle" description="Enable a voluntary blind raise" />
-                                    <Toggle name="anteEnabled" checked={anteEnabled} onChange={this.handleFormChange} title="Ante" description="Collect an ante before each hand" />
-                                    <Toggle name="idleSeatClearEnabled" checked={idleSeatClearEnabled} onChange={this.handleFormChange} title="Waiting seat clear" description="Refund and free seats if a table cannot start" />
-                                </div>
-                                <div className="ring-form-grid ring-form-grid--four ring-conditional-rules">
-                                    {straddleEnabled && <Field label="Straddle type"><select className="ring-control" name="straddleMode" value={straddleMode} onChange={this.handleFormChange}><option value="UTG">UTG only</option><option value="MISSISSIPPI">Mississippi</option></select></Field>}
-                                    {anteEnabled && <Field label="Ante amount"><input className="ring-control" name="ante" type="number" min="0" step="any" value={ante} onChange={this.handleFormChange} /></Field>}
-                                    {timeBankEnabled && <Field label="Time bank"><div className="ring-control-with-unit"><input className="ring-control" name="timeBankSeconds" type="number" min="1" max="3600" value={timeBankSeconds} onChange={this.handleFormChange} /><span>sec</span></div></Field>}
-                                    {idleSeatClearEnabled && <Field label="Clear waiting seats"><div className="ring-control-with-unit"><input className="ring-control" name="idleSeatClearMinutes" type="number" min="1" max="1440" step="1" value={idleSeatClearMinutes} onChange={this.handleFormChange} /><span>min</span></div></Field>}
-                                </div></>}
-                            </section>
-
-                            {this.state.showAdvancedRules && <section className={`ring-form-section ring-form-section--randomness ring-field--full ${formData.randomnessProvider === 'ORAO' ? 'ring-oracle-enabled' : ''}`}>
-                                <div className="ring-form-section__heading"><h3>Verifiable shuffle</h3><span>Applies to new hands</span></div>
-                                <Toggle name="oraoEnabled" checked={formData.randomnessProvider === 'ORAO'}
-                                    onChange={e => this.handleFormChange({ target: { name: 'randomnessProvider', value: e.target.checked ? 'ORAO' : 'CSPRNG' } })}
-                                    title="ORAO randomness" description="Treasury-funded oracle request for each hand" />
-                                {formData.randomnessProvider === 'ORAO' && <>
-                                    <p>Full deck verification opens after the hand and pot settlement, including folded cards. Oracle delays pause dealing. Server setup and spending limits are required.</p>
-                                    <Field label="ORAO time rate (MPCE/hour)" hint={balanceType === 'FP' ? 'Free Play never burns MPCE. The treasury sponsors oracle costs.' : 'Replaces the ordinary rate while enabled; zero means treasury sponsored.'}>
-                                        <input className="ring-control" name="oraoTimeChargeMpcePerHour" type="number" min="0" step="any" value={formData.oraoTimeChargeMpcePerHour ?? ''} onChange={this.handleFormChange} required />
-                                    </Field>
-                                </>}
-                            </section>}
-                            {selectedGame && canAccess({ role: this.props.role, permissions: this.props.permissions }, 'hand_history.view') && formData.randomnessProvider === 'ORAO' && <RandomnessPanel tableId={selectedGame._id} canCancel={canManage} canRetry={canManage} canRecover={canAccess({ role: this.props.role, permissions: this.props.permissions }, 'cashier.manage')} />}
-
                             <aside className="ring-live-summary" aria-label="Live table summary">
-                                <h3>Live Summary</h3><p>Preview how this table will appear to operators.</p>
-                                <div className={`ring-preview-art ${selectedGame ? 'is-venue-preview' : ''}`}><span>{balanceType === 'FP' ? 'FREE PLAY' : balanceType === 'CASH' ? 'CASH GAME' : 'TIME GAME'}</span><div className="ring-preview-table"><strong>{name || 'New Ring Game'}</strong><small>{gameVariant || 'Poker'} · {smallBlinds || '—'} / {bigBlinds || '—'}</small></div></div>
-                                {selectedGame && <div className="ring-preview-venue-caption"><strong>{name}</strong><small>{formatLimit} {gameVariant} · {smallBlinds}/{bigBlinds} · {seatLimit} seats</small></div>}
-                                <dl>
-                                    <div><dt>Table name</dt><dd>{name || 'New Ring Game'}</dd></div>
-                                    <div><dt>Economy</dt><dd>{balanceType === 'FP' ? 'Free Play' : balanceType === 'CASH' ? 'Cash' : 'Time / MPCE'}</dd></div>
-                                    <div><dt>Game type</dt><dd>{formatLimit && gameVariant ? `${formatLimit} ${gameVariant}` : gameVariant || 'Not set'}</dd></div>
-                                    <div><dt>Blinds</dt><dd>{smallBlinds || '—'} / {bigBlinds || '—'}</dd></div>
-                                    <div><dt>Buy-in range</dt><dd>{minBuyIn || '—'} – {maxBuyIn || '—'}</dd></div>
-                                    <div><dt>Seats</dt><dd>{seatLimit}</dd></div>
-                                    <div><dt>Region</dt><dd>{REGION_OPTIONS.find(([value]) => value === region)?.[1] || 'Not set'}</dd></div>
-                                    <div><dt>Time charge</dt><dd>{balanceType === 'FP' || timeChargeTier === 'NONE' ? 'Free' : timeChargeTier === 'CUSTOM' ? `${customBurnRateMpcePerHour} MPCE/hr` : `${standardMpcePerHour.toFixed(2)} MPCE/hr`}</dd></div>
-                                    <div><dt>Players to start</dt><dd>{minPlayersToStart}</dd></div>
-                                    <div><dt>Status</dt><dd>{tableStatus}</dd></div>
+                                <SectionLead icon="chart" title="Live Summary" description="Preview how this table will appear to players." />
+                                <div className="ring-preview-card">
+                                    <div className="ring-preview-scene">
+                                        <span className="ring-preview-kind">RING GAME</span>
+                                        <div className="ring-preview-felt"><strong>{name || 'New Ring Game'}</strong><span>{gameLabel}</span><b><ConsoleIcon name={balanceType === 'FP' ? 'chip' : 'coins'} />{displayAmount(smallBlinds)} / {displayAmount(bigBlinds)}</b><small><ConsoleIcon name="coins" />{displayAmount(minBuyIn)} – {displayAmount(maxBuyIn)} Buy-in</small></div>
+                                    </div>
+                                    <div className="ring-preview-facts">
+                                        <div><ConsoleIcon name="users" /><span><strong>{seatLimit}</strong><small>Seats</small></span></div>
+                                        <div><ConsoleIcon name="coins" /><span><strong>{economyLabel}</strong><small>Economy</small></span></div>
+                                        <div><ConsoleIcon name="location" /><span><strong>{regionLabel}</strong><small>Region</small></span></div>
+                                    </div>
+                                </div>
+                                <h4 className="ring-details-title">Table Details</h4>
+                                <dl className="ring-details-list">
+                                    {[
+                                        ['clipboard','Table Name',name || 'New Ring Game'], ['controller','Game Type',gameLabel], ['coins','Stakes',`${displayAmount(smallBlinds)} / ${displayAmount(bigBlinds)}`], ['wallet','Buy-In Range',`${displayAmount(minBuyIn)} – ${displayAmount(maxBuyIn)}`], ['clock','Time Rate',rateLabel], ['users','Seats',seatLimit], ['users','Audience',balanceType === 'FP' ? 'Free Play Users' : balanceType === 'CASH' ? 'Cash Players' : 'Time Players'], ['eye','Economy',economyLabel], ['clock','Idle Seat Release',idleSeatClearEnabled ? `${idleSeatClearMinutes} minutes` : 'Disabled'], ['bolt','Auto Top-Up',allowTopUp ? 'Enabled' : 'Disabled'], ['user-add','Min Players to Start',minPlayersToStart],
+                                    ].map(([icon,label,value]) => <div key={label}><dt><ConsoleIcon name={icon} />{label}</dt><dd>{value}</dd></div>)}
                                 </dl>
                             </aside>
 
-                            <div className="ring-form-actions ring-field--full">
-                                <Button className="delete-btn add-btn" type="button" onClick={this.cancelModal}>Cancel</Button>
-                                <Button className="add-btn" type="submit">{selectedGame ? 'Save changes' : 'Create table'}</Button>
+                            <div className="ring-form-actions ring-dialog-footer">
+                                <div className="ring-ready-note"><ConsoleIcon name="info" /><span><strong>Ready to {selectedGame ? 'save' : 'create'}</strong><small>Review your settings and {selectedGame ? 'save' : 'create'} the ring game. You can always edit these settings later.</small></span></div>
+                                <button className="ring-advanced-link" type="button" aria-expanded={this.state.showAdvancedRules} aria-controls="ring-advanced-settings" onClick={() => this.setState(({ showAdvancedRules }) => ({ showAdvancedRules: !showAdvancedRules }))}>{this.state.showAdvancedRules ? 'Hide Advanced' : 'Advanced Settings'}</button>
+                                <button className="ring-dialog-cancel" type="button" onClick={this.cancelModal}>Cancel</button>
+                                <button className="ring-dialog-submit" type="submit"><ConsoleIcon name="chip" />{selectedGame ? 'Save Changes' : 'Create Game'}</button>
                             </div>
                         </form>
                     </ModalBody>

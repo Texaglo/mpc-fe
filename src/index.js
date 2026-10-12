@@ -15,6 +15,9 @@ import "./assets/scss/black-dashboard-react.css";
 import './assets/css/style.css';
 import './assets/css/mpc-design-system.css';
 import './assets/css/client-console.css';
+import './components/ConsoleIcon/index.css';
+import './assets/css/console-artwork.css';
+import './assets/css/ring-dialog.css';
 
 
 const sagaMiddleware = createSagaMiddleware();
