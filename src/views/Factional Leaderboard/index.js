@@ -114,7 +114,7 @@ class Leaderboard extends React.Component {
                     <Fragment>
                         <div className='main-container-head mb-3'>
                             <ReactTable
-                                minRows={20}
+                                minRows={Math.min(Math.max(leaderboardArray.length, 1), 10)}
                                 className="table"
                                 data={leaderboardArray}
                                 resolveData={data => data.map(row => row)}
@@ -140,7 +140,7 @@ class Leaderboard extends React.Component {
                             <div className="row">
                                 <div className="col-12">
                                     <ReactTable
-                                        minRows={20}
+                                        minRows={Math.min(Math.max(factionMembers.length, 1), 10)}
                                         className="table"
                                         data={factionMembers}
                                         resolveData={data => data.map(row => row)}

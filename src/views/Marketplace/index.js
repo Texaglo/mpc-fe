@@ -274,7 +274,7 @@ const Marketplace = () => {
                 <Fragment>
                     <div className='main-container-head mb-3'>
                         <ReactTable
-                            minRows={20}
+                            minRows={Math.min(Math.max(items.length, 1), 10)}
                             className="table"
                             data={items}
                             resolveData={data => data.map(row => row)}

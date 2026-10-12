@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
-import React, { Fragment } from 'react';
+import React from 'react';
 import Button from '@material-ui/core/Button';
 import EventBus from 'eventing-bus';
 import axios from 'axios';
@@ -35,8 +35,9 @@ const REGION_OPTIONS = [
 ];
 
 export function normalizeFormData(source = {}, minutesPerMpce = TIME_MINUTES_PER_MPCE) {
-    const timeChargeTier = String(source.timeChargeTier || 'STANDARD').toUpperCase();
-    const timeChargeMinutesPerHour = Number(source.timeChargeMinutesPerHour ?? 60);
+    const isFreePlay = String(source.balanceType || 'CASH').toUpperCase() === 'FP';
+    const timeChargeTier = isFreePlay ? 'NONE' : String(source.timeChargeTier || 'STANDARD').toUpperCase();
+    const timeChargeMinutesPerHour = isFreePlay ? 0 : Number(source.timeChargeMinutesPerHour ?? 60);
     const ante = Number(source.ante || 0);
     const timeBankSeconds = Number(source.timeBankSeconds || 0);
     const idleSeatClearMinutes = Number(source.idleSeatClearMinutes ?? 30);
@@ -201,6 +202,11 @@ export class Ring extends React.Component {
         this.props.toggleModal(true);
     };
 
+    createRing = balanceType => {
+        this.setState({ selectedGame: null, formData: { ...DEFAULT_RING_FORM, balanceType, ...(balanceType === 'FP' ? { timeChargeTier: 'NONE', timeChargeMinutesPerHour: 0 } : {}) }, template: '' });
+        this.props.toggleModal(true);
+    };
+
     openNewGamesControl = pendingNewGamesPaused => {
         this.setState({ showNewGamesModal: true, pendingNewGamesPaused, newGamesReason: '' });
     };
@@ -296,6 +302,13 @@ export class Ring extends React.Component {
         } = formData;
         const { isModal, allTemplates, allRingGames } = this.props;
         const allRingGamesArray = Object.values(allRingGames);
+        const tableEconomy = game => String(game.balanceType || 'CASH').toUpperCase();
+        const cashGames = allRingGamesArray.filter(game => tableEconomy(game) === 'CASH');
+        const freePlayGames = allRingGamesArray.filter(game => tableEconomy(game) === 'FP');
+        const timeGames = allRingGamesArray.filter(game => !['CASH', 'FP'].includes(tableEconomy(game)));
+        const activeGames = allRingGamesArray.filter(game => String(game.tableStatus || 'ACTIVE').toUpperCase() === 'ACTIVE');
+        const seatedPlayers = allRingGamesArray.reduce((total, game) => total + Number(game.playersJoined || 0), 0);
+        const openSeats = activeGames.reduce((total, game) => total + Math.max(0, Number(game.seatLimit || 0) - Number(game.playersJoined || 0)), 0);
         const minBuyInBb = Number(bigBlinds) > 0 && minBuyIn !== '' ? Number(minBuyIn) / Number(bigBlinds) : null;
         const maxBuyInBb = Number(bigBlinds) > 0 && maxBuyIn !== '' ? Number(maxBuyIn) / Number(bigBlinds) : null;
         const minutesPerMpce = this.getMinutesPerMpce();
@@ -307,29 +320,31 @@ export class Ring extends React.Component {
 
         const canManage = canAccess({ role: this.props.role, permissions: this.props.permissions }, 'games.manage');
         const columns = [
-            { Header: '#', Cell: ({ index }) => index + 1, width: 52, maxWidth: 52, filterable: false },
+            { Header: '#', Cell: ({ index }) => index + 1, width: 35, maxWidth: 35, filterable: false },
             {
-                accessor: 'name', Header: 'Ring Name', minWidth: 155,
+                accessor: 'name', Header: 'Table Name', minWidth: 115,
                 className: 'ring-name-cell',
                 filterMethod: (filter, row) => String(row[filter.id] || '').toLowerCase().includes(filter.value.toLowerCase()),
             },
-            { Header: 'Blinds', minWidth: 80, Cell: row => `${row.original.smallBlinds}/${row.original.bigBlinds}`, filterable: false },
-            { Header: 'Players', minWidth: 80, Cell: row => `${row.original.playersJoined}/${row.original.seatLimit}`, filterable: false },
-            { accessor: 'gameVariant', Header: 'Game Type', minWidth: 145 },
-            { Header: 'Buy-In', minWidth: 115, filterable: false, Cell: row => `${row.original.minBuyIn ?? row.original.minCoins ?? 0} – ${row.original.maxBuyIn ?? row.original.maxCoins ?? 'No max'}` },
+            { Header: 'Audience', minWidth: 105, filterable: false, Cell: row => <span className={`ring-audience-badge is-${tableEconomy(row.original).toLowerCase()}`}>{tableEconomy(row.original) === 'FP' ? 'Free Play Users' : tableEconomy(row.original) === 'CASH' ? 'Cash Users' : 'Time Users'}</span> },
             {
-                accessor: 'balanceType', Header: 'Balance', minWidth: 90, filterable: false,
-                Cell: row => <span className="ring-balance-badge">{row.original.balanceType || 'CASH'}</span>,
+                accessor: 'balanceType', Header: 'Economy', minWidth: 75, filterable: false,
+                Cell: row => <span className={`ring-balance-badge is-${tableEconomy(row.original).toLowerCase()}`}>{tableEconomy(row.original) === 'FP' ? 'Free Play' : tableEconomy(row.original) === 'CASH' ? 'Cash' : 'Time'}</span>,
             },
+            { Header: 'Blinds', minWidth: 70, Cell: row => `${row.original.smallBlinds}/${row.original.bigBlinds}`, filterable: false },
+            { Header: 'Buy-In', minWidth: 95, filterable: false, Cell: row => `${row.original.minBuyIn ?? row.original.minCoins ?? 0} – ${row.original.maxBuyIn ?? row.original.maxCoins ?? 'No max'}` },
+            { Header: 'Seats', minWidth: 46, Cell: row => row.original.seatLimit, filterable: false },
+            { Header: 'Players', minWidth: 60, Cell: row => `${row.original.playersJoined || 0}/${row.original.seatLimit}`, filterable: false },
+            { Header: 'Time Rate', minWidth: 70, Cell: row => tableEconomy(row.original) === 'FP' || String(row.original.timeChargeTier).toUpperCase() === 'NONE' ? 'Free' : String(row.original.timeChargeTier).toUpperCase() === 'CUSTOM' ? 'Custom' : 'Standard', filterable: false },
             {
-                accessor: 'tableStatus', Header: 'Status', minWidth: 100, filterable: false,
+                accessor: 'tableStatus', Header: 'Status', minWidth: 80, filterable: false,
                 Cell: row => {
                     const status = String(row.original.tableStatus || 'ACTIVE').toUpperCase();
                     return <span className={`ring-status-badge is-${row.original.closeAfterHand ? 'closing' : status.toLowerCase()}`}>{row.original.closeAfterHand ? 'CLOSING' : status}</span>;
                 },
             },
             ...(canManage ? [{
-                Header: 'Actions', width: 380, minWidth: 380, maxWidth: 400, filterable: false, sortable: false,
+                Header: 'Actions', width: 280, minWidth: 280, maxWidth: 280, filterable: false, sortable: false,
                 Cell: row => (
                     <div className="ring-table-actions">
                         <button onClick={() => this.editRing(row.original)} className="ring-action-btn ring-action-edit">Edit</button>
@@ -346,7 +361,7 @@ export class Ring extends React.Component {
             <div className="content">
                 <div className="main-container player-scores">
                     <div className="main-container-head ring-list-header mb-3">
-                        <p className="main-container-heading">RING GAME</p>
+                        <div><h2 className="main-container-heading">Ring Tables</h2><p className="ring-list-subtitle">Live cash, Free Play, and time tables.</p></div>
                         <div className="ring-list-controls">
                             <span className={`ring-join-state ${newGamesPaused ? 'is-paused' : 'is-live'}`}>
                                 New joins: {newGamesPaused ? 'Paused' : 'Live'}
@@ -354,26 +369,40 @@ export class Ring extends React.Component {
                             {canManage && <button onClick={() => this.openNewGamesControl(!newGamesPaused)} className={`ring-global-control ${newGamesPaused ? 'is-resume' : ''}`}>
                                 {newGamesPaused ? 'Resume new joins' : 'Pause new joins'}
                             </button>}
-                            {canManage && <button onClick={() => { this.props.toggleModal(true); this.setState({ selectedGame: null, formData: { ...DEFAULT_RING_FORM }, template: '' }); }} className="add-btn">Create Ring Game</button>}
+                            {canManage && <button onClick={() => this.createRing('CASH')} className="ring-create-cash">Create Cash Table</button>}
+                            {canManage && <button onClick={() => this.createRing('FP')} className="add-btn">Create Free Play Table</button>}
                         </div>
                     </div>
-                    <Fragment>
-                        <div className="ring-table-shell mb-3">
+                    <div className="console-metric-grid ring-metric-grid" aria-label="Ring table summary">
+                        <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-controller" /></span><div><small>Active Cash Tables</small><strong>{cashGames.filter(game => String(game.tableStatus || 'ACTIVE').toUpperCase() === 'ACTIVE').length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-controller" /></span><div><small>Active Free Play Tables</small><strong>{freePlayGames.filter(game => String(game.tableStatus || 'ACTIVE').toUpperCase() === 'ACTIVE').length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-single-02" /></span><div><small>Players Seated</small><strong>{seatedPlayers}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-simple-add" /></span><div><small>Open Seats</small><strong>{openSeats}</strong></div></div>
+                    </div>
+                    {[
+                        { id: 'cash', title: 'Cash Tables', description: 'Cash economy tables and their current player activity.', games: cashGames },
+                        { id: 'fp', title: 'Free Play Tables', description: 'Virtual chip tables. Free Play cannot be withdrawn.', games: freePlayGames },
+                        { id: 'time', title: 'Time Tables', description: 'Tables using the MPCE time economy.', games: timeGames },
+                    ].map(group => (group.games.length > 0 || group.id !== 'time') && (
+                        <section className="ring-table-section" key={group.id}>
+                            <div className="ring-table-section-header"><div><h3>{group.title}</h3><p>{group.description}</p></div><span>{group.games.length} tables</span></div>
+                            <div className="ring-table-shell">
                             <ReactTable
-                                minRows={Math.min(Math.max(allRingGamesArray.length, 1), 10)}
+                                minRows={Math.min(group.games.length, 1)}
                                 defaultPageSize={10}
-                                showPagination={allRingGamesArray.length > 10}
+                                showPagination={group.games.length > 10}
                                 className="table ring-games-table"
-                                data={allRingGamesArray}
+                                data={group.games}
                                 columns={columns}
                                 filterable
                             />
-                        </div>
-                    </Fragment>
+                            </div>
+                        </section>
+                    ))}
                 </div>
 
                 <Modal isOpen={isModal} toggle={this.cancelModal} className="main-modal reward-modal ring-management-modal">
-                    <ModalHeader toggle={this.cancelModal}><div className="reward-modal-title"><p>{selectedGame ? 'Edit Ring' : 'Create Ring'}</p></div></ModalHeader>
+                    <ModalHeader toggle={this.cancelModal}><div className="reward-modal-title"><p>{selectedGame ? `Edit ${selectedGame.name || 'Ring Game'}` : 'Create Ring Game'}</p><small>{selectedGame ? 'Configure table settings and lobby visibility.' : 'Set up a new table and get players in the game.'}</small></div></ModalHeader>
                     <ModalBody className="modal-body reward-modal-body">
                         <form className="ring-form" onSubmit={event => { event.preventDefault(); this.submitRing(); }}>
                             {!selectedGame && (
@@ -384,6 +413,13 @@ export class Ring extends React.Component {
                                     </select>
                                 </Field>
                             )}
+
+                            <div className="ring-economy-choices ring-field--full" role="group" aria-label="Table economy">
+                                <span>Economy Type</span>
+                                <button type="button" className={balanceType === 'CASH' ? 'active' : ''} onClick={() => this.handleFormChange({ target: { name: 'balanceType', value: 'CASH' } })}>Cash <small>Real money tables</small></button>
+                                <button type="button" className={balanceType === 'FP' ? 'active' : ''} onClick={() => this.handleFormChange({ target: { name: 'balanceType', value: 'FP' } })}>Free Play <small>Virtual chips</small></button>
+                                <button type="button" className={balanceType === 'TIME' ? 'active' : ''} onClick={() => this.handleFormChange({ target: { name: 'balanceType', value: 'TIME' } })}>Time <small>MPCE economy</small></button>
+                            </div>
 
                             <section className="ring-form-section ring-form-section--game ring-field--full">
                                 <div className="ring-form-section__heading"><h3>Game setup</h3><span>Identity, format and availability</span></div>
@@ -453,6 +489,23 @@ export class Ring extends React.Component {
                                     {idleSeatClearEnabled && <Field label="Clear waiting seats"><div className="ring-control-with-unit"><input className="ring-control" name="idleSeatClearMinutes" type="number" min="1" max="1440" step="1" value={idleSeatClearMinutes} onChange={this.handleFormChange} /><span>min</span></div></Field>}
                                 </div>
                             </section>
+
+                            <aside className="ring-live-summary" aria-label="Live table summary">
+                                <h3>Live Summary</h3><p>Preview how this table will appear to operators.</p>
+                                <div className="ring-preview-art"><span>{balanceType === 'FP' ? 'FREE PLAY' : balanceType === 'CASH' ? 'CASH GAME' : 'TIME GAME'}</span><div className="ring-preview-table"><strong>{name || 'New Ring Game'}</strong><small>{gameVariant || 'Poker'} · {smallBlinds || '—'} / {bigBlinds || '—'}</small></div></div>
+                                <dl>
+                                    <div><dt>Table name</dt><dd>{name || 'New Ring Game'}</dd></div>
+                                    <div><dt>Economy</dt><dd>{balanceType === 'FP' ? 'Free Play' : balanceType === 'CASH' ? 'Cash' : 'Time / MPCE'}</dd></div>
+                                    <div><dt>Game type</dt><dd>{formatLimit && gameVariant ? `${formatLimit} ${gameVariant}` : gameVariant || 'Not set'}</dd></div>
+                                    <div><dt>Blinds</dt><dd>{smallBlinds || '—'} / {bigBlinds || '—'}</dd></div>
+                                    <div><dt>Buy-in range</dt><dd>{minBuyIn || '—'} – {maxBuyIn || '—'}</dd></div>
+                                    <div><dt>Seats</dt><dd>{seatLimit}</dd></div>
+                                    <div><dt>Region</dt><dd>{REGION_OPTIONS.find(([value]) => value === region)?.[1] || 'Not set'}</dd></div>
+                                    <div><dt>Time charge</dt><dd>{balanceType === 'FP' || timeChargeTier === 'NONE' ? 'Free' : timeChargeTier === 'CUSTOM' ? `${customBurnRateMpcePerHour} MPCE/hr` : `${standardMpcePerHour.toFixed(2)} MPCE/hr`}</dd></div>
+                                    <div><dt>Players to start</dt><dd>{minPlayersToStart}</dd></div>
+                                    <div><dt>Status</dt><dd>{tableStatus}</dd></div>
+                                </dl>
+                            </aside>
 
                             <div className="ring-form-actions ring-field--full">
                                 <Button className="delete-btn add-btn" type="button" onClick={this.cancelModal}>Cancel</Button>

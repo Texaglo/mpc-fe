@@ -54,6 +54,12 @@ class Games extends React.Component {
         return (
             <div className='content'>
                 <div className="main-container games-page">
+                    <header className="console-page-header games-page-header">
+                        <div>
+                            <h1>Games / {effectiveTab === 'ring' ? 'Ring Games' : effectiveTab === 'template' ? 'Templates' : effectiveTab === 'competitionSetup' ? 'Competition Setup' : effectiveTab === 'botTests' ? 'Test Bots' : effectiveTab === 'sitNgo' ? 'Sit’n’Go' : 'Tournaments'}</h1>
+                            <p>Manage poker tables, event formats, and game operations.</p>
+                        </div>
+                    </header>
                     {/* Tabs */}
                     <div className="games-tabs-container">
                         {canViewGames && <button

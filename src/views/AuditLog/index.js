@@ -94,13 +94,20 @@ const AuditLog = () => {
             <div className="main-container audit-page">
                 <div className="audit-page-header">
                     <div>
-                        <h2>Admin Audit Log</h2>
+                        <h2>Audit Log</h2>
                         <p>Permanent operational history showing who changed what, who was affected, and why.</p>
                     </div>
                     <div className="audit-total">
-                        <span>Total records</span>
-                        <strong>{Number(auditLogsPagination.totalLogs || 0).toLocaleString()}</strong>
+                        <span>Newest activity</span>
+                        <strong>{auditLogs[0]?.createdAt ? new Date(auditLogs[0].createdAt).toLocaleString() : '—'}</strong>
                     </div>
+                </div>
+
+                <div className="console-metric-grid audit-metric-grid" aria-label="Audit record summary">
+                    <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-notes" /></span><div><small>Total Records</small><strong>{Number(auditLogsPagination.totalLogs || 0).toLocaleString()}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-alert-circle-exc" /></span><div><small>Critical · This Page</small><strong>{auditLogs.filter(log => ['FREEZE_USER', 'REJECT_WITHDRAWAL', 'FORCE_LOGOUT'].includes(log.action)).length}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-single-02" /></span><div><small>Player Changes · This Page</small><strong>{auditLogs.filter(log => Boolean(log.targetUserId)).length}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-controller" /></span><div><small>Table Changes · This Page</small><strong>{auditLogs.filter(log => /RING|TABLE|TOURNAMENT|SNG/i.test(String(log.action || ''))).length}</strong></div></div>
                 </div>
 
                 <form className="audit-filters" onSubmit={submitSearch}>

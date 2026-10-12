@@ -14,6 +14,7 @@ import "./assets/css/nucleo-icons.css";
 import "./assets/scss/black-dashboard-react.css";
 import './assets/css/style.css';
 import './assets/css/mpc-design-system.css';
+import './assets/css/client-console.css';
 
 
 const sagaMiddleware = createSagaMiddleware();

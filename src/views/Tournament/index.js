@@ -127,7 +127,7 @@ const Tournament = () => {
                 <Fragment>
                     <div className='main-container-head mb-3'>
                         <ReactTable
-                            minRows={20}
+                            minRows={Math.min(Math.max(winners.length, 1), 10)}
                             className="table"
                             data={winners}
                             resolveData={data => data.map(row => row)}

@@ -163,7 +163,7 @@ var routes = [
   {
     layout: "/home",
     path: "/audit-log",
-    name: "Admin Audit Log",
+    name: "Audit Log",
     component: AuditLog,
     icon: "tim-icons icon-notes",
     permission: 'audit.view',

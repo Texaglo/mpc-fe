@@ -462,30 +462,19 @@ class PendingWithdrawals extends React.Component {
         return (
             <div className='content'>
                 <div className="main-container pending-withdrawals">
-                    <div className='main-container-head mb-3'>
-                        <p className="main-container-heading">
-                            {activeTab === 'pending' ? 'PENDING WITHDRAWALS' : 'APPROVED WITHDRAWALS'}
-                        </p>
+                    <div className='console-page-header'>
+                        <div><h1>Operations / Cashier</h1><p>Review withdrawals, wallet coverage, and payout operations.</p></div>
                         {canViewWallets && <button className="balance-btn" onClick={this.openBalanceModal}>
                             Wallet Operations {pendingRefills.length > 0 ? `(${pendingRefills.length})` : ''}
                         </button>}
                     </div>
 
-                    {/* Stats Summary */}
-                    {activeTab === 'pending' && pendingWithdrawalsData.length > 0 && (
-                        <div className="withdrawals-stats">
-                            <div className="stat-item">
-                                <span className="stat-label">Total Pending:</span>
-                                <span className="stat-value">
-                                    {pendingWithdrawalsData.reduce((sum, w) => sum + (parseFloat(w.receivedAmount) || 0), 0).toFixed(6)} SOL
-                                </span>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">Count:</span>
-                                <span className="stat-value">{pendingWithdrawalsData.length}</span>
-                            </div>
-                        </div>
-                    )}
+                    <div className="console-metric-grid withdrawals-stats" aria-label="Withdrawal summary">
+                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-time-alarm" /></span><div><small>Pending Withdrawals</small><strong>{pendingWithdrawalsData.length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Approved Records</small><strong>{approvedWithdrawalsData.length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-coins" /></span><div><small>Pending Payout Total</small><strong>{pendingWithdrawalsData.reduce((sum, w) => sum + (parseFloat(w.receivedAmount) || 0), 0).toFixed(4)} SOL</strong></div></div>
+                        {canViewWallets && <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-wallet-43" /></span><div><small>Hot Wallet SOL</small><strong>{Number(walletBalance?.hotWallet?.balanceSOL ?? hotWalletSol).toLocaleString()}</strong></div></div>}
+                    </div>
 
                     {/* Tabs */}
                     <div className="tabs-container">
@@ -506,7 +495,7 @@ class PendingWithdrawals extends React.Component {
                     <Fragment>
                         <div className='main-container-head mb-3'>
                             <ReactTable
-                                minRows={20}
+                                minRows={Math.min(Math.max((activeTab === 'pending' ? pendingWithdrawalsData : approvedWithdrawalsData).length, 1), 10)}
                                 className="table"
                                 columns={activeTab === 'pending' ? pendingColumns : approvedColumns}
                                 filterable={true}

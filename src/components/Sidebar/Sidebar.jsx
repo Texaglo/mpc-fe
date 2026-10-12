@@ -39,6 +39,7 @@ class Sidebar extends React.Component {
   render() {
     const { bgColor, routes, rtlActive, role, permissions } = this.props;
     const access = { role, permissions };
+    const environment = process.env.REACT_APP_ENVIRONMENT || (process.env.REACT_APP_ADMIN_API_ENV === 'development' ? 'Local / staging' : process.env.NODE_ENV === 'production' ? 'Production' : 'Local');
 
     return (
       <div className="sidebar" data={bgColor}>
@@ -77,6 +78,10 @@ class Sidebar extends React.Component {
               );
             })}
           </Nav>
+          <div className="mpc-sidebar-status" aria-label={`${environment} environment status`}>
+            <span className="mpc-status-dot" aria-hidden="true" />
+            <div><strong>{environment}</strong><small>Admin console</small></div>
+          </div>
         </div>
       </div>
     );

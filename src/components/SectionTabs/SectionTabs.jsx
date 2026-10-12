@@ -27,11 +27,11 @@ const groups = [
         label: 'Players',
         icon: 'tim-icons icon-single-02',
         tabs: [
-            { path: '/home/qa-tests', label: 'Safe Game Tests', permission: 'bots.view' },
+            { path: '/home/users', label: 'Players', permission: 'players.view' },
             { path: '/home/integrity', label: 'Integrity & Reports', permission: 'integrity.view' },
-            { path: '/home/users', label: 'User Management', permission: 'players.view' },
             { path: '/home/leaderboards', label: 'Leaderboards', permission: 'players.view' },
             { path: '/home/hand-history', label: 'Hand History', permission: 'hand_history.view' },
+            { path: '/home/qa-tests', label: 'Safe Game Tests', permission: 'bots.view' },
         ],
     },
     {
@@ -41,13 +41,14 @@ const groups = [
         tabs: [
             { path: '/home/pending-withdrawals', label: 'Withdrawals', permission: 'operations.view' },
             { path: '/home/cashier', label: 'Cashier', permission: 'cashier.view' },
-            { path: '/home/settings', label: 'Economy Settings', permission: 'economy.view' },
-            { path: '/home/free-play', label: 'Free Play', permission: 'free_play.view' },
+            { path: '/home/settings', label: 'Treasury & Rules', permission: 'economy.view' },
+            { path: '/home/free-play', label: 'Free Play Economy', permission: 'free_play.view' },
         ],
     },
 ];
 
 const SectionTabs = ({ pathname, role, permissions }) => {
+    if (pathname === '/home/dashboard') return null;
     const group = groups.find((candidate) => candidate.tabs.some((tab) => tab.path === pathname));
     if (!group) return null;
 

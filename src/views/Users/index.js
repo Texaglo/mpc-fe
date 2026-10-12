@@ -574,8 +574,8 @@ class Users extends React.Component {
         return (
             <div className='content'>
                 <div className="main-container users-container">
-                    <div className='main-container-head mb-3'>
-                        <p className="main-container-heading">USERS</p>
+                    <div className='console-page-header'>
+                        <div><h1>Players / User Management</h1><p>Manage player accounts, access, wallets, verification, and activity.</p></div>
                         <div className="search-container">
                             <input
                                 type="text"
@@ -587,15 +587,12 @@ class Users extends React.Component {
                         </div>
                     </div>
 
-                    <div className="users-stats">
-                        <div className="stat-item">
-                            <span className="stat-label">Total Users:</span>
-                            <span className="stat-value">{pagination?.totalUsers || 0}</span>
-                        </div>
-                        <div className="stat-item">
-                            <span className="stat-label">Page:</span>
-                            <span className="stat-value">{pagination?.currentPage || 1} / {pagination?.totalPages || 1}</span>
-                        </div>
+                    <div className="console-metric-grid users-stats" aria-label="Player summary">
+                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-single-02" /></span><div><small>Total Users</small><strong>{Number(pagination?.totalUsers || 0).toLocaleString()}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-bullet-list-67" /></span><div><small>Showing on This Page</small><strong>{usersData.length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-link-72" /></span><div><small>Wallet Connected · This Page</small><strong>{usersData.filter(user => Boolean(user.publicAddress)).length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>KYC Verified · This Page</small><strong>{usersData.filter(user => String(user.KYCStatus || '').toLowerCase() === 'verified').length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-lock-circle" /></span><div><small>Banned · This Page</small><strong>{usersData.filter(user => user.isFrozen).length}</strong></div></div>
                         {selectedUsers.length > 0 && (
                             <div className="bulk-actions">
                                 <span className="selected-count">{selectedUsers.length} selected</span>
@@ -609,7 +606,7 @@ class Users extends React.Component {
                     <Fragment>
                         <div className='main-container-head mb-3'>
                             <ReactTable
-                                minRows={10}
+                                minRows={Math.min(Math.max(usersData.length, 1), 10)}
                                 className="table"
                                 columns={columns}
                                 filterable={false}

@@ -49,6 +49,8 @@ const GameStore = () => {
 
     const [formData, setFormData] = useState({ _id: "", name: "", amount: 0 });
     const [selectedAsset, setSelectedAsset] = useState(null);
+    const products = Array.isArray(allGameItems) ? allGameItems : [];
+    const activeProducts = products.filter(item => item.isActive !== false).length;
 
     const handleFormChange = ({ target }) => {
         setFormData(prev => ({ ...prev, [target.name]: target.value }));
@@ -140,19 +142,25 @@ const GameStore = () => {
 
     return (
         <div className='content'>
-        <div className="main-container player-scores">
-            <div className='main-container-head mb-3'>
-                <p className="main-container-heading">Game Store</p>
+        <div className="main-container player-scores commerce-products-page">
+            <div className='console-page-header'>
+                <div><h1>Commerce / Products</h1><p>Manage products and availability in the player store.</p></div>
                 <button onClick={() => {
                     dispatch(toggleModal(true));
-                }} className="add-btn">Create Game Asset</button>
+                }} className="add-btn">Create Product</button>
             </div>
+            <div className="console-metric-grid commerce-metric-grid" aria-label="Product summary">
+                <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-bag-16" /></span><div><small>Total Products</small><strong>{products.length}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Active Products</small><strong>{activeProducts}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-simple-remove" /></span><div><small>Disabled Products</small><strong>{products.length - activeProducts}</strong></div></div>
+            </div>
+            <div className="console-panel-title"><h2>Product catalog</h2><span>Current store items and availability</span></div>
             <Fragment>
                 <div className='main-container-head mb-3'>
                     <ReactTable
-                        minRows={20}
+                        minRows={Math.min(Math.max(products.length, 1), 10)}
                         className="table"
-                        data={allGameItems}
+                        data={products}
                         resolveData={data => data.map(row => row)}
                         columns={columns}
                         filterable={true}
@@ -164,7 +172,7 @@ const GameStore = () => {
         {/* ---------------ADD SNG MODAL--------------- */}
         <Modal isOpen={isModal} toggle={cancelModal} className="main-modal reward-modal">
             <ModalHeader toggle={cancelModal}>
-                <div className="reward-modal-title"><p className=''> {selectedAsset ? 'Edit Asset' : 'Create Asset'}</p></div>
+                <div className="reward-modal-title"><p className=''> {selectedAsset ? 'Edit Product' : 'Create Product'}</p></div>
                 <div className="reward-modal-line"><hr /></div>
             </ModalHeader>
             <ModalBody className="modal-body modal-height reward-modal-body">
@@ -173,13 +181,13 @@ const GameStore = () => {
                         <ValidatorForm className="row" >
                             <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                 <Grid className="input-fields" item xs={12}>
-                                    <label> Asset Name</label>
+                                    <label>Product Name</label>
                                     <CustomTextField
                                         disabled={selectedAsset}
                                         fullWidth
                                         className="text-field"
                                         autoComplete='on'
-                                        placeholder="Asset Name"
+                                        placeholder="Product Name"
                                         name="name"
                                         type="text"
                                         value={formData.name}
@@ -187,18 +195,18 @@ const GameStore = () => {
                                         margin="dense"
                                         onChange={handleFormChange}
                                         validators={['required']}
-                                        errorMessages={['Please Add Asset Name']}
+                                        errorMessages={['Please add a product name']}
                                     />
                                 </Grid>
                             </Grid>
                             <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                 <Grid className="input-fields" item xs={12}>
-                                    <label>Asset Amount</label>
+                                    <label>Product Amount</label>
                                     <CustomTextField
                                         fullWidth
                                         className="text-field"
                                         autoComplete='on'
-                                        placeholder="Asset Amount"
+                                        placeholder="Product Amount"
                                         name="amount"
                                         type="Number"
                                         value={formData.amount}
@@ -206,7 +214,7 @@ const GameStore = () => {
                                         margin="dense"
                                         onChange={handleFormChange}
                                         validators={['required']}
-                                        errorMessages={['Please Enter Asset Amount']}
+                                        errorMessages={['Please enter a product amount']}
                                     />
                                 </Grid>
                             </Grid>

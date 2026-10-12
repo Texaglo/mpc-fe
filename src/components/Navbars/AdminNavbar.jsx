@@ -112,19 +112,15 @@ class AdminNavbar extends React.Component {
               </div>
               <NavbarBrand className="mpc-navbar-brand" href="#" onClick={event => event.preventDefault()}>
                 <span className="mpc-navbar-brand-title">Modern Poker Club</span>
+                <span className="mpc-navbar-brand-divider" aria-hidden="true">—</span>
                 <span className="mpc-navbar-brand-subtitle">Operations Console</span>
               </NavbarBrand>
-              <div className="mpc-navbar-context" aria-label={`Current page: ${this.props.brandText}`}>
-                <span>Current workspace</span>
-                <strong>{this.props.brandText}</strong>
-              </div>
             </div>
             <Collapse navbar isOpen={this.state.collapseOpen}>
               <Nav className="ml-auto" navbar>
                 <li className="mpc-environment-status" aria-label={`${environment} environment`}>
                   <span className="mpc-status-dot" />
                   <span>{environment}</span>
-                  <small>Authenticated admin</small>
                 </li>
                 <UncontrolledDropdown nav>
                   <DropdownToggle
@@ -135,8 +131,9 @@ class AdminNavbar extends React.Component {
                     onClick={e => e.preventDefault()}
                   >
                     <div className="photo mpc-admin-avatar" aria-hidden="true">
-                      <i className="tim-icons icon-lock-circle" />
+                      <i className="tim-icons icon-single-02" />
                     </div>
+                    <span className="mpc-admin-label">Authenticated admin</span>
                     <b className="caret d-none d-lg-block d-xl-block" />
                     <p className="d-lg-none">Logout</p>
                   </DropdownToggle>

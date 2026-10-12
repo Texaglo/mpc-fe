@@ -261,7 +261,7 @@ const AdminHomePage = () => {
     const dashboardKpiGroups = [
         {
             id: 'live-floor',
-            title: 'Live Floor',
+            title: 'Live Platform Metrics',
             caption: 'Current player and table activity',
             items: [
                 {
@@ -298,7 +298,7 @@ const AdminHomePage = () => {
         },
         {
             id: 'cash-flow',
-            title: "Today's Cash Flow",
+            title: 'Revenue & Cashier Activity',
             caption: 'Movement requiring operator awareness',
             items: [
                 {
@@ -376,7 +376,10 @@ const AdminHomePage = () => {
         <div className="content">
             <div className="main-container dashboard-container">
                 <div className="dashboard-header">
-                    <h2 className="dashboard-title">Dashboard</h2>
+                    <div>
+                        <h2 className="dashboard-title">Dashboard / Overview</h2>
+                        <p className="console-page-subtitle">Real-time system status, key metrics, and platform activity.</p>
+                    </div>
                     <div className="period-filter-container">
                         <div className="period-filter">
                             <label>Period:</label>
@@ -418,7 +421,6 @@ const AdminHomePage = () => {
                 </div>
 
                 <section className="system-status-bar" aria-label="System status">
-                    <div><strong>System status</strong><span>Live backend checks</span></div>
                     {[
                         ['API', stats?.system?.api?.status],
                         ['Database', stats?.system?.database?.status],
@@ -427,9 +429,9 @@ const AdminHomePage = () => {
                         ['Game engine', stats?.system?.gameEngine?.newGamesPaused ? 'PAUSED' : stats?.system?.gameEngine?.status],
                         ['Cashier', stats?.system?.cashier?.status],
                     ].map(([label, status]) => (
-                        <span className={`system-status-chip is-${String(status || 'checking').toLowerCase()}`} key={label}>
-                            <i />{label}: {status || 'Checking'}
-                        </span>
+                        <div className={`system-status-chip is-${String(status || 'checking').toLowerCase()}`} key={label}>
+                            <i aria-hidden="true" /><span><strong>{label}</strong><small>{status || 'Checking'}</small></span>
+                        </div>
                     ))}
                 </section>
 
