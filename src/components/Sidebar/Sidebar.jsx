@@ -57,7 +57,7 @@ class Sidebar extends React.Component {
             {routes.filter((route) => canAccess(access, route.permission)).map((prop) => {
               return (
                 <React.Fragment key={`${prop.layout}${prop.path}`}>
-                  {!prop['hidden'] &&
+                  {(!prop['hidden'] || (['/achievement', '/tournament'].includes(prop.path) && !canAccess(access, 'games.view'))) &&
                     <li
                       className={
                         this.activeRoute(prop.path) +

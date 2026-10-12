@@ -114,6 +114,7 @@ var routes = [
     name: "Achievements",
     component: Achievement,
     icon: "tim-icons icon-book-bookmark",
+    hidden: true,
     permission: 'achievements.view',
   },
   {
@@ -122,6 +123,7 @@ var routes = [
     name: "Tournament",
     component: Tournament,
     icon: "tim-icons icon-trophy",
+    hidden: true,
     permission: 'tournaments.view',
   },
   {

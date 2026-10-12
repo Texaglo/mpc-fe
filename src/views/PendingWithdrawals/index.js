@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import ReactTable from 'react-table-6';
 import React, { Fragment } from 'react';
+import { Link } from 'react-router-dom';
 import {
     getPendingWithdrawals,
     approveWithdrawal,
@@ -56,6 +57,7 @@ class PendingWithdrawals extends React.Component {
             modalAction: '', // 'approve' or 'reject'
             isBalanceModalOpen: false,
             activeTab: 'pending', // 'pending' or 'approved'
+            withdrawalSearch: '',
             refillAmount: '',
             refillReason: '',
             selectedRefill: null,
@@ -235,6 +237,7 @@ class PendingWithdrawals extends React.Component {
             modalAction,
             isBalanceModalOpen,
             activeTab,
+            withdrawalSearch,
             refillAmount,
             refillReason,
             selectedRefill,
@@ -254,16 +257,19 @@ class PendingWithdrawals extends React.Component {
         const canManageWithdrawals = canAccess(access, 'withdrawals.manage');
         const canViewWallets = canAccess(access, 'cashier.view');
         const canManageWallets = canAccess(access, 'cashier.manage');
+        const selectedWithdrawals = activeTab === 'pending' ? pendingWithdrawalsData : approvedWithdrawalsData;
+        const displayedWithdrawals = selectedWithdrawals.filter((item) => [item.username, item.userWalletAddress, item.withdrawalMethod, item.paidCoinType, item.receivedCoinType].some((value) => String(value || '').toLowerCase().includes(withdrawalSearch.toLowerCase())));
         const pendingColumns = [
             {
                 Header: '#',
                 Cell: ({ index }) => index + 1,
-                width: 100,
+                width: 36,
                 filterable: false
             },
             {
                 accessor: 'username',
                 Header: 'Username',
+                width: 100,
                 filterMethod: (filter, row) => {
                     return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
                 },
@@ -272,6 +278,7 @@ class PendingWithdrawals extends React.Component {
             {
                 accessor: 'paidAmount',
                 Header: 'Paid Amount',
+                width: 80,
                 Cell: ({ original }) => {
                     if (original.paidAmount && original.paidCoinType) {
                         return `${original.paidAmount} ${original.paidCoinType.toUpperCase()}`;
@@ -283,6 +290,7 @@ class PendingWithdrawals extends React.Component {
             {
                 accessor: 'receivedAmount',
                 Header: 'Received Amount',
+                width: 88,
                 Cell: ({ original }) => {
                     if (original.receivedAmount && original.receivedCoinType) {
                         return `${original.receivedAmount} ${original.receivedCoinType.toUpperCase()}`;
@@ -294,6 +302,7 @@ class PendingWithdrawals extends React.Component {
             {
                 accessor: 'withdrawalMethod',
                 Header: 'Method',
+                width: 77,
                 Cell: ({ value }) => value || 'N/A',
                 filterMethod: (filter, row) => {
                     return row[filter.id] ? row[filter.id].toLowerCase().includes(filter.value.toLowerCase()) : false;
@@ -302,6 +311,7 @@ class PendingWithdrawals extends React.Component {
             {
                 accessor: 'userWalletAddress',
                 Header: 'Wallet Address',
+                width: 116,
                 Cell: ({ value }) => {
                     if (value) {
                         // Show first 6 and last 6 characters for long addresses
@@ -317,6 +327,7 @@ class PendingWithdrawals extends React.Component {
             {
                 accessor: 'KYCStatus',
                 Header: 'KYC Status',
+                width: 77,
                 Cell: ({ value }) => value ? (
                     <span className={`kyc-status ${value === 'verified' ? 'verified' : 'pending'}`}>
                         {value}
@@ -329,6 +340,7 @@ class PendingWithdrawals extends React.Component {
             {
                 accessor: 'requestedAt',
                 Header: 'Request Date',
+                width: 91,
                 Cell: ({ value }) => value ? new Date(value).toLocaleDateString() : 'N/A',
                 filterable: false
             },
@@ -340,6 +352,7 @@ class PendingWithdrawals extends React.Component {
                     </div>
                 ),
                 Header: 'Actions',
+                width: 119,
                 filterable: false
             }] : []),
         ];
@@ -469,13 +482,20 @@ class PendingWithdrawals extends React.Component {
                         </button>}
                     </div>
 
+                    <nav className="operations-category-tabs" aria-label="Operations sections"><span className="active">Withdrawals</span><Link to="/home/cashier">Deposits</Link><Link to="/home/settings">Treasury</Link><Link to="/home/free-play">Free Play Economy</Link></nav>
+
                     <div className="console-metric-grid withdrawals-stats" aria-label="Withdrawal summary">
                         <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-time-alarm" /></span><div><small>Pending Withdrawals</small><strong>{pendingWithdrawalsData.length}</strong></div></div>
                         <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Approved Records</small><strong>{approvedWithdrawalsData.length}</strong></div></div>
                         <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-coins" /></span><div><small>Pending Payout Total</small><strong>{pendingWithdrawalsData.reduce((sum, w) => sum + (parseFloat(w.receivedAmount) || 0), 0).toFixed(4)} SOL</strong></div></div>
+                        {canViewWallets && <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-money-coins" /></span><div><small>Hot Wallet USDC</small><strong>{Number(walletBalance?.hotWallet?.balanceUSDC || 0).toLocaleString()}</strong></div></div>}
                         {canViewWallets && <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-wallet-43" /></span><div><small>Hot Wallet SOL</small><strong>{Number(walletBalance?.hotWallet?.balanceSOL ?? hotWalletSol).toLocaleString()}</strong></div></div>}
+                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-lock-circle" /></span><div><small>Pending Wallet Refills</small><strong>{pendingRefills.length}</strong></div></div>
                     </div>
 
+                    <div className="withdrawals-main-grid">
+                    <section className="withdrawals-table-panel">
+                        <div className="withdrawals-table-heading"><h2>{activeTab === 'pending' ? 'Pending Withdrawals' : 'Approved Withdrawals'}</h2><p>Review and process cash withdrawal requests from eligible users.</p></div>
                     {/* Tabs */}
                     <div className="tabs-container">
                         <button
@@ -490,20 +510,34 @@ class PendingWithdrawals extends React.Component {
                         >
                             Approved
                         </button>
+                        <input className="withdrawals-search" type="search" aria-label="Search withdrawals" placeholder="Search user, wallet, or token..." value={withdrawalSearch} onChange={(event) => this.setState({ withdrawalSearch: event.target.value })} />
                     </div>
 
                     <Fragment>
                         <div className='main-container-head mb-3'>
                             <ReactTable
-                                minRows={Math.min(Math.max((activeTab === 'pending' ? pendingWithdrawalsData : approvedWithdrawalsData).length, 1), 10)}
+                                minRows={Math.min(Math.max(displayedWithdrawals.length, 1), 10)}
                                 className="table"
                                 columns={activeTab === 'pending' ? pendingColumns : approvedColumns}
-                                filterable={true}
-                                data={activeTab === 'pending' ? pendingWithdrawalsData : approvedWithdrawalsData}
+                                filterable={false}
+                                defaultPageSize={10}
+                                showPagination={displayedWithdrawals.length > 10}
+                                data={displayedWithdrawals}
                                 resolveData={data => data.map(item => item)}
                             />
                         </div>
                     </Fragment>
+                    </section>
+                    <aside className="withdrawals-treasury-panel">
+                        <h2><i className="tim-icons icon-bank" /> Treasury Snapshot</h2>
+                        <p>Live balances and processing metrics.</p>
+                        <div className="withdrawals-treasury-item"><span className="console-metric-icon blue"><i className="tim-icons icon-money-coins" /></span><div><small>USDC Balance</small><strong>{canViewWallets ? `${Number(walletBalance?.hotWallet?.balanceUSDC || 0).toLocaleString()} USDC` : 'Restricted'}</strong></div><em>{walletBalance?.hotWallet?.status || '—'}</em></div>
+                        <div className="withdrawals-treasury-item"><span className="console-metric-icon blue"><i className="tim-icons icon-wallet-43" /></span><div><small>SOL Balance</small><strong>{canViewWallets ? `${Number(walletBalance?.hotWallet?.balanceSOL ?? hotWalletSol).toLocaleString()} SOL` : 'Restricted'}</strong></div><em>{walletBalance?.hotWallet?.status || '—'}</em></div>
+                        <div className="withdrawals-treasury-item"><span className="console-metric-icon gold"><i className="tim-icons icon-time-alarm" /></span><div><small>Pending Payout Total</small><strong>{pendingWithdrawalsData.reduce((sum, w) => sum + (parseFloat(w.receivedAmount) || 0), 0).toFixed(4)} SOL</strong></div></div>
+                        <div className="withdrawals-treasury-item"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Approved Records</small><strong>{approvedWithdrawalsData.length}</strong></div></div>
+                        <div className="withdrawals-treasury-notice"><i className="tim-icons icon-alert-circle-exc" /><span>Cash withdrawals require an eligible, verified user and available distribution wallet funds.</span></div>
+                    </aside>
+                    </div>
                 </div>
 
                 {/* ---------------APPROVAL/REJECTION MODAL--------------- */}

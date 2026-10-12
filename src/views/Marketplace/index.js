@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Fragment } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import ReactTable from 'react-table-6';
 import Grid from '@material-ui/core/Grid';
@@ -34,6 +35,8 @@ const CustomTextField = withStyles({
 
 const Marketplace = () => {
     const dispatch = useDispatch();
+    const history = useHistory();
+    const location = useLocation();
     const {
         isModal,
         items,
@@ -46,10 +49,15 @@ const Marketplace = () => {
         isModal: Auth.isModal,
     }));
 
-    const [selectedItemType, setSelectedItemType] = useState('');
+    const [selectedItemType, setSelectedItemType] = useState(() => new URLSearchParams(location.search).get('type') || '');
     const [selectedStatus, setSelectedStatus] = useState('');
     const [catalogSearch, setCatalogSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+
+    useEffect(() => {
+        setSelectedItemType(new URLSearchParams(location.search).get('type') || '');
+        setCurrentPage(1);
+    }, [location.search]);
 
     useEffect(() => {
         dispatch(setLoader(false));
@@ -233,12 +241,23 @@ const Marketplace = () => {
 
     return (
         <div className='content'>
-            <div className="main-container player-scores">
-                <div className='main-container-head mb-3'>
-                    <p className="main-container-heading">Marketplace</p>
+            <div className="main-container player-scores commerce-products-page">
+                <div className='console-page-header'>
+                    <div><h1>Commerce / Products</h1><p>Manage Free Play packs, cosmetics, and other marketplace items.</p></div>
                     <button onClick={() => {
                         dispatch(toggleModal(true));
-                    }} className="add-btn">Create Item</button>
+                    }} className="add-btn">Create Product</button>
+                </div>
+                <div className="console-metric-grid commerce-metric-grid" aria-label="Marketplace product summary">
+                    <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-bag-16" /></span><div><small>Catalog Products</small><strong>{pagination.totalItems || items.length}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Active · This Page</small><strong>{items.filter(item => item.isActive !== false).length}</strong></div></div>
+                    <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-simple-remove" /></span><div><small>Disabled · This Page</small><strong>{items.filter(item => item.isActive === false).length}</strong></div></div>
+                </div>
+                <div className="commerce-category-tabs" aria-label="Product categories">
+                    <button type="button" onClick={() => history.push('/home/game-store')}>▤ &nbsp; Time Bundles</button>
+                    <button type="button" className={selectedItemType === 'currency_bundle' ? 'active' : ''} onClick={() => history.push('/home/marketplace?type=currency_bundle')}>◉ &nbsp; FP Chip Packs</button>
+                    <button type="button" className={selectedItemType === 'cosmetic' ? 'active' : ''} onClick={() => history.push('/home/marketplace?type=cosmetic')}>♧ &nbsp; Cosmetics</button>
+                    <button type="button" className={!selectedItemType ? 'active' : ''} onClick={() => history.push('/home/marketplace')}>All Products</button>
                 </div>
                 <div className='filters-container mb-3'>
                     <div className='filter-group catalog-search-group'>

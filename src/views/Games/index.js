@@ -22,13 +22,19 @@ class Games extends React.Component {
         this.setState({ activeTab: tabName });
     }
 
+    openGameTool = (tool) => {
+        if (tool === 'achievements') return this.props.history.push('/home/achievement');
+        if (tool === 'tournamentPage') return this.props.history.push('/home/tournament');
+        this.switchTab(tool);
+    }
+
     renderActiveContent = (activeTab = this.state.activeTab) => {
         const access = { role: this.props.role, permissions: this.props.permissions };
         const canViewGames = canAccess(access, 'games.view');
         const canViewBots = canAccess(access, ['bots.view', 'bots.manage']);
         switch (activeTab) {
             case 'ring':
-                return canViewGames ? <Ring /> : canViewBots ? <BotTests /> : null;
+                return canViewGames ? <Ring onOpenTemplates={() => this.switchTab('template')} onOpenGameTool={this.openGameTool} showAchievementTool={canAccess(access, 'achievements.view')} showTournamentTool={canAccess(access, 'tournaments.view')} showCompetitionTool={canAccess(access, 'tournaments.manage')} showBotTools={canViewBots} /> : canViewBots ? <BotTests /> : null;
             case 'sitNgo':
                 return <><p>Legacy Sit’n’Go records. Use Competition setup for new events; legacy operations are disabled when the new runner is enabled.</p><SitnGo /></>;
             case 'tourney':
@@ -54,14 +60,14 @@ class Games extends React.Component {
         return (
             <div className='content'>
                 <div className="main-container games-page">
-                    <header className="console-page-header games-page-header">
+                    {effectiveTab !== 'ring' && <header className="console-page-header games-page-header">
                         <div>
                             <h1>Games / {effectiveTab === 'ring' ? 'Ring Games' : effectiveTab === 'template' ? 'Templates' : effectiveTab === 'competitionSetup' ? 'Competition Setup' : effectiveTab === 'botTests' ? 'Test Bots' : effectiveTab === 'sitNgo' ? 'Sit’n’Go' : 'Tournaments'}</h1>
                             <p>Manage poker tables, event formats, and game operations.</p>
                         </div>
-                    </header>
+                    </header>}
                     {/* Tabs */}
-                    <div className="games-tabs-container">
+                    {effectiveTab !== 'ring' && <div className="games-tabs-container">
                         {canViewGames && <button
                             className={`games-tab-button ${effectiveTab === 'ring' ? 'active' : ''}`}
                             onClick={() => this.switchTab('ring')}
@@ -96,7 +102,7 @@ class Games extends React.Component {
                         >
                             Test Bots
                         </button>}
-                    </div>
+                    </div>}
 
                     {/* Active Content */}
                     <div className="games-content">

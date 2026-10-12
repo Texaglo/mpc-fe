@@ -40,6 +40,15 @@ const getChange = (details = {}) => {
     return `${displayValue(previous)} → ${displayValue(next)}`;
 };
 
+const getModule = (log) => {
+    const action = String(log.action || '').toUpperCase();
+    if (/RING|TABLE|TOURNAMENT|SNG|GAME/.test(action)) return 'Games';
+    if (/WITHDRAWAL|WALLET|CASHIER|DEPOSIT|REFILL/.test(action)) return 'Operations';
+    if (/INVENTORY|PRODUCT|STORE|PURCHASE/.test(action)) return 'Commerce';
+    if (/USER|PLAYER|BALANCE|LOGOUT|KYC/.test(action)) return 'Players';
+    return 'System';
+};
+
 const AuditLog = () => {
     const dispatch = useDispatch();
     const {
@@ -52,6 +61,7 @@ const AuditLog = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [period, setPeriod] = useState('all');
     const [action, setAction] = useState('');
+    const [module, setModule] = useState('');
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
     const [startDate, setStartDate] = useState('');
@@ -81,6 +91,7 @@ const AuditLog = () => {
         setCurrentPage(1);
         setPeriod('all');
         setAction('');
+        setModule('');
         setSearchInput('');
         setSearch('');
         setStartDate('');
@@ -88,6 +99,7 @@ const AuditLog = () => {
     };
 
     const totalPages = Number(auditLogsPagination.totalPages || 1);
+    const visibleAuditLogs = module ? auditLogs.filter((log) => getModule(log) === module) : auditLogs;
 
     return (
         <div className="content">
@@ -130,6 +142,13 @@ const AuditLog = () => {
                         </select>
                     </label>
                     <label>
+                        Module
+                        <select value={module} onChange={(event) => setModule(event.target.value)}>
+                            <option value="">All modules</option>
+                            {['Games', 'Commerce', 'Operations', 'Players', 'System'].map((name) => <option value={name} key={name}>{name}</option>)}
+                        </select>
+                    </label>
+                    <label>
                         Period
                         <select value={period} onChange={(event) => { setPeriod(event.target.value); setCurrentPage(1); }}>
                             <option value="all">All time</option>
@@ -158,13 +177,14 @@ const AuditLog = () => {
                         {auditLogsLoading && <span className="audit-loading">Refreshing…</span>}
                     </div>
 
-                    {auditLogs.length > 0 ? (
+                    {visibleAuditLogs.length > 0 ? (
                         <div className="audit-table-scroll">
                             <table className="audit-table">
                                 <thead>
                                     <tr>
                                         <th>Date and time</th>
                                         <th>Administrator</th>
+                                        <th>Module</th>
                                         <th>Action</th>
                                         <th>Affected player / scope</th>
                                         <th>Old value → new value</th>
@@ -174,7 +194,7 @@ const AuditLog = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {auditLogs.map((log) => {
+                                    {visibleAuditLogs.map((log) => {
                                         const details = log.details || {};
                                         return (
                                             <tr key={log._id}>
@@ -183,6 +203,7 @@ const AuditLog = () => {
                                                     <strong>{log.adminId?.username || 'Admin'}</strong>
                                                     <small>{log.adminId?.email || log.adminId?._id || ''}</small>
                                                 </td>
+                                                <td className="audit-module">{getModule(log)}</td>
                                                 <td><span className={`audit-action audit-${String(log.action || '').toLowerCase()}`}>{readableAction(log.action)}</span></td>
                                                 <td>
                                                     <strong>{log.targetUserId?.username || details.username || 'System / global'}</strong>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Fragment } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import ReactTable from 'react-table-6';
 import Grid from '@material-ui/core/Grid';
@@ -7,6 +8,8 @@ import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { createGameStore, updateGameStore, getGameStores, toggleStoreItem } from "../../store/actions/GameStore";
+import { getMarketplaceItems } from '../../store/actions/Marketplace';
+import fpChips from '../../assets/img/admin-console/fp-chip-stack-blue.png';
 import './index.css';
 
 const CustomTextField = withStyles({
@@ -34,23 +37,30 @@ const CustomTextField = withStyles({
 
 const GameStore = () => {
     const dispatch = useDispatch();
+    const history = useHistory();
     const {
         isModal,
-        allGameItems
-    } = useSelector(({ Auth, GameStore }) => ({
+        allGameItems,
+        marketItems
+    } = useSelector(({ Auth, GameStore, Marketplace }) => ({
         allGameItems: GameStore.allGameItems,
+        marketItems: Marketplace.items,
         isModal: Auth.isModal,
     }));
 
     useEffect(() => {
         dispatch(setLoader(false));
         dispatch(getGameStores());
+        dispatch(getMarketplaceItems({ page: 1, limit: 20, itemType: 'currency_bundle' }));
     }, [dispatch]);
 
     const [formData, setFormData] = useState({ _id: "", name: "", amount: 0 });
     const [selectedAsset, setSelectedAsset] = useState(null);
     const products = Array.isArray(allGameItems) ? allGameItems : [];
     const activeProducts = products.filter(item => item.isActive !== false).length;
+    const fpCatalogProducts = (Array.isArray(marketItems) ? marketItems : []).filter(item => item.itemType === 'currency_bundle');
+    const fpProducts = fpCatalogProducts.slice(0, 4);
+    const activeCatalogProducts = activeProducts + fpCatalogProducts.filter(item => item.isActive !== false).length;
 
     const handleFormChange = ({ target }) => {
         setFormData(prev => ({ ...prev, [target.name]: target.value }));
@@ -94,19 +104,23 @@ const GameStore = () => {
         {
             Header: '#',
             Cell: ({ index }) => index + 1,
-            width: 100,
+            width: 46,
             filterable: false
         },
         {
             accessor: 'name',
-            Header: 'Name',
+            Header: 'Product Name',
             filterMethod: (filter, row) => {
                 return row[filter.id].toLowerCase().includes(filter.value.toLowerCase());
             },
         },
+        { Header: 'Audience', Cell: () => <span className="commerce-audience">Cash Users</span>, filterable: false },
+        { Header: 'Type', Cell: () => <span className="commerce-type">Time Bundle</span>, filterable: false },
+        { Header: 'Includes', Cell: ({ original }) => original.name, filterable: false },
         {
             accessor: 'price',
-            Header: 'Amount',
+            Header: 'Price',
+            Cell: ({ value }) => `$${Number(value || 0).toFixed(2)}`,
         },
         {
             accessor: 'isActive',
@@ -150,11 +164,17 @@ const GameStore = () => {
                 }} className="add-btn">Create Product</button>
             </div>
             <div className="console-metric-grid commerce-metric-grid" aria-label="Product summary">
-                <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-bag-16" /></span><div><small>Total Products</small><strong>{products.length}</strong></div></div>
-                <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Active Products</small><strong>{activeProducts}</strong></div></div>
-                <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-simple-remove" /></span><div><small>Disabled Products</small><strong>{products.length - activeProducts}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-coins" /></span><div><small>Time Bundles</small><strong>{products.length}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-controller" /></span><div><small>FP Chip Packs</small><strong>{fpCatalogProducts.length}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>Active Products</small><strong>{activeCatalogProducts}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-simple-remove" /></span><div><small>Disabled Products</small><strong>{products.length + fpCatalogProducts.length - activeCatalogProducts}</strong></div></div>
+                <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-trophy" /></span><div><small>Highest Priced Bundle</small><strong>{products.length ? `$${Math.max(...products.map(item => Number(item.price || 0))).toFixed(2)}` : '—'}</strong></div></div>
             </div>
-            <div className="console-panel-title"><h2>Product catalog</h2><span>Current store items and availability</span></div>
+            <div className="commerce-category-tabs" aria-label="Product categories">
+                <button type="button" className="active">▤ &nbsp; Time Bundles</button>
+                <button type="button" onClick={() => history.push('/home/marketplace?type=currency_bundle')}>◉ &nbsp; FP Chip Packs</button>
+                <button type="button" onClick={() => history.push('/home/marketplace?type=cosmetic')}>♧ &nbsp; Cosmetics</button>
+            </div>
             <Fragment>
                 <div className='main-container-head mb-3'>
                     <ReactTable
@@ -163,10 +183,19 @@ const GameStore = () => {
                         data={products}
                         resolveData={data => data.map(row => row)}
                         columns={columns}
-                        filterable={true}
+                        filterable={false}
+                        defaultPageSize={10}
+                        showPagination={products.length > 10}
                     />
                 </div>
             </Fragment>
+            <div className="commerce-lower-grid">
+                <section className="commerce-featured-panel">
+                    <header><div><h2>Featured FP Chip Packs</h2><p>Free Play chips for practice and social play.</p></div><button type="button" onClick={() => history.push('/home/marketplace?type=currency_bundle')}>View all FP chip packs →</button></header>
+                    {fpProducts.length ? <div className="commerce-pack-grid">{fpProducts.map((item, index) => <div className="commerce-pack-card" key={item._id}><img className={`commerce-pack-art variant-${index % 4}`} src={fpChips} alt="" /><strong>{item.name}</strong><span>${Number(item.price || 0).toFixed(2)}</span><button type="button" onClick={() => history.push('/home/marketplace?type=currency_bundle')}>View Product</button></div>)}</div> : <div className="commerce-pack-empty">No Free Play chip packs are configured in the catalog yet.</div>}
+                </section>
+                <aside className="commerce-flow-panel"><h2>Purchase Flow Information</h2><div><i className="tim-icons icon-coins" /><span><strong>Cash Users</strong><small>Purchase play time bundles here or deposit funds directly through the cashier.</small></span></div><div><i className="tim-icons icon-controller" /><span><strong>Free Play Users</strong><small>Purchase FP chip packs in the catalog to play on Free Play tables.</small></span></div><div><i className="tim-icons icon-bag-16" /><span><strong>Cosmetic Items</strong><small>Available for player customization and in-game appearance.</small></span></div></aside>
+            </div>
         </div>
 
         {/* ---------------ADD SNG MODAL--------------- */}

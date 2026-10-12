@@ -48,7 +48,7 @@ const groups = [
 ];
 
 const SectionTabs = ({ pathname, role, permissions }) => {
-    if (pathname === '/home/dashboard') return null;
+    if (pathname === '/home/dashboard' || pathname === '/home/game-store' || pathname === '/home/marketplace' || pathname === '/home/pending-withdrawals') return null;
     const group = groups.find((candidate) => candidate.tabs.some((tab) => tab.path === pathname));
     if (!group) return null;
 

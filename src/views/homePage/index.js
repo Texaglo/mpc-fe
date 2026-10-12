@@ -43,6 +43,7 @@ const AdminHomePage = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [showCustomDates, setShowCustomDates] = useState(false);
+    const [activityFilter, setActivityFilter] = useState('All');
     const activeDashboardQuery = useRef({ period: 'all' });
 
     const fetchDashboardData = useCallback((period = 'all', start = '', end = '', options = {}) => {
@@ -262,73 +263,97 @@ const AdminHomePage = () => {
         {
             id: 'live-floor',
             title: 'Live Platform Metrics',
-            caption: 'Current player and table activity',
+            caption: 'Updating in real time',
             items: [
                 {
                     label: 'Players Online',
                     value: stats?.live?.playersOnline?.toLocaleString() || '0',
-                    detail: `${stats?.live?.recentAuthenticatedPlayers ?? stats?.live?.httpActivePlayers ?? 0} authenticated · ${stats?.live?.socketConnections || 0} sockets`,
-                    icon: 'icon-wifi', iconClass: 'online-icon', to: '/home/users',
+                    detail: `${stats?.live?.socketConnections || 0} socket connections`,
+                    icon: 'icon-single-02', iconClass: 'online-icon', to: '/home/users',
                 },
                 {
-                    label: 'Active Tables',
-                    value: stats?.live?.activeTables?.toLocaleString() || '0',
-                    detail: "Ring, Sit'n'Go & tournaments",
+                    label: 'Cash Players Online',
+                    value: stats?.live?.cashPlayersOnline?.toLocaleString() ?? '—',
+                    detail: 'Cash presence',
+                    icon: 'icon-money-coins', iconClass: 'cash-players-icon', to: '/home/users',
+                },
+                {
+                    label: 'Free Play Players Online',
+                    value: stats?.live?.freePlayPlayersOnline?.toLocaleString() ?? '—',
+                    detail: 'Free Play presence',
+                    icon: 'icon-controller', iconClass: 'free-players-icon', to: '/home/users',
+                },
+                {
+                    label: 'Active Cash Tables',
+                    value: stats?.live?.breakdown?.cash?.activeTables?.toLocaleString() ?? '—',
+                    detail: 'Cash ring tables',
                     icon: 'icon-controller', iconClass: 'active-tables-icon', to: '/home/games',
+                },
+                {
+                    label: 'Active Free Play Tables',
+                    value: stats?.live?.breakdown?.freePlay?.activeTables?.toLocaleString() ?? '—',
+                    detail: 'Free Play ring tables',
+                    icon: 'icon-controller', iconClass: 'free-tables-icon', to: '/home/games',
                 },
                 {
                     label: 'Players Seated',
                     value: stats?.live?.playersSeated?.toLocaleString() || '0',
-                    detail: `${stats?.live?.connectedRingPlayers || 0} connected at ring tables`,
+                    detail: 'At live tables',
                     icon: 'icon-single-02', iconClass: 'seated-icon', to: '/home/games',
                 },
                 {
-                    label: 'Total Users',
-                    value: stats?.users?.total?.toLocaleString() || '0',
-                    detail: `${stats?.users?.newInPeriod?.toLocaleString() || 0} added in selected period`,
-                    icon: 'icon-single-02', iconClass: 'users-icon', to: '/home/users',
+                    label: 'New Users Today',
+                    value: stats?.users?.newToday?.toLocaleString() || '0',
+                    detail: 'Player registrations',
+                    icon: 'icon-simple-add', iconClass: 'new-accounts-icon', to: '/home/users',
                 },
                 {
-                    label: 'New Today',
-                    value: stats?.users?.newToday?.toLocaleString() || '0',
-                    detail: 'New player accounts',
-                    icon: 'icon-simple-add', iconClass: 'new-accounts-icon', to: '/home/users',
+                    label: 'Pending KYC Reviews',
+                    value: stats?.users?.pendingKyc?.toLocaleString() ?? '—',
+                    detail: 'Awaiting review',
+                    icon: 'icon-lock-circle', iconClass: 'pending-icon', to: '/home/users',
                 },
             ],
         },
         {
             id: 'cash-flow',
             title: 'Revenue & Cashier Activity',
-            caption: 'Movement requiring operator awareness',
+            caption: '',
             items: [
                 {
-                    label: "Today's Deposits",
-                    value: stats?.today?.deposits?.count?.toLocaleString() || '0',
-                    detail: 'Recorded deposits',
+                    label: 'Deposits Today',
+                    value: formatUsd(stats?.today?.deposits?.amount),
+                    detail: `${stats?.today?.deposits?.count || 0} completed deposits`,
                     icon: 'icon-coins', iconClass: 'deposits-icon', to: '/home/cashier',
-                },
-                {
-                    label: "Today's Withdrawals",
-                    value: stats?.today?.withdrawals?.count?.toLocaleString() || '0',
-                    detail: 'Recorded withdrawals',
-                    icon: 'icon-send', iconClass: 'withdrawals-icon', to: '/home/pending-withdrawals',
                 },
                 {
                     label: 'Pending Withdrawals',
                     value: stats?.withdrawals?.pendingCount?.toLocaleString() || '0',
-                    detail: 'Awaiting operator review',
+                    detail: `${formatUsd(stats?.withdrawals?.pendingAmount)} awaiting review`,
                     icon: 'icon-credit-card', iconClass: 'pending-icon', to: '/home/pending-withdrawals',
                 },
                 {
-                    label: 'Time Purchased',
-                    value: `${formatMinutes(stats?.today?.timePurchases?.timeMinutes)} min`,
-                    detail: `${formatMpce(stats?.today?.timePurchases?.mpce)} MPCE · ${formatUsd(stats?.today?.timePurchases?.cashUsd)}`,
+                    label: 'Approved Withdrawals Today',
+                    value: formatUsd(stats?.today?.withdrawals?.amount),
+                    detail: `${stats?.today?.withdrawals?.count || 0} approved requests`,
+                    icon: 'icon-check-2', iconClass: 'withdrawals-icon', to: '/home/pending-withdrawals',
+                },
+                {
+                    label: 'Play Time Sold Today',
+                    value: formatUsd(stats?.today?.timePurchases?.cashUsd),
+                    detail: `${formatMinutes(stats?.today?.timePurchases?.timeMinutes)} minutes`,
                     icon: 'icon-time-alarm', iconClass: 'time-purchased-icon', to: '/home/cashier', valueClass: 'treasury-value',
+                },
+                {
+                    label: 'FP Chip Sales Today',
+                    value: stats?.today?.fpChipSales?.amountUsd == null ? '—' : formatUsd(stats.today.fpChipSales.amountUsd),
+                    detail: 'Free Play purchases',
+                    icon: 'icon-controller', iconClass: 'free-players-icon', to: '/home/free-play',
                 },
                 {
                     label: 'Revenue Today',
                     value: formatUsd(stats?.revenueToday?.estimatedUsd),
-                    detail: `${formatMpce(stats?.revenueToday?.mpce)} MPCE · ${formatMinutes(stats?.revenueToday?.timeMinutes)} min`,
+                    detail: `${formatMpce(stats?.revenueToday?.mpce)} MPCE earned`,
                     icon: 'icon-coins', iconClass: 'revenue-today-icon', to: '/home/mpce-ledger', valueClass: 'treasury-value',
                 },
             ],
@@ -336,40 +361,61 @@ const AdminHomePage = () => {
         {
             id: 'economy-risk',
             title: 'Economy & Risk',
-            caption: 'Liabilities, house earnings and custody',
+            caption: '',
             items: [
                 {
-                    label: 'Player Liabilities',
-                    value: formatUsd(stats?.liabilities?.mainnetCashUsd ?? stats?.liabilities?.cashUsd),
-                    detail: `Dev ${formatUsd(stats?.liabilities?.devnetCashUsd)} · ${formatMpce(stats?.liabilities?.mpce)} MPCE · ${formatMpce(stats?.liabilities?.fp)} FP`,
-                    icon: 'icon-chart-pie-36', iconClass: 'liabilities-icon', to: '/home/users', valueClass: 'treasury-value',
-                },
-                {
-                    label: 'House MPCE',
-                    value: formatMpce(stats?.houseMpce?.availableBalance),
-                    detail: `+${formatMpce(stats?.houseMpce?.periodEarned)} in selected period`,
-                    icon: 'icon-bank', iconClass: 'house-mpce-icon', to: '/home/mpce-ledger',
-                },
-                {
-                    label: 'Treasury SOL',
-                    value: walletBalance?.treasuryWallet?.balanceSOL || 'Unavailable',
-                    detail: walletBalance?.network || 'Network unavailable',
-                    icon: 'icon-wallet-43', iconClass: 'treasury-icon', to: '/home/pending-withdrawals', valueClass: 'treasury-value',
-                },
-                {
                     label: 'Treasury USDC',
-                    value: walletBalance?.treasuryWallet?.balanceUSDC || 'Unavailable',
+                    value: walletBalance?.treasuryWallet?.balanceUSDC == null ? '—' : Number(walletBalance.treasuryWallet.balanceUSDC).toLocaleString(),
                     detail: 'Deposit custody',
                     icon: 'icon-money-coins', iconClass: 'treasury-usdc-icon', to: '/home/pending-withdrawals', valueClass: 'treasury-value',
                 },
                 {
-                    label: 'Banned Users',
+                    label: 'Treasury SOL',
+                    value: walletBalance?.treasuryWallet?.balanceSOL == null ? '—' : Number(walletBalance.treasuryWallet.balanceSOL).toLocaleString(),
+                    detail: 'Network balance',
+                    icon: 'icon-wallet-43', iconClass: 'treasury-icon', to: '/home/pending-withdrawals', valueClass: 'treasury-value',
+                },
+                {
+                    label: 'Player Cash Liabilities',
+                    value: formatUsd(stats?.liabilities?.mainnetCashUsd ?? stats?.liabilities?.cashUsd),
+                    detail: 'Player cash balance',
+                    icon: 'icon-bank', iconClass: 'liabilities-icon', to: '/home/users', valueClass: 'treasury-value',
+                },
+                {
+                    label: 'Free Play Chips Outstanding',
+                    value: formatMpce(stats?.liabilities?.fp),
+                    detail: 'Non-withdrawable FP',
+                    icon: 'icon-controller', iconClass: 'free-tables-icon', to: '/home/free-play',
+                },
+                {
+                    label: 'House MPCE Balance',
+                    value: formatMpce(stats?.houseMpce?.availableBalance),
+                    detail: `+${formatMpce(stats?.houseMpce?.periodEarned)} this period`,
+                    icon: 'icon-wallet-43', iconClass: 'house-mpce-icon', to: '/home/mpce-ledger',
+                },
+                {
+                    label: 'Fraud / Risk Alerts',
                     value: stats?.users?.frozen?.toLocaleString() || '0',
-                    detail: 'Account access restricted',
+                    detail: 'Restricted accounts',
                     icon: 'icon-lock-circle', iconClass: 'frozen-icon', to: '/home/users',
                 },
             ],
         },
+    ];
+
+    const activityFilters = ['All', 'Deposits', 'Withdrawals', 'Tables', 'Support / Risk'];
+    const filteredActivity = (auditLogs || []).filter((log) => {
+        if (activityFilter === 'All') return true;
+        const action = String(log.action || '');
+        if (activityFilter === 'Deposits') return /DEPOSIT|CREDIT/i.test(action);
+        if (activityFilter === 'Withdrawals') return /WITHDRAW/i.test(action);
+        if (activityFilter === 'Tables') return /RING|TABLE|TOURNAMENT|SNG/i.test(action);
+        return /FREEZE|RESTRICT|KYC|RISK|FRAUD/i.test(action);
+    }).slice(0, 5);
+    const liveFloorRows = [
+        ['Ring Tables', stats?.live?.breakdown?.ring],
+        ["Sit'n'Go", stats?.live?.breakdown?.sitNGo],
+        ['Tournaments', stats?.live?.breakdown?.tournament],
     ];
 
     return (
@@ -424,10 +470,10 @@ const AdminHomePage = () => {
                     {[
                         ['API', stats?.system?.api?.status],
                         ['Database', stats?.system?.database?.status],
-                        ['Sockets', stats?.system?.sockets?.status],
-                        ['Solana RPC', stats?.system?.solanaRpc?.status],
                         ['Game engine', stats?.system?.gameEngine?.newGamesPaused ? 'PAUSED' : stats?.system?.gameEngine?.status],
                         ['Cashier', stats?.system?.cashier?.status],
+                        ['Wallet service', stats?.system?.solanaRpc?.status],
+                        ['Geolocation', stats?.system?.geolocation?.status || 'Not monitored'],
                     ].map(([label, status]) => (
                         <div className={`system-status-chip is-${String(status || 'checking').toLowerCase()}`} key={label}>
                             <i aria-hidden="true" /><span><strong>{label}</strong><small>{status || 'Checking'}</small></span>
@@ -463,6 +509,43 @@ const AdminHomePage = () => {
                             </div>
                         </section>
                     ))}
+                </div>
+
+                <div className="dashboard-operations-grid">
+                    <section className="dashboard-operations-panel">
+                        <header><h3><i className="tim-icons icon-light-3" /> Recent Activity</h3><button type="button" onClick={() => history.push('/home/audit-log')}>View all activity →</button></header>
+                        <div className="dashboard-activity-filters">
+                            {activityFilters.map(filter => <button type="button" key={filter} className={activityFilter === filter ? 'active' : ''} onClick={() => setActivityFilter(filter)}>{filter}</button>)}
+                        </div>
+                        <div className="dashboard-operations-list">
+                            {filteredActivity.length ? filteredActivity.map(log => (
+                                <div className="dashboard-activity-row" key={log._id}>
+                                    <span className={`dashboard-list-icon ${getActionIconClass(log.action)}`}><i className={`tim-icons ${getActionIcon(log.action)}`} /></span>
+                                    <span><strong>{formatActionType(log.action)}</strong><small>{log.targetUserId?.username || log.adminId?.username || 'System activity'}</small></span>
+                                    <time>{log.createdAt ? new Date(log.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '—'}</time>
+                                </div>
+                            )) : <div className="dashboard-operations-empty">No activity for this filter.</div>}
+                        </div>
+                    </section>
+                    <section className="dashboard-operations-panel">
+                        <header><h3><i className="tim-icons icon-controller" /> Live Tables / Live Floor</h3><button type="button" onClick={() => history.push('/home/games')}>View all tables →</button></header>
+                        <table className="dashboard-floor-table"><thead><tr><th>Table</th><th>Tables</th><th>Players</th><th>Status</th></tr></thead><tbody>
+                            {liveFloorRows.map(([label, data]) => <tr key={label}><td>{label}</td><td>{data?.activeTables ?? '—'}</td><td>{data?.playersSeated ?? '—'}</td><td><span className={`dashboard-state ${Number(data?.activeTables || 0) > 0 ? 'live' : ''}`}><i />{Number(data?.activeTables || 0) > 0 ? 'Live' : 'No tables'}</span></td></tr>)}
+                        </tbody></table>
+                        <div className="dashboard-floor-foot">{stats?.live?.activeTables ?? 0} active tables · {stats?.live?.playersSeated ?? 0} players seated</div>
+                    </section>
+                    <section className="dashboard-operations-panel">
+                        <header><h3><i className="tim-icons icon-bell-55" /> System Notifications</h3><button type="button" onClick={() => history.push('/home/audit-log')}>View all →</button></header>
+                        <div className="dashboard-operations-list">
+                            {[
+                                ['API', stats?.system?.api?.status],
+                                ['Database', stats?.system?.database?.status],
+                                ['Game engine', stats?.system?.gameEngine?.newGamesPaused ? 'PAUSED' : stats?.system?.gameEngine?.status],
+                                ['Cashier', stats?.system?.cashier?.status],
+                                ['Solana RPC', stats?.system?.solanaRpc?.status],
+                            ].map(([label, status]) => <div className="dashboard-notification-row" key={label}><i className={`dashboard-notification-dot ${String(status || '').toLowerCase()}`} /><span><strong>{label}</strong><small>{status || 'Checking status'}</small></span></div>)}
+                        </div>
+                    </section>
                 </div>
 
                 <section className="house-ledger-card">

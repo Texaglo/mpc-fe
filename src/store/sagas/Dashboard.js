@@ -32,7 +32,7 @@ function* getDashboardCharts({ payload }) {
         }
     }
     const { error, response } = yield call(getCall, `/admin/dashboard/charts${queryParams}`);
-    if (error) EventBus.publish("error", error['response']['data']['message']);
+    if (error) EventBus.publish("error", error?.response?.data?.message || 'Unable to refresh dashboard charts');
     else if (response) yield put(setDashboardCharts(response['data']['body']));
 }
 

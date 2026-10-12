@@ -16,6 +16,7 @@ class Users extends React.Component {
         super(props);
         this.state = {
             usersData: [],
+            playerViewFilter: 'all',
             searchTerm: '',
             currentPage: 1,
             selectedUser: null,
@@ -432,6 +433,15 @@ class Users extends React.Component {
         const canManageBalances = canAccess(access, 'balances.manage');
         const canManageInventory = canAccess(access, 'inventory.manage');
         const canManageAdminAccess = role === 'admin';
+        const displayedUsers = usersData.filter((user) => {
+            switch (this.state.playerViewFilter) {
+                case 'cash': return Number(user.mainnetCashBalance ?? user.cashBalance ?? 0) > 0;
+                case 'freePlay': return Number(user.fpBalance || 0) > 0;
+                case 'verified': return String(user.KYCStatus || '').toLowerCase() === 'verified';
+                case 'banned': return Boolean(user.isFrozen);
+                default: return true;
+            }
+        });
 
         const columns = [
             {
@@ -465,7 +475,7 @@ class Users extends React.Component {
                 accessor: 'username',
                 Header: 'Player',
                 Cell: ({ original }) => <div className="user-identity-cell"><strong>{original.username || 'N/A'}</strong><span>{original.email || 'No email'}</span>{original.role && original.role !== 'user' && <small className={`admin-role-badge is-${original.role}`}>{original.role === 'sub_admin' ? 'Sub-admin' : 'Full admin'}</small>}</div>,
-                width: 165
+                width: 150
             },
             {
                 accessor: 'publicAddress',
@@ -480,14 +490,14 @@ class Users extends React.Component {
                     return 'N/A';
                 },
                 filterable: false,
-                width: 105
+                width: 100
             },
             {
                 id: 'balances',
                 Header: 'Balances',
                 Cell: ({ original }) => <div className="user-balance-stack"><span>Mainnet <strong>${Number(original.mainnetCashBalance ?? original.cashBalance ?? 0).toLocaleString()}</strong></span><span>Devnet <strong>${Number(original.devnetCashBalance || 0).toLocaleString()}</strong></span><span>MPCE <strong>{Number(original.mpceCredit || 0).toLocaleString()}</strong></span><span>FP <strong>{Number(original.fpBalance || 0).toLocaleString()}</strong></span></div>,
                 filterable: false,
-                width: 135
+                width: 125
             },
             {
                 id: 'currentSession',
@@ -505,7 +515,7 @@ class Users extends React.Component {
                     );
                 },
                 filterable: false,
-                width: 145
+                width: 120
             },
             {
                 accessor: 'isFrozen',
@@ -517,57 +527,33 @@ class Users extends React.Component {
                     </div>
                 ),
                 filterable: false,
-                width: 105
+                width: 90
             },
             {
                 accessor: 'createdAt',
                 Header: 'Joined',
                 Cell: ({ value }) => value ? new Date(value).toLocaleDateString() : 'N/A',
                 filterable: false,
-                width: 84
+                width: 75
             },
             {
                 Cell: item => (
-                    <div className="action-buttons">
-                        {canAccess(access, 'integrity.view') && <button className="profile-btn" title="Review player integrity" onClick={() => this.props.history.push(`/home/integrity?player=${item.original._id}`)}>Integrity</button>}
+                    <div className="action-buttons user-primary-actions">
                         <button onClick={() => this.openProfileModal(item.original)} className="profile-btn" title="Open complete player profile">Profile</button>
-                        <button
-                            onClick={() => this.openHistoryModal(item.original)}
-                            className="history-btn"
-                            title="View Transactions"
-                        >
-                            History
-                        </button>
-                        <button onClick={() => this.openInventoryModal(item.original)} className="inventory-btn" title="View and manage inventory">Inventory</button>
-                        {canManageBalances && <button
-                            onClick={() => this.openAdjustModal(item.original)}
-                            className="adjust-btn"
-                            title="Adjust Balance"
-                        >
-                            Adjust
-                        </button>}
-                        {canManageAdminAccess && <button onClick={() => this.openAccessModal(item.original)} className="access-btn" title="Set full or delegated admin access">Access</button>}
-                        {canManagePlayers && <button onClick={() => this.openLogoutModal(item.original)} className="logout-btn" title="Revoke all active sessions">Logout</button>}
-                        {canManagePlayers && (item.original.isFrozen ? (
-                            <button
-                                onClick={() => this.openFreezeModal(item.original, false)}
-                                className="unfreeze-btn"
-                            >
-                                Unban
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => this.openFreezeModal(item.original, true)}
-                                className="freeze-btn"
-                            >
-                                Ban
-                            </button>
-                        ))}
+                        {canManageBalances && <button onClick={() => this.openAdjustModal(item.original)} className="adjust-btn" title="Adjust player balance">Cashier</button>}
+                        <details className="user-row-more"><summary aria-label={`More actions for ${item.original.username || 'player'}`}>•••</summary><div>
+                            {canAccess(access, 'integrity.view') && <button onClick={() => this.props.history.push(`/home/integrity?player=${item.original._id}`)}>Integrity</button>}
+                            <button onClick={() => this.openHistoryModal(item.original)}>History</button>
+                            <button onClick={() => this.openInventoryModal(item.original)}>Inventory</button>
+                            {canManageAdminAccess && <button onClick={() => this.openAccessModal(item.original)}>Access</button>}
+                            {canManagePlayers && <button onClick={() => this.openLogoutModal(item.original)}>Logout</button>}
+                            {canManagePlayers && <button onClick={() => this.openFreezeModal(item.original, !item.original.isFrozen)}>{item.original.isFrozen ? 'Unban' : 'Ban'}</button>}
+                        </div></details>
                     </div>
                 ),
                 Header: 'Actions',
                 filterable: false,
-                width: 350
+                width: 200
             },
         ];
 
@@ -589,7 +575,8 @@ class Users extends React.Component {
 
                     <div className="console-metric-grid users-stats" aria-label="Player summary">
                         <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-single-02" /></span><div><small>Total Users</small><strong>{Number(pagination?.totalUsers || 0).toLocaleString()}</strong></div></div>
-                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-bullet-list-67" /></span><div><small>Showing on This Page</small><strong>{usersData.length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon gold"><i className="tim-icons icon-coins" /></span><div><small>Cash Balance Holders · This Page</small><strong>{usersData.filter(user => Number(user.mainnetCashBalance ?? user.cashBalance ?? 0) > 0).length}</strong></div></div>
+                        <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-controller" /></span><div><small>Free Play Balance Holders · This Page</small><strong>{usersData.filter(user => Number(user.fpBalance || 0) > 0).length}</strong></div></div>
                         <div className="console-metric"><span className="console-metric-icon blue"><i className="tim-icons icon-link-72" /></span><div><small>Wallet Connected · This Page</small><strong>{usersData.filter(user => Boolean(user.publicAddress)).length}</strong></div></div>
                         <div className="console-metric"><span className="console-metric-icon green"><i className="tim-icons icon-check-2" /></span><div><small>KYC Verified · This Page</small><strong>{usersData.filter(user => String(user.KYCStatus || '').toLowerCase() === 'verified').length}</strong></div></div>
                         <div className="console-metric"><span className="console-metric-icon red"><i className="tim-icons icon-lock-circle" /></span><div><small>Banned · This Page</small><strong>{usersData.filter(user => user.isFrozen).length}</strong></div></div>
@@ -603,14 +590,17 @@ class Users extends React.Component {
                         )}
                     </div>
 
+                    <div className="users-access-notice"><i className="tim-icons icon-alert-circle-exc" /><span><strong>Free Play and cash access are separate.</strong> FP is non-withdrawable and cannot be converted into cash, USDC, SOL, or MPCE. Review each player's verification status before cash operations.</span><button type="button" onClick={() => this.props.history.push('/home/free-play')}>Learn More ↗</button></div>
+
                     <Fragment>
                         <div className='main-container-head mb-3'>
+                            <div className="users-table-toolbar"><h2>Players ({Number(pagination?.totalUsers || 0).toLocaleString()})</h2><div><select aria-label="Filter players on this page" value={this.state.playerViewFilter} onChange={event => this.setState({ playerViewFilter: event.target.value })}><option value="all">Filters · All</option><option value="cash">Cash balance · This page</option><option value="freePlay">Free Play balance · This page</option><option value="verified">KYC verified · This page</option><option value="banned">Banned · This page</option></select><button type="button" onClick={this.exportToCSV} disabled={!selectedUsers.length}>Export selected</button></div></div>
                             <ReactTable
-                                minRows={Math.min(Math.max(usersData.length, 1), 10)}
+                                minRows={Math.min(Math.max(displayedUsers.length, 1), 10)}
                                 className="table"
                                 columns={columns}
                                 filterable={false}
-                                data={usersData}
+                                data={displayedUsers}
                                 pages={pagination?.totalPages || 1}
                                 page={pagination?.currentPage - 1 || 0}
                                 manual
