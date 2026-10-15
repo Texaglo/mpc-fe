@@ -3,7 +3,7 @@ import React from 'react';
 import LegalPage from '../LegalPage';
 
 const ResponsibleSocialGameplayPolicy = (props) => (
-  <LegalPage title="Responsible Social Gameplay Policy" sticky={props.sticky}>
+  <LegalPage embedded={props.embedded} title="Responsible Social Gameplay Policy" sticky={props.sticky}>
     <p>ModernPokerClub (“MPC”) promotes responsible gameplay and player safety.</p>
 
     <h3>Player Guidance</h3>

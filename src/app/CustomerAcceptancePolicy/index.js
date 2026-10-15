@@ -3,7 +3,7 @@ import React from 'react';
 import LegalPage from '../LegalPage';
 
 const CustomerAcceptancePolicy = (props) => (
-  <LegalPage title="Customer Acceptance Policy" sticky={props.sticky}>
+  <LegalPage embedded={props.embedded} title="Customer Acceptance Policy" sticky={props.sticky}>
     <p>To use MPC, players must:</p>
     <ul>
       <li>Be at least 21 years old</li>

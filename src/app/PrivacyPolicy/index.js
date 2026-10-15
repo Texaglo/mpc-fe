@@ -3,7 +3,7 @@ import React from 'react';
 import LegalPage from '../LegalPage';
 
 const PrivacyPolicy = (props) => (
-  <LegalPage title="Privacy Policy" sticky={props.sticky}>
+  <LegalPage embedded={props.embedded} title="Privacy Policy" sticky={props.sticky}>
     <p>ModernPokerClub (“MPC,” “we,” “our,” or “us”) may collect information including:</p>
     <ul>
       <li>Name, email, DOB, and account details</li>

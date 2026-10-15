@@ -4,7 +4,7 @@ import './index.css';
 import Navbar from '../../components/navbar';
 import Footer from '../../components/footer';
 
-const LegalPage = ({ title, children, sticky }) => (
+const LegalPage = ({ title, children, sticky, embedded }) => embedded ? <article className="inline-agreement"><h2>{title}</h2>{children}</article> : (
   <div className="mp-club-page">
     <Navbar sticky={sticky} />
     <div className="bridge-modals trems-page legal-page">

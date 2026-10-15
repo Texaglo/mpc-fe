@@ -1,0 +1,29 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import TermsandConditions from '../TermsandConditions';
+import PrivacyPolicy from '../PrivacyPolicy';
+import ResponsibleSocialGameplayPolicy from '../ResponsibleSocialGameplayPolicy';
+import CustomerAcceptancePolicy from '../CustomerAcceptancePolicy';
+import RiskDisclaimer from '../RiskDisclaimer';
+import MembershipShell from '../ClubHomepage/MembershipShell';
+import './index.css';
+import '../ClubHomepage/desktop.css';
+const sections = [["Free-play poker", ["MPC free-play poker is available only in supported jurisdictions. Free-play chips have no monetary value and cannot be withdrawn, redeemed for cash or cryptocurrency, exchanged for valuable prizes, or sold or transferred for value. Free-play winnings remain within the free-play environment."]], ["Virtual-chip purchases", ["Where available, users may purchase additional nonredeemable free-play chips for entertainment use. Eligibility to purchase free-play chips may differ from eligibility to access free-play poker and may be restricted or disabled by jurisdiction."]], ["MPC membership agreement", ["Restricted MPC membership is established through a digital Membership Agreement presented through the account and access flow.", "Membership is separate from NFT ownership. The Membership Agreement creates the club-member relationship, while a qualifying MPC Genesis NFT can serve as the member’s on-chain membership credential for eligible access and holder benefits.", "MPC may approve, restrict, suspend, or terminate membership in accordance with the Membership Agreement and applicable club rules."]], ["Accounts & game integrity", ["Bots, collusion, chip dumping, prohibited real-time assistance (RTA), prohibited external tools, account sharing, multi-accounting, location spoofing, fraud, and other abusive or manipulative activity are prohibited.", "MPC may use identity verification, geolocation, device intelligence, fraud signals, hand-history and game-behavior analysis, account relationships, and third-party services to enforce access, security, and game-integrity rules."]], ["Texas online cash access", ["Cash-game access is restricted to eligible MPC members who satisfy the required membership and verification conditions, including a qualifying Genesis NFT credential, KYC, and verified physical presence in Texas.", "MPC cash games use fixed table-time pricing. MPC does not take a percentage of pots or player winnings as rake.", "Access to cash-game features, including cash tables, cash balances, deposits, withdrawals, and Time, may be disabled or unavailable until all eligibility requirements are satisfied."]], ["Genesis NFTs", ["MPC Genesis NFTs are unique 1-of-1 PFP collectibles and can serve as persistent MPC player identities.", "Qualifying Genesis NFTs can also serve as on-chain membership credentials for eligible MPC club access. Genesis holders may receive the MPC Genesis Holder role in Discord and other holder benefits announced by MPC, including promotional Time, cosmetics, access perks, or other club benefits.", "Genesis identities may also carry or reflect season history, faction participation, rank snapshots, and other competitive progression associated with the player’s MPC journey.", "NFT ownership does not guarantee profit, resale value, liquidity, appreciation, revenue sharing, yield, or any financial return."]], ["Payments & blockchain", ["MPC may accept supported cryptocurrencies for eligible purchases and deposits. Blockchain transactions are irreversible once confirmed, and users are responsible for sending supported assets to the correct wallet or address."]]];
+const documents = { 'terms-and-conditions': TermsandConditions, 'privacy-policy': PrivacyPolicy, 'responsible-social-gameplay-policy': ResponsibleSocialGameplayPolicy, 'customer-acceptance-policy': CustomerAcceptancePolicy, 'risk-disclaimer': RiskDisclaimer };
+export default function RulesLegal() {
+  const location=useLocation();
+  const [key,setKey]=useState(()=>new URLSearchParams(location.search).get('document'));
+  const [selection,setSelection]=useState(0);
+  const selectDocument=(event)=>{ const link=event.target.closest('a'); if (!link) return; const url=new URL(link.href,window.location.origin); if(url.pathname === '/legal'){ event.preventDefault(); event.stopPropagation(); setKey(url.searchParams.get('document')); setSelection(n=>n+1); } };
+  const Agreement=documents[key];
+  const panel=useRef(null);
+  useEffect(()=>{ if ((key || selection) && panel.current) { panel.current.scrollIntoView({behavior:'auto',block:'start'}); panel.current.focus({preventScroll:true}); } },[key,selection]);
+  useEffect(() => { const previous=document.title; document.title='Rules, Eligibility & Privacy — Modern Poker Club'; if (!key) window.scrollTo(0,0); return () => { document.title=previous; }; }, []);
+  return <div onClickCapture={selectDocument}><MembershipShell active="legal" mainId="rules-main">
+    <main id="rules-main" className="rules-legal">
+      <h1 className="club-eyebrow">Rules, eligibility &amp; privacy</h1>
+      <div className="rules-legal-panel" ref={panel} tabIndex="-1">{Agreement ? <Agreement embedded /> : sections.map(([title, paragraphs]) => <section key={title}><h2>{title}</h2>{paragraphs.map((paragraph,i)=><p key={i}>{paragraph}</p>)}</section>)}</div>
+      <nav className="rules-document-links" aria-label="Full legal documents"><Link to="/legal">Rules overview</Link><Link to="/legal?document=terms-and-conditions">Terms &amp; Conditions</Link><Link to="/legal?document=privacy-policy">Privacy Policy</Link><Link to="/legal?document=responsible-social-gameplay-policy">Responsible Play</Link><Link to="/legal?document=customer-acceptance-policy">Member Eligibility</Link><Link to="/legal?document=risk-disclaimer">Risk Disclaimer</Link></nav>
+    </main>
+  </MembershipShell></div>;
+}

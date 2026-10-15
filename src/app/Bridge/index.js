@@ -5,8 +5,9 @@ import Web3 from 'web3';
 // import withNavigation from './withNavigation'; 
 
 import './index.css';
-import Navbar from '../../components/navbar';
-import Footer from '../../components/footer';
+import MembershipShell from '../ClubHomepage/MembershipShell';
+import './club-design.css';
+import '../ClubHomepage/desktop.css';
 import Loader from '../../components/loader-bridge';
 import { ApiUrl, explorer, solanaExplorer, solanaExplorerClusterQuery, isLocalBridgeTesting, localBridgeNftAddress, localBridgeRpcUrl, localEvmChain, localSolanaRpcUrl, bridgeAllowedEthCollection } from '../../store/config';
 import { setBurnNftRecord, createBurnNftRecord, mintNewNft, setMintedNft, getBurnNftHistory, getWalletNft, setWalletNft, connectWalletSuccess } from '../../store/actions/Auth';
@@ -1007,7 +1008,7 @@ export class Bridge extends Component {
 
 
     render() {
-        let { sticky, publicAddress, burnHistory, nftMetadata } = this.props;
+        let { publicAddress, burnHistory, nftMetadata } = this.props;
         const burnHistoryList = Array.isArray(burnHistory) ? burnHistory : [];
         const nftMetadataList = Array.isArray(nftMetadata) ? nftMetadata : [];
         const recoverableBurns = this.getRecoverableBurns();
@@ -1016,20 +1017,16 @@ export class Bridge extends Component {
         const batchProgress = this.state.batchProgress;
 
         return (
-            <div className="mp-club-page" onWheel={this.onScroll}>
+            <MembershipShell mainId="migration-main"><main id="migration-main" className="club-migration">
                 {this.state.isLoading && (<Loader />)}
-                <Navbar sticky={sticky} />
-                <div role="status" style={{padding: "130px 24px 0", color: "#e7bb59", textAlign: "center"}}>{this.state.migrationNotice} <a href="/mint" style={{color: "#e7bb59", textDecoration: "underline"}}>New Solana mints</a></div>
+                <p className="club-eyebrow">Genesis migration / Ethereum to Solana</p><h1>Bring your Genesis <em>to Solana.</em></h1><p className="migration-intro">Connect your wallets, select your eligible Genesis NFTs, and follow the migration steps.</p>
+                <div role="status" className="migration-notice">{this.state.migrationNotice} <a href="/mint" title="Coming soon" data-coming-soon="Coming soon" style={{color: "#e7bb59", textDecoration: "underline"}}>New Solana mints</a></div>
                 <div className="bridge-modals">
                     <div className="auto-container">
                         <div className="row">
                             <div className="col-12">
                                 <div className='content-area bridge-content-area'>
-                                    <div className="top-area">
-                                        <div className="sec-title text-center">
-                                            <h2><img src={require('../../static/images/new-landing/bridge-title.png')} alt='' /></h2>
-                                        </div>
-                                    </div>
+                                    <ol className="migration-steps" aria-label="Migration steps"><li><span>01</span> Connect wallets</li><li><span>02</span> Select NFTs</li><li><span>03</span> Migrate &amp; track</li></ol>
                                     <div className="bridge-section">
 
                                         <div className="wallet-to-sec">
@@ -1045,7 +1042,7 @@ export class Bridge extends Component {
                                                 </div>
                                             </div>
                                             <div className="to-btn">
-                                                <img src={require('../../static/images/new-landing/to-btn.png')} alt='' />
+                                                <span aria-hidden="true">→</span>
                                             </div>
                                             <div className="wallet-left">
                                                 <div className="wallet-inner">
@@ -1053,7 +1050,7 @@ export class Bridge extends Component {
                                                         <i><img src={require('../../static/images/new-landing/solana-icon.png')} alt='' /></i>
                                                         solana
                                                     </div>
-                                                    <input type="text" onChange={(e) => this.setState({ solanaWallet: e.target.value })} placeholder="Connect Phantom or paste address" value={this.state.solanaWallet} />
+                                                    <input aria-label="Destination Solana wallet address" type="text" onChange={(e) => this.setState({ solanaWallet: e.target.value })} placeholder="Connect Phantom or paste address" value={this.state.solanaWallet} />
                                                     <button className="wallet-connect-btn solana-connect-btn bridge-site-button" type="button" onClick={this.connectPhantomWallet}>
                                                         {this.state.phantomConnected ? this.getShortAddress(this.state.solanaWallet) : 'Connect Phantom'}
                                                     </button>
@@ -1134,7 +1131,7 @@ export class Bridge extends Component {
                                             )}
                                             <div className="nft-inner-area">
                                                 {nftMetadataList.length === 0 ? (
-                                                    <p>No NFT found in your wallet</p>
+                                                    <p>No NFTs to display. Connect your Ethereum wallet to view your collection.</p>
                                                 ) : (
                                                     nftMetadataList.map((nft, index) => (
                                                         <button
@@ -1177,7 +1174,7 @@ export class Bridge extends Component {
                                         </div>
                                     </div>
                                     <div className="history-sec">
-                                        <h2>History</h2>
+                                        <h2>Migration history</h2>
                                         <div className="bottom-data-area">
                                             <div className="table-responsive">
                                                 <table className="table">
@@ -1324,8 +1321,7 @@ export class Bridge extends Component {
                         </div>
                     </div>
                 </div>
-                <Footer />
-            </div >
+                </main></MembershipShell>
         );
     }
 }

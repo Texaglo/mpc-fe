@@ -1,0 +1,31 @@
+
+.mint-desktop-heading{display:none}
+@media(min-width:1000px){
+.club-site{max-width:none;width:100%;box-shadow:none;--content-width:1240px}
+.club-site:before{background-size:5483px auto;background-position:center top}
+.club-site .club-header{height:112px;padding:18px max(32px,calc((100% - 1200px)/2));gap:16px}
+.club-site .club-brand img:first-child{width:126px;height:64px}.club-site .club-brand img:last-child{width:62px;height:62px}
+.club-site .club-header nav{gap:16px;justify-content:space-between}.club-site .club-nav-group a{padding:10px 12px}.club-site .club-header-play{width:150px;height:46px}
+.club-site .club-footer{padding:30px max(32px,calc((100% - 1200px)/2));font-size:13px}
+.club-site h2{font-size:52px}.club-site .club-eyebrow{font-size:22px}
+.club-site .club-hero{display:grid;grid-template-columns:44% 56%;grid-template-rows:auto auto auto 1fr;max-width:1200px;min-height:730px;margin:auto;padding:40px 0 55px;align-items:start}
+.club-site .club-hero>.club-eyebrow{grid-column:1;grid-row:1;margin:0 0 16px}
+.club-site .club-hero>h1{grid-column:2;grid-row:1/3;margin:0;z-index:1}
+.club-site .club-hero-logo{width:460px;margin:0 auto}
+.club-site .club-hero-art{grid-column:2;grid-row:3/5;width:710px;max-width:110%;margin:-20px 0 0 -30px}
+.club-site .club-hero>h2{grid-column:1;grid-row:2;font-size:72px;line-height:1.02;text-align:left;max-width:520px;margin:0 0 20px}
+.club-site .club-hero>.club-intro{grid-column:1;grid-row:3;text-align:left;font-size:20px;max-width:420px;margin:0;line-height:1.45}
+.club-site .club-hero-actions{grid-column:1;grid-row:4;justify-content:flex-start;margin-top:24px;gap:14px}.club-site .club-hero-actions .club-play{width:175px;height:54px;font-size:22px}.club-site .club-hero-actions .club-button{min-height:48px;padding:10px 18px;font-size:14px}
+.club-site .club-section{padding:85px max(32px,calc((100% - 1240px)/2)) 105px}.club-site .club-section:before{height:130px;top:-65px;background:linear-gradient(transparent,#052a21c9,transparent)}
+.club-site .club-section>.club-eyebrow{margin:0 0 25px}.club-site .club-steps{flex-direction:row;max-width:none;gap:28px;margin-top:40px}.club-site .club-step{flex:1;min-width:0;min-height:265px;padding:48px 25px 24px}.club-site .club-step h3{font-size:26px}.club-site .club-step p{font-size:18px}
+.club-site .club-personality-grid{grid-template-columns:repeat(4,minmax(0,1fr));max-width:1200px;gap:35px;margin-top:65px}.club-site .club-personality-grid img{width:240px}.club-site .club-personality-grid p{max-width:230px}
+.club-site .club-cash{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}.club-site .club-cash>.club-eyebrow,.club-site .club-cash>h2,.club-site .club-cash>.club-intro,.club-site .club-access-steps{grid-column:1/-1}.club-site .club-access-steps{margin:25px 0}.club-site .club-pricing,.club-site .club-verification{max-width:none;width:100%;margin:0;padding:24px}.club-site .club-panel h3{text-align:left;font-size:26px}.club-site .club-price-grid{gap:16px;margin:25px 0 0}.club-site .club-verification-list{max-width:none}
+.club-site .club-founder h2{font-size:52px}.club-site .club-founder-actions{flex-direction:row;justify-content:center}
+.club-site .genesis-mint .genesis-introduction{padding:70px max(32px,calc((100% - 1200px)/2)) 85px}.club-site .genesis-mint h1{font-size:52px;margin:28px 0 18px}.mint-mobile-heading{display:none}.mint-desktop-heading{display:inline}.club-site .genesis-copy{max-width:1160px;font-size:20px}.club-site .genesis-card{max-width:1240px;display:grid;grid-template-columns:1fr 1fr;gap:28px;border-radius:12px;padding:26px;margin-top:40px;align-items:stretch}.club-site .genesis-card>img{height:100%;width:100%;object-fit:cover;border-radius:0}.club-site .genesis-facts{margin:0;padding:26px;gap:15px 22px;border-radius:12px}.club-site .genesis-facts>div{border-radius:10px;display:flex;flex-direction:column;justify-content:center}.club-site .genesis-mint-action{max-width:900px}.club-site .genesis-migration-card{max-width:1240px}.club-site .genesis-migration h2{font-size:52px}
+.club-site .rules-legal{padding:65px max(32px,calc((100% - 1240px)/2)) 160px}.club-site .rules-legal-panel{max-width:none;margin:48px auto 0;padding:40px 36px}.club-site .rules-legal-panel section+section{margin-top:40px}.club-site .rules-document-links{max-width:none}.club-site .rules-legal-panel h2{font-size:25px}
+.club-site .club-migration{padding:60px max(32px,calc((100% - 1200px)/2)) 120px}.club-site .club-migration h1{font-size:52px}.club-site .migration-intro{max-width:900px}.club-site .migration-notice,.club-site .migration-steps{max-width:none}.club-site .club-migration .bridge-modals .bridge-content-area .bridge-section,.club-site .club-migration .bridge-modals .bridge-content-area .history-sec{max-width:none}.club-site .club-migration .wallet-to-sec{grid-template-columns:minmax(0,1fr) 70px minmax(0,1fr);padding:20px}.club-site .club-migration .nft-inner-area .nft-box{width:calc(25% - 12px)}
+}
+@media(min-width:1000px) and (max-width:1300px){.club-site .club-hero{margin:0 40px;min-height:650px}.club-site .club-hero>h2{font-size:60px}.club-site .club-hero-art{max-width:100%;margin:0}.club-site .club-hero-logo{width:90%}.club-site .club-price-grid article{flex-wrap:wrap}.club-site .club-nav-group a{font-size:13px}}
+@media(min-width:1000px){.club-site .club-hero>h1{position:absolute;top:40px;right:0;width:56%}.club-site .club-hero-art{position:absolute;top:265px;right:-10px;width:660px;max-width:56%;margin:0}.club-site .club-hero{grid-template-rows:auto auto auto 1fr}.club-site .club-hero>h2{max-width:515px}.club-site .genesis-card>img{border-radius:0}}
+@media(min-width:1000px) and (max-width:1300px){.club-site .club-hero-art{top:245px;right:0}}
+@media(min-width:1000px){.club-site .club-hero>h1,.club-site .club-hero-art{grid-area:auto}.club-site .club-hero-art{width:660px;max-width:56%}}

@@ -3,7 +3,7 @@ import React from 'react';
 import LegalPage from '../LegalPage';
 
 const RiskDisclaimer = (props) => (
-  <LegalPage title="Risk Disclaimer" sticky={props.sticky}>
+  <LegalPage embedded={props.embedded} title="Risk Disclaimer" sticky={props.sticky}>
     <p>ModernPokerClub (“MPC”) is a skill-based, time-access entertainment platform. Players pay for access time and compete against other players. MPC does not guarantee winnings or profits.</p>
     <p>Digital assets, cryptocurrencies, NFTs, and blockchain transactions involve financial and technical risk, including volatility, loss of access, and market fluctuations.</p>
 

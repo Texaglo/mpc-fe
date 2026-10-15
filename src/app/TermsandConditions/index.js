@@ -3,7 +3,7 @@ import React from 'react';
 import LegalPage from '../LegalPage';
 
 const TermsConditions = (props) => (
-  <LegalPage title="Terms & Conditions" sticky={props.sticky}>
+  <LegalPage embedded={props.embedded} title="Terms & Conditions" sticky={props.sticky}>
     <h3>Introduction</h3>
     <p>These Terms and Conditions (“Terms”) form a legally binding agreement between you (“Player,” “you,” or “your”) and VaultEcho LLC d/b/a ModernPokerClub (“MPC,” “we,” “our,” or “us”).</p>
     <p>By creating an account, connecting a wallet, purchasing MPCE Time, or participating in any activity on the MPC platform, you agree to be bound by these Terms and all associated rules, policies, and platform guidelines.</p>
