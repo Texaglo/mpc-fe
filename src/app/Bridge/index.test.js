@@ -25,3 +25,18 @@ test('network failure cannot proceed to Ethereum burn', async () => {
     expect(page.setState).toHaveBeenLastCalledWith({ isLoading: false });
     expect(getInjectedEthereumProvider).not.toHaveBeenCalled();
 });
+
+test('connecting a Solana wallet loads its migration history without Ethereum', async () => {
+    const getBurnNftHistory = jest.fn();
+    const page = new Bridge({ getBurnNftHistory });
+    const previous = { ...page.state };
+    page.state.solanaWallet = 'D2PWtCHF2TRi9xqH2yw8wEKwiSHFXDknHVzCYMrgAkHk';
+    await page.componentDidUpdate({}, previous);
+    expect(getBurnNftHistory).toHaveBeenCalledWith(page.state.solanaWallet);
+});
+test('disconnecting clears Solana history instead of leaving the prior wallet records', async () => {
+    const getBurnNftHistory = jest.fn();
+    const page = new Bridge({ getBurnNftHistory });
+    await page.componentDidUpdate({}, { ...page.state, solanaWallet: 'D2PWtCHF2TRi9xqH2yw8wEKwiSHFXDknHVzCYMrgAkHk' });
+    expect(getBurnNftHistory).toHaveBeenCalledWith(undefined);
+});

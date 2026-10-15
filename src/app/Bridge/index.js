@@ -76,7 +76,11 @@ export class Bridge extends Component {
         }
     }
 
-    async componentDidUpdate(prevProps) {
+    async componentDidUpdate(prevProps, prevState) {
+        if (this.state.solanaWallet !== prevState.solanaWallet) {
+            const address = this.state.solanaWallet.trim();
+            this.props.getBurnNftHistory(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address) ? address : this.props.publicAddress);
+        }
         const { publicAddress, isBurnNftRecord, nftMinted } = this.props;
         const { tokenId, contractAddress } = this.state.burnNftRecord;
 
@@ -109,7 +113,7 @@ export class Bridge extends Component {
     loadUserData = async (publicAddress) => {
         try {
             setTimeout(() => {
-                this.props.getBurnNftHistory(publicAddress);
+                this.props.getBurnNftHistory(this.state.solanaWallet || publicAddress);
             }, 0);
             await this.props.getWalletNft(publicAddress);
             await this.refreshDiscoveredBurns(publicAddress);
@@ -217,6 +221,7 @@ export class Bridge extends Component {
     handlePhantomDisconnect = () => {
         this.setState({
             phantomConnected: false,
+            solanaWallet: '',
             solanaBalance: null,
             solanaAssets: [],
             coreAssets: [],
@@ -1184,6 +1189,7 @@ export class Bridge extends Component {
                                                             <th scope="col">ID</th>
                                                             <th scope="col">Ethereum</th>
                                                             <th scope="col">Solana</th>
+                                                            <th scope="col">Source / destination wallets</th>
                                                             <th scope="col">Date</th>
                                                             <th scope="col">Status</th>
                                                         </tr>
@@ -1280,6 +1286,10 @@ export class Bridge extends Component {
                                                                                 </div>
                                                                         })()}
                                                                     </td>
+                                                                    <td className="migration-wallets">
+                                                                        <div title={item.EtherumWallet}>Ethereum: {this.getShortAddress(item.EtherumWallet) || "Unavailable"}</div>
+                                                                        <div title={item.SolanaWallet}>Solana: {this.getShortAddress(item.SolanaWallet) || "Unavailable"}</div>
+                                                                    </td>
                                                                     <td>
                                                                         <div className="text-box">
                                                                             {item?.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-'}
@@ -1304,7 +1314,7 @@ export class Bridge extends Component {
                                                             })
                                                         ) : (
                                                             <tr>
-                                                                <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: 'white' }}>
+                                                                <td colSpan="7" style={{ textAlign: 'center', padding: '20px', color: 'white' }}>
                                                                     No records found
                                                                 </td>
                                                             </tr>

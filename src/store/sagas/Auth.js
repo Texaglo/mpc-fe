@@ -40,6 +40,10 @@ function* mintNewNft({ payload }) {
 };
 
 function* getBurnNftHistory({ payload }) {
+  if (!payload) {
+    yield put({ type: "BURN_NFT_HISTORY", payload: [] });
+    return;
+  }
   const contractAddress = env === 'localhost' && localBridgeNftAddress
     ? localBridgeNftAddress
     : bridgeAllowedEthCollection;
