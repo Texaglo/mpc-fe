@@ -58,7 +58,7 @@ class Footer extends Component {
                                         <div className="social-links">
                                             <a href="https://discord.gg/PqqdrwTxFn" className="social-link" target="_blank" rel="noopener noreferrer" aria-label="Discord"><img src={require('../../static/images/new-landing/discord-icon.png')} alt='' /></a>
                                             <a href="https://x.com/ModernPokerClub" className="social-link" target="_blank" rel="noopener noreferrer" aria-label="X/Twitter"><img src={require('../../static/images/new-landing/twitter-icon.png')} alt='' /></a>
-                                            <a href="https://www.youtube.com/@modernpokerclub7637" className="social-link" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><img src={require('../../static/images/new-landing/youtube-icon.png')} alt='' /></a>
+                                            <a href="https://www.youtube.com/stickyrice1?sub_confirmation=1" className="social-link" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><img src={require('../../static/images/new-landing/youtube-icon.png')} alt='' /></a>
                                             <a href="https://t.me/ModernPokerClub" className="social-link opensea-link" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><img src={require('../../static/images/new-landing/telegram-icon.png')} alt='' /></a>
                                         </div>
                                     </div>

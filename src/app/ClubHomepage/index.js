@@ -13,7 +13,7 @@ import shark from './assets/shark.png';
 
 const playUrl = 'https://main.du6evc0snv7lm.amplifyapp.com/';
 const discordUrl = 'https://discord.gg/PqqdrwTxFn';
-const youtubeUrl = 'https://www.youtube.com/@modernpokerclub7637';
+const youtubeUrl = 'https://www.youtube.com/stickyrice1?sub_confirmation=1';
 const personalities = [
   {name:'Fish', image:fish, copy:'The noob beginner. Learning the ropes, asking questions, and chasing that first great hand.', rate:3, stakes:'$0.05 / $0.10'},
   {name:'Donkey', image:donkey, copy:'The risk taker. Wild instincts, fearless calls, and one more hand—always.', rate:6, stakes:'$0.25 / $0.50'},
