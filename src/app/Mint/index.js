@@ -92,7 +92,7 @@ export default function Mint() {
         <p className="club-eyebrow">Magic Eden</p>
         <h2>View on <em>Magic Eden</em></h2>
         <p className="genesis-copy">Browse existing MPC Genesis collectibles listed by current holders.</p>
-        <a className="genesis-button genesis-market-button" href="https://magiceden.io" target="_blank" rel="noopener noreferrer">View on Magic Eden</a>
+        <a className="genesis-button genesis-market-button" href="https://magiceden.io/marketplace/modernpokerclub" target="_blank" rel="noopener noreferrer">View on Magic Eden</a>
       </section>
       <section className="club-section genesis-migration">
         <p className="club-eyebrow">Ethereum</p>
