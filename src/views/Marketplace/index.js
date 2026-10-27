@@ -208,7 +208,7 @@ const Marketplace = () => {
             accessor: 'price',
             Header: 'Prices',
             width: 150,
-            Cell: ({ original }) => <div className="catalog-prices"><span>${Number(original.price || 0).toLocaleString()} USD</span><span className={original.solPrice > 0 ? 'catalog-sol-price' : 'catalog-sol-disabled'}><ConsoleIcon name="solana" />{original.solPrice > 0 ? `${Number(original.solPrice).toLocaleString(undefined, { maximumFractionDigits: 9 })} SOL` : 'SOL disabled'}</span></div>
+            Cell: ({ original }) => <div className="catalog-prices"><span>{original.price > 0 ? `$${Number(original.price).toLocaleString()} USD` : 'USD disabled'}</span><span className={original.solPrice > 0 ? 'catalog-sol-price' : 'catalog-sol-disabled'}><ConsoleIcon name="solana" />{original.solPrice > 0 ? `${Number(original.solPrice).toLocaleString(undefined, { maximumFractionDigits: 9 })} SOL` : 'SOL disabled'}</span></div>
         },
         {
             accessor: 'rarity',
@@ -405,7 +405,7 @@ const Marketplace = () => {
                                     <label htmlFor="catalog-sol-price">SOL price per item</label>
                                     <input id="catalog-sol-price" name="solPrice" type="number" min="0.000000001" step="0.000000001" value={formData.solPrice} onChange={handleFormChange} placeholder="Disabled until a price is set" aria-describedby="catalog-sol-help" />
                                     <small id="catalog-sol-help">Leave blank to disable SOL purchases. Up to 9 decimal places.</small>
-                                    {formData.itemType === 'currency_bundle' && <><label htmlFor="catalog-fp-amount">Free Points per pack</label><input id="catalog-fp-amount" name="fpAmount" type="number" min="0" step="0.000001" value={formData.fpAmount} onChange={handleFormChange} /><small>Non-withdrawable FP credited for each pack purchased.</small></>}
+                                    {formData.itemType === 'currency_bundle' && <><label htmlFor="catalog-fp-amount">Free Points per pack</label><input id="catalog-fp-amount" name="fpAmount" type="number" min="0" step="0.000001" value={formData.fpAmount} onChange={handleFormChange} /><small>Non-withdrawable FP credited per pack. This amount and the SOL price above are independent of the standard cashier rate.</small></>}
                                     {solPriceError && <p className="catalog-price-error" role="alert">{solPriceError}</p>}
                                 </div>
                                 <Grid container spacing={2} className="group-input" alignItems="flex-end">

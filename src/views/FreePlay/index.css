@@ -26,6 +26,7 @@
 .fp-rate-preview { text-align: right; }
 .fp-rate-preview span { display: block; color: #898d94; font-size: 8px; text-transform: uppercase; }
 .fp-rate-preview strong { color: #d0a535; font-size: 15px; }
+.fp-rate-preview small { display: block; margin-top: 4px; color: #a9bfce; }
 .fp-economy-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
 .fp-economy-grid label, .fp-schedule-row label, .fp-save-bar label { display: flex; flex-direction: column; gap: 5px; margin: 0; color: #a9acb2; font-size: 9px; font-weight: 700; text-transform: uppercase; }
 .fp-economy-grid input, .fp-schedule-row input, .fp-save-bar input { height: 37px; padding: 0 10px; border: 1px solid #474b53; border-radius: 6px; background: #171b20; color: #fff; outline: none; }

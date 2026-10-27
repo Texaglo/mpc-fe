@@ -8,7 +8,7 @@ jest.mock('eventing-bus', () => ({ publish: jest.fn() }));
 const mockDispatch = jest.fn();
 let mockAccess;
 jest.mock('react-redux', () => ({ useDispatch: () => mockDispatch, useSelector: selector => selector({ Auth: mockAccess }) }));
-const settings = { enabled: true, purchasesEnabled: true, tokensPerUsd: 10, minPurchaseUsd: 1, maxPurchaseUsd: 100, solPurchasesEnabled: false, tokensPerSol: 0, minPurchaseSol: 0.001, maxPurchaseSol: 10, dailyBonuses: [] };
+const settings = { enabled: true, purchasesEnabled: true, tokensPerUsd: 10, minPurchaseUsd: 1, maxPurchaseUsd: 100, solPurchasesEnabled: false, tokensPerSol: 750, minPurchaseSol: 0.001, maxPurchaseSol: 10, dailyBonuses: [] };
 const open = async () => {
     const ui = render(<MemoryRouter><FreePlay /></MemoryRouter>);
     await waitFor(() => expect(ui.getByLabelText('Maximum SOL purchase').value).toBe('10'));
@@ -35,6 +35,7 @@ test('admin enables SOL purchasing, previews the rate and saves exact SOL limits
 });
 test('invalid enabled rate and conflicting limits cannot be saved', async () => {
     const ui = await open();
+    fireEvent.change(ui.getByLabelText('Free Points per SOL'), { target: { value: '0' } });
     fireEvent.click(ui.getByRole('button', { name: 'SOL purchases' }));
     expect(ui.getByText(/Set a positive FP per SOL/)).toBeTruthy();
     fireEvent.change(ui.getByLabelText('Free Points per SOL'), { target: { value: '1000' } });
@@ -43,6 +44,13 @@ test('invalid enabled rate and conflicting limits cannot be saved', async () => 
     fireEvent.change(ui.getByPlaceholderText('Why are these Free Play settings changing?'), { target: { value: 'Change terms' } });
     expect(ui.getByRole('button', { name: 'Save changes' }).disabled).toBe(true);
     expect(axios.put).not.toHaveBeenCalled();
+});
+test('standard rate starts at 750 with the 0.1 SOL example and explicitly excludes store packs', async () => {
+    const ui = await open();
+    expect(ui.getByLabelText('Free Points per SOL').value).toBe('750');
+    expect(ui.getByText('1 SOL = 750 FP')).toBeTruthy();
+    expect(ui.getByText('0.1 SOL = 75 FP')).toBeTruthy();
+    expect(ui.getByText(/Changing this rate or these purchase limits does not change pack pricing/)).toBeTruthy();
 });
 test('view-only operators cannot modify SOL terms', async () => {
     mockAccess = { role: 'sub_admin', permissions: ['free_play.view'] };

@@ -17,7 +17,7 @@ const DEFAULT_SETTINGS = {
     minPurchaseUsd: 10,
     maxPurchaseUsd: 1000,
     solPurchasesEnabled: false,
-    tokensPerSol: 0,
+    tokensPerSol: 750,
     minPurchaseSol: 0.001,
     maxPurchaseSol: 10,
     dailyBonuses: [],
@@ -231,14 +231,14 @@ const FreePlay = () => {
                 </section>
 
                 <section className="fp-panel fp-sol-panel" aria-labelledby="fp-sol-heading">
-                    <div className="fp-panel-title"><div><h3 id="fp-sol-heading"><ConsoleIcon name="solana" /> Solana purchases</h3><p>Set the SOL price of Free Points for direct wallet payments and deposited SOL purchases.</p></div><div className="fp-rate-preview"><span>Purchase value</span><strong>1 SOL = {formatNumber(settings.tokensPerSol)} FP</strong></div></div>
+                    <div className="fp-panel-title"><div><h3 id="fp-sol-heading"><ConsoleIcon name="solana" /> Solana purchases</h3><p>Set the standard FP rate for amount-based cashier purchases, paid from a wallet or deposited SOL.</p></div><div className="fp-rate-preview"><span>Standard purchase rate</span><strong>1 SOL = {formatNumber(settings.tokensPerSol)} FP</strong><small>0.1 SOL = {formatNumber(Number(settings.tokensPerSol) / 10)} FP</small></div></div>
                     <Toggle active={settings.solPurchasesEnabled} label="SOL purchases" hint="Allow players, including Free Play users, to purchase FP with SOL" onClick={() => updateSetting('solPurchasesEnabled', !settings.solPurchasesEnabled)} />
                     <div className="fp-economy-grid fp-sol-grid">
-                        <label><span>Free Points per SOL</span><input aria-label="Free Points per SOL" type="number" min="0" step="0.000001" value={settings.tokensPerSol} onChange={event => updateSetting('tokensPerSol', event.target.value)} /><small>FP received for 1 SOL</small></label>
+                        <label><span>Free Points per SOL</span><input aria-label="Free Points per SOL" type="number" min="0" step="0.000001" value={settings.tokensPerSol} onChange={event => updateSetting('tokensPerSol', event.target.value)} /><small>Standard cashier rate; does not change store packs</small></label>
                         <label><span>Minimum SOL purchase</span><input aria-label="Minimum SOL purchase" type="number" min="0" step="0.000000001" value={settings.minPurchaseSol} onChange={event => updateSetting('minPurchaseSol', event.target.value)} /><small>SOL · up to 9 decimal places</small></label>
                         <label><span>Maximum SOL purchase</span><input aria-label="Maximum SOL purchase" type="number" min="0" step="0.000000001" value={settings.maxPurchaseSol} onChange={event => updateSetting('maxPurchaseSol', event.target.value)} /><small>SOL per purchase</small></label>
                     </div>
-                    <p className="fp-sol-note">Store products have their own SOL prices in Commerce → Products. Free Points remain non-withdrawable.</p>
+                    <p className="fp-sol-note">Each store pack has its own SOL price and FP amount in Commerce → Products → FP Chip Packs. Changing this rate or these purchase limits does not change pack pricing. Free Points remain non-withdrawable.</p>
                 </section>
 
                 <section className="fp-panel">

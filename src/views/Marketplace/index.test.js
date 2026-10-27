@@ -39,3 +39,15 @@ test('FP packs require configured points and submit the per-pack amount with the
     fireEvent.click(ui.getByRole('button', { name: 'Update' }));
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'UPDATE_MARKETPLACE_ITEM', payload: expect.objectContaining({ fpAmount: 1200, solPrice: 0.02 }) });
 });
+test('SOL-only packs show disabled USD checkout and save independently editable pack terms', () => {
+    mockState.Marketplace.items = [{ ...item, name: '150 FP Pack', price: 0, itemType: 'currency_bundle', fpAmount: 150, solPrice: 0.1, stock: null }];
+    const ui = render(<MemoryRouter><Marketplace /></MemoryRouter>);
+    expect(ui.getByText('USD disabled')).toBeTruthy();
+    expect(ui.getByText('0.1 SOL')).toBeTruthy();
+    fireEvent.click(ui.getByRole('button', { name: 'Edit' }));
+    expect(ui.getByLabelText('Free Points per pack').value).toBe('150');
+    fireEvent.change(ui.getByLabelText('Free Points per pack'), { target: { value: '300' } });
+    fireEvent.change(ui.getByLabelText('SOL price per item'), { target: { value: '0.2' } });
+    fireEvent.click(ui.getByRole('button', { name: 'Update' }));
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'UPDATE_MARKETPLACE_ITEM', payload: expect.objectContaining({ price: 0, solPrice: 0.2, fpAmount: 300, stock: null }) });
+});
