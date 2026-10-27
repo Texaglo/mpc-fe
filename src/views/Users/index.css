@@ -95,6 +95,24 @@
 }
 
 /* Status Badge */
+.player-presence { display: inline-flex; align-items: center; gap: 5px; color: #9db2c0; font-size: 11px; line-height: 1.4; }
+.player-presence i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.player-presence.is-online { color: #43de76; }
+.player-presence.is-online i { box-shadow: 0 0 8px #43de7640; }
+.player-presence.is-recent_activity { color: #f2bd39; }
+.player-presence.is-unknown { color: #a4b4c2; }
+.user-last-login { color: #94aebe; font-size: 10px; white-space: normal; }
+.player-activity-panel { margin: 12px 0; }
+.player-activity-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.player-activity-summary > div { display: flex; flex-direction: column; gap: 6px; }
+.player-activity-summary small, .player-activity-note { color: #9db2c0; font-size: 11px; }
+.player-activity-summary strong { color: #eff7fc; font-size: 13px; }
+.player-activity-note { margin: 12px 0 6px; }
+.player-login-history { max-height: 220px; overflow: auto; }
+.player-login-history table { width: 100%; font-size: 12px; }
+.player-login-history th, .player-login-history td { padding: 8px; border-bottom: 1px solid #18384b; text-align: left; }
+.player-login-history th { color: #e7bd4b; }
+@media (max-width: 850px) { .player-activity-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .status-badge {
     padding: 4px 12px;
     border-radius: 15px;
@@ -926,7 +944,11 @@
 .admin-access-reason { color: #aeb2bd; display: grid; font-size: 11px; gap: 6px; }
 .admin-access-actions { display: flex; gap: 10px; justify-content: flex-end; }
 .admin-access-actions button { min-width: 145px; }
-.player-profile-modal { max-width: 1180px; }
+.modal.show .modal-dialog.player-profile-modal { width: min(1180px, calc(100vw - 32px)); max-width: 1180px !important; top: 0; margin: 16px auto; transform: none; }
+.player-profile-modal .modal-content { max-height: calc(100vh - 32px); padding: 0; }
+.player-profile-modal .modal-header { padding: 14px 18px !important; }
+.player-profile-modal .player-profile-body { overflow-y: auto; padding: 16px !important; }
+.player-profile-modal .profile-panel, .player-profile-modal .profile-hero, .player-profile-modal .profile-balance-grid article { background: #062130; border-color: #20475c; }
 .player-profile-body { color: #f3f4f7; }
 .profile-loading, .profile-empty { color: #9ca0aa; padding: 16px 0; }
 .profile-hero { align-items: center; background: #202432; border: 1px solid #3c4050; border-radius: 12px; display: flex; justify-content: space-between; padding: 18px; }

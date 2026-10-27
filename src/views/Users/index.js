@@ -9,6 +9,7 @@ import { setLoader, toggleModal } from "../../store/actions/Auth";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { canAccess } from '../../utils/adminAccess';
 import PokerStatistics from './PokerStatistics';
+import PlayerActivity, { PlayerPresence, activityTime } from './PlayerActivity';
 
 import './index.css';
 
@@ -33,6 +34,7 @@ class Users extends React.Component {
             profileUser: null,
             profileData: null,
             profileLoading: false,
+            profileActivityError: false,
             // Adjust Balance modal
             showAdjustModal: false,
             adjustUser: null,
@@ -72,10 +74,13 @@ class Users extends React.Component {
         this.usersRefreshTimer = window.setInterval(() => {
             const { searchTerm, currentPage } = this.state;
             this.props.getUsers({ search: searchTerm, page: currentPage, limit: 20, silent: true });
+            this.setState({ activityCheckedAt: Date.now() });
+            this.refreshProfileActivity();
         }, 30000);
     }
 
     componentWillUnmount() {
+        this.unmounted = true;
         if (this.usersRefreshTimer) window.clearInterval(this.usersRefreshTimer);
         if (this.searchTimeout) window.clearTimeout(this.searchTimeout);
         if (this.inventorySearchTimeout) window.clearTimeout(this.inventorySearchTimeout);
@@ -174,18 +179,31 @@ class Users extends React.Component {
     }
 
     openProfileModal = async (user) => {
-        this.setState({ showProfileModal: true, profileUser: user, profileData: null, profileLoading: true });
+        this.setState({ showProfileModal: true, profileUser: user, profileData: null, profileLoading: true, profileActivityError: false });
         try {
             const response = await axios.get(`/admin/users/${user._id}/profile`);
-            this.setState({ profileData: response?.data?.body || null });
+            if (!this.unmounted && this.state.showProfileModal && this.state.profileUser?._id === user._id) this.setState({ profileData: response?.data?.body || null });
         } catch (error) {
             EventBus.publish('error', error?.response?.data?.message || 'Unable to load player profile');
         } finally {
-            this.setState({ profileLoading: false });
+            if (!this.unmounted && this.state.profileUser?._id === user._id) this.setState({ profileLoading: false });
         }
     }
 
     closeProfileModal = () => this.setState({ showProfileModal: false, profileUser: null, profileData: null, profileLoading: false });
+
+    refreshProfileActivity = async () => {
+        const userId = this.state.profileUser?._id;
+        if (!this.state.showProfileModal || !this.state.profileData || !userId) return;
+        try {
+            const response = await axios.get(`/admin/users/${userId}/activity`);
+            if (this.unmounted || !this.state.showProfileModal || this.state.profileUser?._id !== userId) return;
+            const activity = response?.data?.body;
+            this.setState(({ profileData }) => ({ profileActivityError: false, profileData: { ...profileData, activity, user: { ...profileData.user, lastLoginAt: activity.lastLoginAt, presence: activity.presence } } }));
+        } catch (error) {
+            if (!this.unmounted && this.state.showProfileModal && this.state.profileUser?._id === userId) this.setState({ profileActivityError: true });
+        }
+    };
 
     openAccessModal = async (user) => {
         this.setState({
@@ -475,7 +493,7 @@ class Users extends React.Component {
             {
                 accessor: 'username',
                 Header: 'Player',
-                Cell: ({ original }) => <div className="user-identity-with-avatar"><span className={`user-initial-avatar avatar-${String(original.username || "").charCodeAt(0) % 5}`} aria-hidden="true">{String(original.username || "?").slice(0, 2).toUpperCase()}</span><div className="user-identity-cell"><strong>{original.username || 'N/A'}</strong><span>{original.email || 'No email'}</span>{original.role && original.role !== 'user' && <small className={`admin-role-badge is-${original.role}`}>{original.role === 'sub_admin' ? 'Sub-admin' : 'Full admin'}</small>}</div></div>,
+                Cell: ({ original }) => <div className="user-identity-with-avatar"><span className={`user-initial-avatar avatar-${String(original.username || "").charCodeAt(0) % 5}`} aria-hidden="true">{String(original.username || "?").slice(0, 2).toUpperCase()}</span><div className="user-identity-cell"><strong>{original.username || 'N/A'}</strong><span>{original.email || 'No email'}</span><small className="user-last-login" title={activityTime(original.lastLoginAt)}>Last login: {activityTime(original.lastLoginAt)}</small>{original.role && original.role !== 'user' && <small className={`admin-role-badge is-${original.role}`}>{original.role === 'sub_admin' ? 'Sub-admin' : 'Full admin'}</small>}</div></div>,
                 width: 150
             },
             {
@@ -529,7 +547,7 @@ class Users extends React.Component {
                 accessor: 'isFrozen',
                 Header: 'Status',
                 Cell: ({ value, original }) => (
-                    <div className="user-status-stack">
+                    <div className="user-status-stack"><PlayerPresence presence={original.presence} />
                         <span className={`status-badge ${value ? 'frozen' : 'active'}`}>{value ? 'Banned' : 'Active'}</span>
                         <small className={`kyc-inline ${original.KYCStatus || 'unverified'}`}>{original.KYCStatus || 'Unverified'}</small>
                     </div>
@@ -675,9 +693,9 @@ class Users extends React.Component {
                             return <Fragment>
                                 <section className="profile-hero">
                                     <div><small>Player</small><h4>{player.username || 'Unnamed player'}</h4><span>{player.email || 'No email'} · {player._id}</span></div>
-                                    <div className="profile-state"><span className={`status-badge ${player.isFrozen ? 'frozen' : 'active'}`}>{player.isFrozen ? 'Banned' : 'Active'}</span><LoginProvider provider={player.authProvider} /><small>Last login {player.lastLoginAt ? new Date(player.lastLoginAt).toLocaleString() : 'Never recorded'}</small></div>
+                                    <div className="profile-state"><PlayerPresence presence={this.state.profileActivityError ? null : player.presence} /><span className={`status-badge ${player.isFrozen ? 'frozen' : 'active'}`}>{player.isFrozen ? 'Banned' : 'Active'}</span><LoginProvider provider={player.authProvider} /><small>Last login {player.lastLoginAt ? new Date(player.lastLoginAt).toLocaleString() : 'Never recorded'}</small></div>
                                 </section>
-                                <section className="profile-balance-grid">
+                                <PlayerActivity activity={profileData.activity} refreshFailed={this.state.profileActivityError} /><section className="profile-balance-grid">
                                     <article><span>Mainnet Cash</span><strong>${Number(player.mainnetCashBalance ?? player.cashBalance ?? 0).toLocaleString()}</strong><small>Withdrawable production liability</small></article>
                                     <article><span>Devnet Cash</span><strong>${Number(player.devnetCashBalance || 0).toLocaleString()}</strong><small>Test-only · not mainnet liability</small></article>
                                     <article><span>MPCE / Time</span><strong>{Number(player.mpceCredit || 0).toLocaleString()}</strong><small>{Number(player.timeBalanceMinutes || 0).toLocaleString()} minutes</small></article>
