@@ -9,6 +9,7 @@ import { toggleModal, setLoader } from '../../store/actions/Auth';
 import { ValidatorForm, TextValidator } from '../../components/FormValidator';
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 import { getMarketplaceItems, createMarketplaceItem, updateMarketplaceItem, toggleMarketplaceItem } from "../../store/actions/Marketplace";
+import { decimalUnits, validateItemSolPrice } from '../../utils/solPricing';
 import './index.css';
 
 const CustomTextField = withStyles({
@@ -88,6 +89,8 @@ const Marketplace = () => {
         name: "",
         description: "",
         price: 0,
+        solPrice: "",
+        fpAmount: 0,
         itemType: "",
         itemSubType: "",
         rarity: "common",
@@ -105,14 +108,22 @@ const Marketplace = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const solPriceError = validateItemSolPrice(formData.solPrice) || (formData.itemType === 'currency_bundle' &&
+        (decimalUnits(formData.fpAmount, 6) === null || (formData.solPrice !== '' && Number(formData.fpAmount) <= 0))
+        ? 'Set a positive Free Points amount for this SOL chip pack (up to 6 decimal places).' : '');
+
     const submitItem = () => {
+        if (solPriceError) return;
         const payload = {
             ...formData,
             price: Number(formData.price),
+            solPrice: formData.solPrice === "" ? null : Number(formData.solPrice),
+            fpAmount: Number(formData.fpAmount),
             expirationDays: formData.expirationDays ? Number(formData.expirationDays) : null,
-            stock: formData.stock ? Number(formData.stock) : null
+            stock: formData.stock === "" ? null : Number(formData.stock)
         };
 
+        if (!payload.sku.trim()) delete payload.sku;
         if (selectedItem) {
             dispatch(updateMarketplaceItem(payload));
         } else {
@@ -132,11 +143,13 @@ const Marketplace = () => {
             name: item.name || "",
             description: item.description || "",
             price: item.price || 0,
+            solPrice: item.solPrice ?? "",
+            fpAmount: item.fpAmount || 0,
             itemType: item.itemType || "",
             itemSubType: item.itemSubType || "",
             rarity: item.rarity || "common",
             expirationDays: item.expirationDays || "",
-            stock: item.stock || ""
+            stock: item.stock ?? ""
         });
         dispatch(toggleModal(true));
     };
@@ -193,8 +206,9 @@ const Marketplace = () => {
         },
         {
             accessor: 'price',
-            Header: 'Price',
-            width: 80
+            Header: 'Prices',
+            width: 150,
+            Cell: ({ original }) => <div className="catalog-prices"><span>${Number(original.price || 0).toLocaleString()} USD</span><span className={original.solPrice > 0 ? 'catalog-sol-price' : 'catalog-sol-disabled'}><ConsoleIcon name="solana" />{original.solPrice > 0 ? `${Number(original.solPrice).toLocaleString(undefined, { maximumFractionDigits: 9 })} SOL` : 'SOL disabled'}</span></div>
         },
         {
             accessor: 'rarity',
@@ -370,7 +384,7 @@ const Marketplace = () => {
                                         />
                                     </Grid>
                                     <Grid className="input-fields" item xs={4}>
-                                        <label>Price *</label>
+                                        <label>Cash price (USD) *</label>
                                         <CustomTextField
                                             fullWidth
                                             className="text-field"
@@ -386,6 +400,14 @@ const Marketplace = () => {
                                         />
                                     </Grid>
                                 </Grid>
+                                <div className="catalog-sol-settings">
+                                    <div className="catalog-sol-heading"><ConsoleIcon name="solana" /><div><h3>Solana checkout</h3><p>Offer this item to players using SOL, including Free Play users.</p></div></div>
+                                    <label htmlFor="catalog-sol-price">SOL price per item</label>
+                                    <input id="catalog-sol-price" name="solPrice" type="number" min="0.000000001" step="0.000000001" value={formData.solPrice} onChange={handleFormChange} placeholder="Disabled until a price is set" aria-describedby="catalog-sol-help" />
+                                    <small id="catalog-sol-help">Leave blank to disable SOL purchases. Up to 9 decimal places.</small>
+                                    {formData.itemType === 'currency_bundle' && <><label htmlFor="catalog-fp-amount">Free Points per pack</label><input id="catalog-fp-amount" name="fpAmount" type="number" min="0" step="0.000001" value={formData.fpAmount} onChange={handleFormChange} /><small>Non-withdrawable FP credited for each pack purchased.</small></>}
+                                    {solPriceError && <p className="catalog-price-error" role="alert">{solPriceError}</p>}
+                                </div>
                                 <Grid container spacing={2} className="group-input" alignItems="flex-end">
                                     <Grid className="input-fields" item xs={6}>
                                         <label>Item Type *</label>
@@ -482,7 +504,7 @@ const Marketplace = () => {
 
                         <div className="col-12 mt-3 d-flex justify-content-around">
                             <button className="delete-btn add-btn col-4" type='button' onClick={cancelModal}>Cancel</button>
-                            <button className="add-btn col-4" type='button' onClick={submitItem}>{selectedItem ? 'Update' : 'Create'}</button>
+                            <button className="add-btn col-4" type='button' onClick={submitItem} disabled={Boolean(solPriceError)}>{selectedItem ? 'Update' : 'Create'}</button>
                         </div>
                     </div>
                 </ModalBody>

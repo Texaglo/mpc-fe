@@ -86,3 +86,9 @@
     .fp-economy-grid, .fp-schedule-row { grid-template-columns: 1fr; }
     .fp-schedule-name { grid-column: auto; }
 }
+
+.fp-sol-panel h3 { display: flex; align-items: center; gap: 10px; }
+.fp-sol-panel h3 .console-icon { font-size: 24px; }
+.fp-sol-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 14px; }
+.fp-sol-note { margin: 12px 0 0; color: var(--mpc-muted, #92959c); font-size: 12px; }
+@media (max-width: 768px) { .fp-sol-grid { grid-template-columns: 1fr; } }

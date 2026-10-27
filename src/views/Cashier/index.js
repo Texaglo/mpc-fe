@@ -5,6 +5,7 @@ import EventBus from 'eventing-bus';
 import { useDispatch, useSelector } from 'react-redux';
 import { Modal, ModalBody, ModalHeader } from 'reactstrap';
 import { setLoader } from '../../store/actions/Auth';
+import { decimalUnits } from '../../utils/solPricing';
 import { canAccess } from '../../utils/adminAccess';
 import './index.css';
 
@@ -12,17 +13,19 @@ const SETTING_META = {
     timePriceUsdPerHour: { label: 'Time price', hint: 'USD charged for one hour of standard time', unit: '$ / hour', min: 0.01 },
     minDepositUsd: { label: 'Minimum deposit', hint: 'Lowest accepted cash value across deposit methods', unit: 'USD', min: 0 },
     maxDepositUsd: { label: 'Maximum deposit', hint: 'Highest accepted cash value across deposit methods', unit: 'USD', min: 0.01 },
+    minDepositSol: { label: 'Minimum SOL deposit', hint: 'Native SOL retained in the player’s spending balance', unit: 'SOL', min: 0 },
+    maxDepositSol: { label: 'Maximum SOL deposit', hint: 'Maximum native SOL per balance deposit', unit: 'SOL', min: 0.000000001 },
     minWithdrawalUsd: { label: 'Minimum withdrawal', hint: 'Lowest request the cashier accepts', unit: 'USD', min: 0 },
     maxWithdrawalUsd: { label: 'Maximum withdrawal', hint: 'Highest request the cashier accepts', unit: 'USD', min: 0.01 },
 };
 
 const SWITCH_META = {
-    cashierPaused: { label: 'Cashier kill switch', hint: 'Stops new deposits, withdrawals and time purchases', danger: true },
+    cashierPaused: { label: 'Cashier kill switch', hint: 'Stops new deposits, withdrawals, time and SOL purchases', danger: true },
     depositsPaused: { label: 'Pause deposits', hint: 'Stops new card, crypto and MoonPay deposit intents' },
     withdrawalsPaused: { label: 'Pause withdrawals', hint: 'Stops new withdrawal requests' },
 };
 
-const formatNumber = value => Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 6 });
+const formatNumber = value => Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 9 });
 const unwrapError = error => error?.response?.data?.message || error?.message || 'Request failed';
 
 const Cashier = () => {
@@ -97,12 +100,16 @@ const Cashier = () => {
 
     const editingMeta = SWITCH_META[editing] || SETTING_META[editing];
     const isSwitchEdit = Boolean(SWITCH_META[editing]);
-    const editIsValid = Boolean(reason.trim()) && Number.isFinite(Number(editValue)) && (
+    const solValueValid = !['minDepositSol', 'maxDepositSol'].includes(editing) || decimalUnits(editValue, 9) !== null;
+    const editIsValid = solValueValid && reason.trim().length >= 3 && Number.isFinite(Number(editValue)) && (
         isSwitchEdit ? ['0', '1'].includes(String(editValue)) : Number(editValue) >= Number(editingMeta?.min || 0)
     );
 
     const categoryLabel = useMemo(() => ({
         cryptoDeposit: 'Crypto deposit',
+        solDeposit: 'SOL balance deposit',
+        freePlayPurchase: 'Free Points purchase',
+        storePurchase: 'Store purchase',
         bankDeposit: 'Card deposit',
         deposit: 'Deposit',
         withdraw: 'Withdrawal',
@@ -156,7 +163,7 @@ const Cashier = () => {
                     <div className="cashier-section-title"><div><span>Audit trail</span><h3>Cashier ledger</h3></div><strong>{pagination.totalTransactions || 0} records</strong></div>
                     <div className="cashier-filters">
                         <select value={filters.category} onChange={event => setFilters(current => ({ ...current, category: event.target.value }))} aria-label="Transaction category">
-                            <option value="all">All transactions</option><option value="deposits">Deposits</option><option value="withdrawals">Withdrawals</option><option value="time">Time purchases</option>
+                            <option value="all">All transactions</option><option value="deposits">Deposits</option><option value="withdrawals">Withdrawals</option><option value="time">Time purchases</option><option value="purchases">FP & store purchases</option>
                         </select>
                         <select value={filters.status} onChange={event => setFilters(current => ({ ...current, status: event.target.value }))} aria-label="Transaction status">
                             <option value="all">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="completed">Completed</option><option value="rejected">Rejected</option>
@@ -172,8 +179,8 @@ const Cashier = () => {
                                     return <tr key={tx._id}>
                                         <td>{new Date(tx.createdAt).toLocaleString()}</td>
                                         <td><strong>{tx.userId?.username || 'Unknown player'}</strong><small>{tx.userId?.email || tx.userId?._id || '—'}</small></td>
-                                        <td>{categoryLabel[tx.type] || tx.type}</td>
-                                        <td>${formatNumber(tx.cashAmountUsd ?? (tx.type === 'timePurchase' || tx.type === 'withdraw' ? tx.paidAmount : tx.receivedAmount))}</td>
+                                        <td>{categoryLabel[tx.type] || tx.type}{tx.solCommerceOutcome === 'CREDITED_SOL' && <small>Purchase unavailable · SOL retained</small>}</td>
+                                        <td>{tx.solCommerceIntentId ? '—' : `$${formatNumber(tx.cashAmountUsd ?? (tx.type === 'timePurchase' || tx.type === 'withdraw' ? tx.paidAmount : tx.receivedAmount))}`}</td>
                                         <td><span className="cashier-movement"><CurrencyAmount asset={tx.paidCoinType}>{formatNumber(tx.paidAmount)} {String(tx.paidCoinType || '').toUpperCase()}</CurrencyAmount> → <CurrencyAmount asset={tx.receivedCoinType}>{formatNumber(tx.receivedAmount)} {String(tx.receivedCoinType || '').toUpperCase()}</CurrencyAmount></span></td>
                                         <td><span className={`cashier-status ${tx.status}`}>{tx.status}</span></td>
                                         <td title={reference}>{reference ? `${String(reference).slice(0, 8)}…${String(reference).slice(-6)}` : '—'}</td>

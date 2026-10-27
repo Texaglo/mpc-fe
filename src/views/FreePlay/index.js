@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { setLoader } from '../../store/actions/Auth';
 import { canAccess } from '../../utils/adminAccess';
+import ConsoleIcon from '../../components/ConsoleIcon';
+import { validateSolTerms } from '../../utils/solPricing';
 import './index.css';
 
 const DEFAULT_SETTINGS = {
@@ -14,6 +16,10 @@ const DEFAULT_SETTINGS = {
     tokensPerUsd: 1,
     minPurchaseUsd: 10,
     maxPurchaseUsd: 1000,
+    solPurchasesEnabled: false,
+    tokensPerSol: 0,
+    minPurchaseSol: 0.001,
+    maxPurchaseSol: 10,
     dailyBonuses: [],
 };
 
@@ -47,6 +53,10 @@ const normalizeSettings = body => {
         tokensPerUsd: Number(source.tokensPerUsd ?? DEFAULT_SETTINGS.tokensPerUsd),
         minPurchaseUsd: Number(source.minPurchaseUsd ?? DEFAULT_SETTINGS.minPurchaseUsd),
         maxPurchaseUsd: Number(source.maxPurchaseUsd ?? DEFAULT_SETTINGS.maxPurchaseUsd),
+        solPurchasesEnabled: Boolean(source.solPurchasesEnabled),
+        tokensPerSol: Number(source.tokensPerSol ?? DEFAULT_SETTINGS.tokensPerSol),
+        minPurchaseSol: Number(source.minPurchaseSol ?? DEFAULT_SETTINGS.minPurchaseSol),
+        maxPurchaseSol: Number(source.maxPurchaseSol ?? DEFAULT_SETTINGS.maxPurchaseSol),
         dailyBonuses: Array.isArray(source.dailyBonuses) ? source.dailyBonuses.map(normalizeBonus) : [],
     };
 };
@@ -75,7 +85,7 @@ const fpMovement = entry => {
 const Toggle = ({ active, label, hint, onClick }) => (
     <article className={`fp-toggle-card ${active ? 'active' : ''}`}>
         <div><h4>{label}</h4><p>{hint}</p></div>
-        <button type="button" className={`fp-toggle ${active ? 'on' : 'off'}`} aria-pressed={active} onClick={onClick}><span />{active ? 'Enabled' : 'Disabled'}</button>
+        <button type="button" className={`fp-toggle ${active ? 'on' : 'off'}`} aria-label={label} aria-pressed={active} onClick={onClick}><span />{active ? 'Enabled' : 'Disabled'}</button>
     </article>
 );
 
@@ -133,6 +143,8 @@ const FreePlay = () => {
             if (!Number.isFinite(Number(settings[key])) || Number(settings[key]) < 0) return 'All economy values must be non-negative numbers.';
         }
         if (Number(settings.minPurchaseUsd) > Number(settings.maxPurchaseUsd)) return 'Minimum purchase cannot exceed maximum purchase.';
+        const solError = validateSolTerms(settings);
+        if (solError) return solError;
         for (const bonus of settings.dailyBonuses) {
             if (!bonus.name.trim() || !bonus.startsAt || !Number.isFinite(Number(bonus.amount)) || Number(bonus.amount) < 0) return 'Every daily bonus needs a name, non-negative amount and start date.';
             if (bonus.endsAt && bonus.endsAt < bonus.startsAt) return 'A daily bonus end date cannot be before its start date.';
@@ -154,6 +166,9 @@ const FreePlay = () => {
                 tokensPerUsd: Number(settings.tokensPerUsd),
                 minPurchaseUsd: Number(settings.minPurchaseUsd),
                 maxPurchaseUsd: Number(settings.maxPurchaseUsd),
+                tokensPerSol: Number(settings.tokensPerSol),
+                minPurchaseSol: Number(settings.minPurchaseSol),
+                maxPurchaseSol: Number(settings.maxPurchaseSol),
                 dailyBonuses: settings.dailyBonuses.map(bonus => ({
                     ...(bonus._id ? { _id: bonus._id } : {}),
                     name: bonus.name.trim(),
@@ -202,7 +217,7 @@ const FreePlay = () => {
                 <fieldset disabled={!canManage} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
                 <section className="fp-toggle-grid">
                     <Toggle active={settings.enabled} label="Free Play availability" hint="Controls Free Play access and automated rewards" onClick={() => updateSetting('enabled', !settings.enabled)} />
-                    <Toggle active={settings.purchasesEnabled} label="FP purchases" hint="Allows deposited Cash/USD to purchase non-withdrawable FP" onClick={() => updateSetting('purchasesEnabled', !settings.purchasesEnabled)} />
+                    <Toggle active={settings.purchasesEnabled} label="Cash / USD purchases" hint="Allows deposited Cash/USD to purchase non-withdrawable FP" onClick={() => updateSetting('purchasesEnabled', !settings.purchasesEnabled)} />
                 </section>
 
                 <section className="fp-panel">
@@ -213,6 +228,17 @@ const FreePlay = () => {
                         <label><span>Minimum purchase</span><input type="number" min="0" step="any" value={settings.minPurchaseUsd} onChange={event => updateSetting('minPurchaseUsd', event.target.value)} /><small>USD</small></label>
                         <label><span>Maximum purchase</span><input type="number" min="0" step="any" value={settings.maxPurchaseUsd} onChange={event => updateSetting('maxPurchaseUsd', event.target.value)} /><small>USD</small></label>
                     </div>
+                </section>
+
+                <section className="fp-panel fp-sol-panel" aria-labelledby="fp-sol-heading">
+                    <div className="fp-panel-title"><div><h3 id="fp-sol-heading"><ConsoleIcon name="solana" /> Solana purchases</h3><p>Set the SOL price of Free Points for direct wallet payments and deposited SOL purchases.</p></div><div className="fp-rate-preview"><span>Purchase value</span><strong>1 SOL = {formatNumber(settings.tokensPerSol)} FP</strong></div></div>
+                    <Toggle active={settings.solPurchasesEnabled} label="SOL purchases" hint="Allow players, including Free Play users, to purchase FP with SOL" onClick={() => updateSetting('solPurchasesEnabled', !settings.solPurchasesEnabled)} />
+                    <div className="fp-economy-grid fp-sol-grid">
+                        <label><span>Free Points per SOL</span><input aria-label="Free Points per SOL" type="number" min="0" step="0.000001" value={settings.tokensPerSol} onChange={event => updateSetting('tokensPerSol', event.target.value)} /><small>FP received for 1 SOL</small></label>
+                        <label><span>Minimum SOL purchase</span><input aria-label="Minimum SOL purchase" type="number" min="0" step="0.000000001" value={settings.minPurchaseSol} onChange={event => updateSetting('minPurchaseSol', event.target.value)} /><small>SOL · up to 9 decimal places</small></label>
+                        <label><span>Maximum SOL purchase</span><input aria-label="Maximum SOL purchase" type="number" min="0" step="0.000000001" value={settings.maxPurchaseSol} onChange={event => updateSetting('maxPurchaseSol', event.target.value)} /><small>SOL per purchase</small></label>
+                    </div>
+                    <p className="fp-sol-note">Store products have their own SOL prices in Commerce → Products. Free Points remain non-withdrawable.</p>
                 </section>
 
                 <section className="fp-panel">
@@ -241,7 +267,7 @@ const FreePlay = () => {
                     <div className="fp-panel-title"><div><h3>FP ledger</h3><p>Recent database issuance, purchases and operator adjustments.</p></div><button type="button" className="fp-ledger-refresh" onClick={() => loadLedger(pagination.currentPage || 1)}>Refresh</button></div>
                     <div className="fp-ledger-summary"><article><span>Outstanding player FP</span><strong>{formatNumber(ledger.summary?.outstandingFp)}</strong><small>Non-withdrawable liability</small></article><article><span>Ledger records</span><strong>{formatNumber(pagination.total)}</strong><small>Canonical asset: FP</small></article><article><span>Withdrawal value</span><strong>$0</strong><small>FP cannot leave the Free Play economy</small></article></div>
                     <div className="fp-ledger-table-wrap"><table className="fp-ledger-table"><thead><tr><th>Date</th><th>Player</th><th>Activity</th><th>Paid</th><th>FP issued / received</th><th>FP balance</th><th>Reference</th></tr></thead><tbody>
-                        {ledger.entries.map(entry => { const movement = fpMovement(entry); return <tr key={entry._id || entry.idempotencyKey}><td>{formatDate(entry.createdAt || entry.processedAt)}</td><td><strong>{entry.userId?.username || 'Player'}</strong><small>{entry.userId?.email || entry.userId?._id || entry.userId || '—'}</small></td><td>{reasonLabel(entry)}</td><td>{formatNumber(entry.paidAmount)} {String(entry.paidCoinType || '').toUpperCase()}</td><td className={movement >= 0 ? 'fp-issued' : 'fp-debited'}>{movement > 0 ? '+' : ''}{formatNumber(movement)} FP</td><td>{formatNumber(entry.updatedFpBalance)}</td><td title={entry.idempotencyKey || entry._id}>{entry.idempotencyKey ? `${entry.idempotencyKey.slice(0, 12)}…` : (entry._id || '—')}</td></tr>; })}
+                        {ledger.entries.map(entry => { const movement = fpMovement(entry); return <tr key={entry._id || entry.idempotencyKey}><td>{formatDate(entry.createdAt || entry.processedAt)}</td><td><strong>{entry.userId?.username || 'Player'}</strong><small>{entry.userId?.email || entry.userId?._id || entry.userId || '—'}</small></td><td>{reasonLabel(entry)}</td><td>{Number(entry.paidAmount || 0).toLocaleString(undefined, { maximumFractionDigits: String(entry.paidCoinType).toUpperCase() === 'SOL' ? 9 : 6 })} {String(entry.paidCoinType || '').toUpperCase()}</td><td className={movement >= 0 ? 'fp-issued' : 'fp-debited'}>{movement > 0 ? '+' : ''}{formatNumber(movement)} FP</td><td>{formatNumber(entry.updatedFpBalance)}</td><td title={entry.idempotencyKey || entry._id}>{entry.idempotencyKey ? `${entry.idempotencyKey.slice(0, 12)}…` : (entry._id || '—')}</td></tr>; })}
                         {!ledger.entries.length && <tr><td colSpan="7" className="fp-ledger-empty">No FP ledger entries have been recorded.</td></tr>}
                     </tbody></table></div>
                     <div className="fp-pagination"><button type="button" disabled={(pagination.currentPage || 1) <= 1} onClick={() => loadLedger(pagination.currentPage - 1)}>Previous</button><span>Page {pagination.currentPage || 1} of {pagination.totalPages || 1}</span><button type="button" disabled={(pagination.currentPage || 1) >= (pagination.totalPages || 1)} onClick={() => loadLedger(pagination.currentPage + 1)}>Next</button></div>

@@ -214,3 +214,17 @@
     margin-bottom: 4px;
     display: block;
 }
+
+.catalog-prices { display: flex; flex-direction: column; gap: 5px; font-size: 12px; }
+.catalog-sol-price, .catalog-sol-disabled { display: inline-flex; align-items: center; gap: 6px; }
+.catalog-sol-disabled { color: var(--mpc-muted, #92a9bb); font-size: 11px; }
+.catalog-sol-settings { width: 100%; margin: 16px 8px; padding: 16px; border: 1px solid var(--mpc-border, #19465b); border-radius: 9px; background: var(--mpc-surface, #031c2a); }
+.catalog-sol-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.catalog-sol-heading > .console-icon { font-size: 30px; }
+.catalog-sol-heading h3 { color: #fff; margin: 0 0 4px; font-size: 16px; }
+.catalog-sol-heading p, .catalog-sol-settings small { color: var(--mpc-muted, #92a9bb); margin: 0; font-size: 12px; }
+.catalog-sol-settings label, .catalog-sol-settings small { display: block; }
+.catalog-sol-settings input { width: 100%; margin: 4px 0 8px; padding: 10px 12px; border: 1px solid var(--mpc-border, #19465b); border-radius: 6px; background: #031521; color: #fff; }
+.catalog-sol-settings input:focus-visible { outline: 2px solid #edb91c; outline-offset: 2px; }
+.catalog-price-error { color: #ff7777; font-size: 12px; margin: 8px 0 0; }
+.marketplace-modal .catalog-sol-settings label { color: var(--mpc-text, #e5edf4); font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
