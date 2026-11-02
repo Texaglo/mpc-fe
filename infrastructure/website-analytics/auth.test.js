@@ -1,62 +1,51 @@
-const { test } = require('node:test');
+'use strict';
+const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(`${__dirname}/index.js`, 'utf8');
-
-function harness({ role = 'admin', permissions = [], accessStatus = 200 } = {}) {
-  const calls = [];
-  const context = {
-    exports: {}, process: { env: { CLICKSTREAM_DATABASE: 'mpc_website', CLICKSTREAM_APP_ID: 'mpc_web', ATHENA_WORKGROUP: 'mpc-reports', ALLOWED_ORIGINS: 'https://admin.modernpokerclub.com' } },
-    AbortSignal, console: { warn() {} },
-    fetch: async (url, options) => {
-      calls.push({ type: 'auth', url, options });
-      return { status: accessStatus, ok: accessStatus === 200, json: async () => ({ body: { role, permissions } }) };
-    },
-    require(name) {
-      if (name === './report') return require('./report');
-      if (name === '@aws-sdk/client-athena') return {
-        AthenaClient: class { async send(command) {
-          calls.push({ type: 'athena', command });
-          return command.kind === 'start' ? { QueryExecutionId: 'test-query' } : { QueryExecution: { Status: { State: 'RUNNING' } } };
-        } },
-        StartQueryExecutionCommand: class { constructor(input) { this.input = input; this.kind = 'start'; } },
-        GetQueryExecutionCommand: class { constructor(input) { this.input = input; this.kind = 'status'; } },
-        GetQueryResultsCommand: class {},
-      };
-      throw new Error('Unexpected dependency');
-    },
-  };
-  vm.runInNewContext(source, context);
-  return { calls, handler: context.exports.handler };
+const fs = require('node:fs');
+const path = require('node:path');
+function load(file, { send = async () => ({ Items: [] }), access = async () => ({ ok: true, json: async () => ({ body: { role: 'admin' } }) }) } = {}) {
+  const sandbox = { exports: {}, process: { env: { APP_ID: 'mpc_test', TABLE_NAME: 'test', SITE_ORIGINS: 'https://www.modernpokerclub.com' } }, Buffer, AbortSignal, console: { warn() {} }, fetch: access,
+    require: name => name === '@aws-sdk/client-dynamodb' ? { DynamoDBClient: class {} }
+      : name === '@aws-sdk/lib-dynamodb' ? { DynamoDBDocumentClient: { from: () => ({ send }) }, QueryCommand: class { constructor(input) { this.input = input; } }, TransactWriteCommand: class { constructor(input) { this.input = input; } } }
+        : require(name === './model' ? './model' : name) };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, file), 'utf8'), sandbox);
+  return sandbox.exports.handler;
 }
-const request = { requestContext: { http: { method: 'GET' } }, headers: { authorization: 'Bearer fixture-only-test-token-123456', origin: 'https://admin.modernpokerclub.com' } };
-
-test('anonymous, normal players, and unpermitted sub-admins cannot query visitor data', async () => {
-  const anonymous = harness();
-  assert.equal((await anonymous.handler({ ...request, headers: {} })).statusCode, 401);
-  assert.equal(anonymous.calls.length, 0);
-  for (const options of [{ role: 'user', permissions: ['overview.view'] }, { role: 'sub_admin', permissions: ['players.view'] }, { accessStatus: 401 }, { accessStatus: 403 }]) {
-    const h = harness(options);
-    assert.ok([401, 403].includes((await h.handler(request)).statusCode));
-    assert.equal(h.calls.filter(call => call.type === 'athena').length, 0);
-  }
+const request = { requestContext: { http: { method: 'GET' } }, headers: { authorization: 'Bearer valid-test-session-token' }, queryStringParameters: { days: '7' } };
+test('reports require a current admin session and never query on auth failure', async () => {
+  let reads = 0;
+  let h = load('index.js', { send: async () => { reads++; }, access: async () => ({ ok: false, status: 401 }) });
+  assert.equal((await h({ ...request, headers: {} })).statusCode, 401);
+  assert.equal((await h(request)).statusCode, 401); assert.equal(reads, 0);
+  h = load('index.js', { send: async () => { reads++; }, access: async () => ({ ok: true, json: async () => ({ body: { role: 'player', permissions: ['overview.view'] } }) }) });
+  assert.equal((await h(request)).statusCode, 403); assert.equal(reads, 0);
 });
-
-test('admin and Overview delegates are checked against the current backend session', async () => {
-  for (const options of [{ role: 'admin' }, { role: 'sub_admin', permissions: ['overview.view'] }]) {
-    const h = harness(options);
-    const result = await h.handler(request);
-    assert.equal(result.statusCode, 202);
-    assert.equal(result.headers['Access-Control-Allow-Origin'], request.headers.origin);
-    assert.equal(h.calls[0].url, 'https://server.modernpokerclub.com/api/admin/access/me');
-    assert.equal(h.calls.filter(call => call.type === 'athena').length, 2);
-  }
+test('sub-admin permissions are rechecked even when report is cached', async () => {
+  let allowed = true, reads = 0;
+  const h = load('index.js', { send: async () => { reads++; return { Items: [] }; }, access: async () => ({ ok: true, json: async () => ({ body: { role: 'sub_admin', permissions: allowed ? ['overview.view'] : [] } }) }) });
+  assert.equal((await h(request)).statusCode, 200); assert.equal(reads, 7);
+  assert.equal((await h(request)).statusCode, 200); assert.equal(reads, 7);
+  allowed = false; assert.equal((await h(request)).statusCode, 403); assert.equal(reads, 7);
 });
-
-test('invalid periods and unsupported HTTP methods never start a query', async () => {
-  const h = harness();
-  assert.equal((await h.handler({ ...request, queryStringParameters: { days: '365 OR true' } })).statusCode, 400);
-  assert.equal((await h.handler({ ...request, requestContext: { http: { method: 'POST' } } })).statusCode, 405);
-  assert.equal(h.calls.length, 0);
+test('reports paginate daily data and return errors instead of misleading zeros', async () => {
+  let reads = 0;
+  const h = load('index.js', { send: async cmd => { reads++; return cmd.input.ExclusiveStartKey ? { Items: [] } : { Items: [], LastEvaluatedKey: { pk: 'test' } }; } });
+  assert.equal((await h(request)).statusCode, 200); assert.equal(reads, 14);
+  assert.equal((await h({ ...request, queryStringParameters: { days: '999' } })).statusCode, 400);
+  assert.equal((await load('index.js', { access: async () => { throw Error('offline'); } })(request)).statusCode, 503);
+});
+const sample = () => ({ appId: 'mpc_test', events: [{ id: '11111111-1111-4111-8111-111111111111', visitorId: '22222222-2222-4222-8222-222222222222', sessionId: '33333333-3333-4333-8333-333333333333', timestamp: Date.now(), path: '/', source: 'Direct', device: 'Desktop' }] });
+const collect = body => ({ requestContext: { http: { method: 'POST' } }, headers: { origin: 'https://www.modernpokerclub.com', 'content-type': 'application/json' }, body: JSON.stringify(body) });
+test('collector rejects unauthorized origins, expired events and unsafe paths before writes', async () => {
+  let writes = 0; const h = load('collector.js', { send: async () => { writes++; } });
+  assert.equal((await h({ ...collect(sample()), headers: { origin: 'https://evil.test' } })).statusCode, 403);
+  const bad = sample(); bad.events[0].path = '/wallet/address'; assert.equal((await h(collect(bad))).statusCode, 400);
+  const old = sample(); old.events[0].timestamp = 1; assert.equal((await h(collect(old))).statusCode, 400); assert.equal(writes, 0);
+});
+test('collector treats only a dedupe conflict as success and permits retry after a failed write', async () => {
+  const duplicate = Object.assign(Error('duplicate'), { name: 'TransactionCanceledException', CancellationReasons: [{ Code: 'ConditionalCheckFailed' }, { Code: 'None' }] });
+  assert.equal((await load('collector.js', { send: async () => { throw duplicate; } })(collect(sample()))).statusCode, 200);
+  const conflict = Object.assign(Error('retry'), { name: 'TransactionCanceledException', CancellationReasons: [{ Code: 'None' }, { Code: 'TransactionConflict' }] });
+  assert.equal((await load('collector.js', { send: async () => { throw conflict; } })(collect(sample()))).statusCode, 503);
 });

@@ -1,102 +1,97 @@
-# Website analytics — deployment handoff
+# Website visitor counter
 
-## Current status (2026-11-02)
+## Design
 
-Website tracker, admin view, authenticated report Lambda, and CloudFormation
-template are implemented locally. **No Clickstream AWS resources have been
-created, and no production website/admin deployment has occurred.** AWS CLI login
-works for account `566235131124`, profile `mpc-admin`, region `us-east-2`.
+The user selected a separate, usage-based AWS counter on 2026-11-02. Amazon
+Pinpoint analytics retired on 2026-10-30. This replaces the earlier undeployed
+Clickstream Guidance/Athena proposal. No Athena, Kinesis, Redshift, QuickSight,
+VPC, NAT gateway, or ECS service is required.
 
-The admin displays an explicit connection-pending state until configured. The
-separate local design preview uses labeled sample data; it is not a production
-metrics source and must never be included in the deployed application.
+Website page view → API Gateway HTTP API → collector Lambda → DynamoDB on-demand.
+Admin report → report Lambda → current backend admin permission check → aggregate counts.
 
-## Proposed architecture
+The game ECS service, backend database, DNS and existing game settings are unchanged.
 
-1. Official [AWS Clickstream Guidance](https://github.com/aws-solutions-library-samples/guidance-for-clickstream-analytics-on-aws),
-   inspected version `0be7644` / 1.1.15.
-2. Separate ingestion service and HTTPS hostname, dedicated S3 data storage.
-3. Guidance data processing to `event_v2`, with UA enrichment and Athena modeling.
-4. This repository's small Lambda/API Gateway reporting layer queries that table.
-5. `/home/website-analytics` draws native admin charts from aggregate results.
+## Resources and permissions
 
-QuickSight and Redshift are optional and are not required by this implementation.
-The report service revalidates the existing admin JWT with
-`https://server.modernpokerclub.com/api/admin/access/me` on every request. Only full
-admins and sub-admins with `overview.view` may retrieve reports. The browser never
-receives AWS credentials or the backend JWT signing key.
+- Account `566235131124`, region `us-east-2`, stack `mpc-website-counter`.
+- Private code bucket `mpc-website-counter-artifacts-566235131124-us-east-2`.
+- Two ARM Node 22 functions, 128/256 MB, concurrency limits 5/3.
+- Encrypted on-demand metrics table; 100 read/write units per second maximum.
+- API throttling: collector 10 requests/second with burst 40; reports 1/second,
+  burst 4. These bound throughput, not total monthly spending.
+- Collector role can only put/update this table. Report role can only query it.
+- Reports validate the current bearer token at `/api/admin/access/me`; full
+  admins or sub-admins with `overview.view` are authorized. No JWT signing
+  secret, user database access or cloud credentials are sent to the browser.
+- CORS is limited to the production website/admin domains. The collector also
+  checks the Origin header, payload size, schema and event age. Origin can be
+  spoofed outside a browser: this is a public, best-effort analytics counter,
+  not an audited billing or fraud-proof system.
+- Logs retain seven days and do not include event payloads or credentials.
 
-**Do not update or restart the poker ECS service for this feature.** Its
-stop-before-start deployment configuration and process-local game ownership need
-separate work before overlapping game tasks are safe. Analytics is independent.
+## Counting
 
-## Information still needed
+- Visitors = distinct anonymous browsers within the full selected period.
+- Visits = distinct sessions; a new session begins after 30 minutes without a
+  page view. Page reloads count as page views but retain the same visitor/session.
+- Page views = initial page loads and SPA path changes. Query-only changes to a
+  legal agreement do not count as new pages. There are no activity heartbeat events.
+- Reports cover 7, 30 or 90 UTC calendar days, including the partial current day.
+  They show daily visitors/visits, top pages, broad source categories and devices.
+- Daily session records expire after 94 days. A transactional event-ID marker
+  expires after two days; events older than one day are rejected. Retrying a
+  successful request cannot increment counts twice.
+- Both event marker and counters commit atomically. Concurrent retries/conflicts
+  cause retry responses. Raw events, IP addresses, wallet/account identities,
+  full URLs, query strings, referrer paths and text input are not stored.
+- Reports query date partitions, paginate, and cache for 60 seconds per warm
+  function. Permissions are checked on every request, including cached reports.
+  More than 100,000 session-day records in one report returns an explicit error;
+  introduce precomputed rollups if measured traffic approaches this threshold.
+- Visitors are browser estimates, not identified individuals. Clearing storage,
+  different devices, blockers and privacy settings affect counts. Game logins and
+  current websocket presence are separate metrics.
+- Historical visits before activation are unavailable.
 
-- Monthly analytics budget (required before provisioning recurring resources).
-- Email for the Guidance Cognito console owner and budget alerts.
+## Cost expectations
 
-The [AWS cost guide](https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/cost.html)
-has a 10 RPS direct-to-S3 ingestion example of $153.80/month, plus processing,
-networking, logging, and query costs. Its optional six-hour processing example
-lists $22.20/month for EMR. These are illustrative us-east-1 figures, not a quote
-for the Ohio account. A planning allowance of $200–$300/month for an Athena-only,
-low-traffic setup needs validation against the selected instance sizes, NAT,
-retention, processing interval, and real usage. Full Redshift/QuickSight reporting
-costs more. Budgets alert; they do not impose a hard spending cap.
+There is no provisioned instance, stream-hour charge or analytics subscription.
+API calls, Lambda execution, DynamoDB requests/storage, and small S3/log storage
+are billed by usage. Free allowances depend on the account and other usage.
 
-Existing Ohio VPC `vpc-073b2998cde079cce` has three public subnets and no NAT gateway.
-The Guidance prerequisites include private processing subnets and network egress;
-prepare a separate network/stack or deliberately add analytics-only private
-subnets. Do not change the poker ALB, target group, DNS, or security groups.
+Ohio DynamoDB pricing checked via the AWS Pricing API on 2026-11-02 is $0.625 per
+million write request units. Each page view writes two small items transactionally
+(4 units), approximately $0.25 per 100,000 page views in write charges. HTTP API,
+Lambda, report reads, storage and transfers are additional. At 100,000 page views
+per month with light admin reporting, roughly $1/month is a planning estimate,
+not a cap or guarantee. Inspect actual billing after collecting real traffic.
 
-## Deployment steps after budget/email selection
+## Deployment
 
-1. Follow the official Guidance deployment instructions. Use separate named
-   artifact/data buckets with public access blocked and encryption enabled.
-   Build and publish the Guidance artifacts/images; do not point its deployment
-   script at the existing `mpc/backend` ECR repository. Use the official control
-   plane with Cognito, register the MPC website project/application, and deploy
-   a direct-to-S3 pipeline with Athena modeling. Enable HTTPS and constrain CORS
-   to the production website hosts. Use a separate test app for validation.
-2. Confirm the processed `event_v2` table and its Glue database, app ID, data
-   bucket, and project-specific processed-data prefix. This API expects the
-   Guidance v2 table schema: custom parameters are a map of `{value,type}` structs.
-3. Package `infrastructure/website-analytics/index.js` and `report.js` in a ZIP.
-   Node.js 22 Lambda includes AWS SDK v3; for dependency pinning, package a pinned
-   `@aws-sdk/client-athena` alongside these files. Upload the ZIP to the private
-   artifact bucket, then deploy `template.yaml` as `mpc-website-analytics-api`.
-   Supply CodeBucket, CodeKey, DataBucket, DataPrefix (trailing slash), Database,
-   and AppId. The template assumes SSE-S3; add scoped KMS decrypt permissions if
-   the data bucket uses a customer-managed KMS key.
-4. The template enforces a 1 GiB Athena scan limit per query, result reuse for
-   15 minutes, API throttling, aggregate-only output, private query results, and
-   seven-day result expiration. Configure a budget and alerts for the full stack.
-5. Set `REACT_APP_WEBSITE_ANALYTICS_API` to the `ReportEndpoint` stack output on
-   Amplify app `d32m7serxcqbdj`, branch **admin**. Preserve existing environment
-   variables. Deploy the website integration to the **main** branch with its
-   Clickstream variables. Do not swap these branches.
-6. Verify a full event delivery in the test app, including Athena processing and
-   authenticated rendering. Verify 401/403 for anonymous/unpermitted viewers.
-   Enable production tracking only after the collector is healthy. Confirm actual
-   production events, deployment success, and browser errors before reporting live.
+1. `npm ci --omit=dev` in `infrastructure/website-analytics` using Node 22.
+2. Package `collector.js`, `index.js`, `model.js`, package files and dependencies.
+   Upload a content-hashed ZIP to the private code bucket.
+3. Deploy `template.yaml` with CodeBucket, CodeKey and AppId. A first validation
+   uses `mpc_website_test`; production uses `mpc_website`. Test records are isolated
+   by app prefix and cannot appear in production reports.
+4. Set `REACT_APP_WEBSITE_ANALYTICS_API` to the stack ReportEndpoint on Amplify app
+   `d32m7serxcqbdj`, branch **admin**. Preserve all other environment variables.
+5. On branch **main**, set `REACT_APP_WEBSITE_ANALYTICS_ENABLED=true`,
+   `REACT_APP_WEBSITE_ANALYTICS_APP_ID=mpc_website`,
+   `REACT_APP_WEBSITE_ANALYTICS_ENDPOINT` to CollectEndpoint, and
+   `REACT_APP_WEBSITE_ANALYTICS_HOSTS=modernpokerclub.com,www.modernpokerclub.com`.
+6. Build/deploy main and admin, then verify production collection and authenticated
+   `/home/website-analytics` rendering. Do not modify the game ECS service.
 
-## Metrics and limitations
+Rollback: disable the website flag and rebuild. AWS counters remain isolated.
+Deleting the CloudFormation stack retains the table deliberately; remove stored
+analytics separately only if authorized. Private artifact storage is separate.
 
-- Distinct anonymous browsers, sessions, page views, game CTA clicks.
-- Average active engagement per session and sessions with a game click / sessions.
-- Daily visitors/sessions, top pages, external referrers, device categories, CTAs.
-- Fixed 7/30/90-day reports in UTC; the current day is partial.
-- Ingestion and processing latency plus up to 15-minute query reuse. No live-online
-  claim. Existing game login/socket statistics remain independent.
-- Retry deliveries are deduplicated by event ID. Distinct visitors are computed
-  across the whole date range, never summed from daily counts.
-- These statistics start when enabled; historical website activity is unavailable.
+## Verification
 
-## Validation completed locally
-
-- Website and admin production builds pass (existing unrelated lint warnings).
-- Six website session/privacy/retry tests pass.
-- Six report/query/auth tests pass.
-- Three admin filter/empty/error-state tests pass.
-- AWS `validate-template` accepts the report API template without creating resources.
-- Local UI preview inspected; live event ingestion/query validation is still pending.
+- `node --test infrastructure/website-analytics/*.test.js`
+- Admin focused tests: `CI=true npm test -- --watchAll=false --runInBand --watchman=false src/views/WebsiteAnalytics/index.test.js`
+- Production builds for main and admin.
+- Live test app: submit the same events twice, query stored session counts, verify
+  anonymous report access is rejected, then switch AppId to production.

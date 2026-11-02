@@ -1,80 +1,62 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: MPC authenticated website analytics API over the AWS Clickstream Guidance Athena tables
+Description: MPC website visitor counter. Usage-based HTTP API, Lambda and DynamoDB; independent of the game service.
 Parameters:
   CodeBucket:
     Type: String
   CodeKey:
     Type: String
-  DataBucket:
-    Type: String
-    Description: Existing Clickstream processed-data S3 bucket
-  DataPrefix:
-    Type: String
-    Description: Existing project processed-data prefix, with trailing slash
-    AllowedPattern: '[a-zA-Z0-9/_-]+/'
-  Database:
-    Type: String
-    AllowedPattern: '[a-z][a-z0-9_]{0,127}'
   AppId:
     Type: String
-    AllowedPattern: '[a-zA-Z0-9_-]{1,128}'
-  AdminOrigins:
-    Type: CommaDelimitedList
-    Default: https://admin.d32m7serxcqbdj.amplifyapp.com,https://admin.modernpokerclub.com
+    Default: mpc_website
+    AllowedPattern: '[a-zA-Z0-9_-]{1,64}'
 Resources:
-  ResultsBucket:
-    Type: AWS::S3::Bucket
+  Counts:
+    Type: AWS::DynamoDB::Table
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      LifecycleConfiguration:
-        Rules:
-          - Id: ExpireQueryResults
-            Status: Enabled
-            ExpirationInDays: 7
-  ResultsPolicy:
-    Type: AWS::S3::BucketPolicy
+      BillingMode: PAY_PER_REQUEST
+      OnDemandThroughput:
+        MaxReadRequestUnits: 100
+        MaxWriteRequestUnits: 100
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Project
+          Value: MPC-Website-Analytics
+  CollectorRole:
+    Type: AWS::IAM::Role
     Properties:
-      Bucket: !Ref ResultsBucket
-      PolicyDocument:
+      AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Effect: Deny
-            Principal: '*'
-            Action: s3:*
-            Resource: [!GetAtt ResultsBucket.Arn, !Sub '${ResultsBucket.Arn}/*']
-            Condition:
-              Bool:
-                aws:SecureTransport: false
-  Workgroup:
-    Type: AWS::Athena::WorkGroup
-    Properties:
-      Name: !Sub '${AWS::StackName}-reports'
-      State: ENABLED
-      WorkGroupConfiguration:
-        EnforceWorkGroupConfiguration: true
-        BytesScannedCutoffPerQuery: 1073741824
-        PublishCloudWatchMetricsEnabled: true
-        EngineVersion:
-          SelectedEngineVersion: Athena engine version 3
-        ResultConfiguration:
-          OutputLocation: !Sub 's3://${ResultsBucket}/reports/'
-          EncryptionConfiguration:
-            EncryptionOption: SSE_S3
-  ReportLog:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-report'
-      RetentionInDays: 14
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: WebsiteCounterWrite
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [dynamodb:PutItem, dynamodb:UpdateItem]
+                Resource: !GetAtt Counts.Arn
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-collect:*'
   ReportRole:
     Type: AWS::IAM::Role
     Properties:
@@ -82,104 +64,138 @@ Resources:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
+            Principal: {Service: lambda.amazonaws.com}
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: ReadClickstreamReports
+        - PolicyName: WebsiteCounterRead
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
+                Action: dynamodb:Query
+                Resource: !GetAtt Counts.Arn
+              - Effect: Allow
                 Action: [logs:CreateLogStream, logs:PutLogEvents]
-                Resource: !GetAtt ReportLog.Arn
-              - Effect: Allow
-                Action: [athena:StartQueryExecution, athena:GetQueryExecution, athena:GetQueryResults, athena:GetWorkGroup]
-                Resource: !Sub 'arn:${AWS::Partition}:athena:${AWS::Region}:${AWS::AccountId}:workgroup/${Workgroup}'
-              - Effect: Allow
-                Action: [glue:GetDatabase, glue:GetTable, glue:GetPartitions, glue:BatchGetPartition]
-                Resource:
-                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog'
-                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/${Database}'
-                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/${Database}/event_v2'
-              - Effect: Allow
-                Action: [s3:GetBucketLocation]
-                Resource: [!Sub 'arn:${AWS::Partition}:s3:::${DataBucket}', !GetAtt ResultsBucket.Arn]
-              - Effect: Allow
-                Action: s3:ListBucket
-                Resource: !Sub 'arn:${AWS::Partition}:s3:::${DataBucket}'
-                Condition:
-                  StringLike:
-                    s3:prefix: [!Sub '${DataPrefix}*']
-              - Effect: Allow
-                Action: s3:GetObject
-                Resource: !Sub 'arn:${AWS::Partition}:s3:::${DataBucket}/${DataPrefix}*'
-              - Effect: Allow
-                Action: s3:ListBucket
-                Resource: !GetAtt ResultsBucket.Arn
-              - Effect: Allow
-                Action: [s3:GetObject, s3:PutObject, s3:AbortMultipartUpload]
-                Resource: !Sub '${ResultsBucket.Arn}/reports/*'
-  ReportFunction:
+                Resource: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-report:*'
+  CollectorLog:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-collect'
+      RetentionInDays: 7
+  ReportLog:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-report'
+      RetentionInDays: 7
+  Collector:
     Type: AWS::Lambda::Function
+    DependsOn: CollectorLog
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-collect'
+      Runtime: nodejs22.x
+      Architectures: [arm64]
+      Handler: collector.handler
+      Role: !GetAtt CollectorRole.Arn
+      MemorySize: 128
+      Timeout: 15
+      ReservedConcurrentExecutions: 5
+      Code: {S3Bucket: !Ref CodeBucket, S3Key: !Ref CodeKey}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Counts
+          APP_ID: !Ref AppId
+          SITE_ORIGINS: https://modernpokerclub.com,https://www.modernpokerclub.com
+  Report:
+    Type: AWS::Lambda::Function
+    DependsOn: ReportLog
     Properties:
       FunctionName: !Sub '${AWS::StackName}-report'
       Runtime: nodejs22.x
+      Architectures: [arm64]
       Handler: index.handler
-      MemorySize: 256
-      Timeout: 15
-      ReservedConcurrentExecutions: 5
       Role: !GetAtt ReportRole.Arn
-      Code:
-        S3Bucket: !Ref CodeBucket
-        S3Key: !Ref CodeKey
+      MemorySize: 256
+      Timeout: 25
+      ReservedConcurrentExecutions: 3
+      Code: {S3Bucket: !Ref CodeBucket, S3Key: !Ref CodeKey}
       Environment:
         Variables:
-          CLICKSTREAM_DATABASE: !Ref Database
-          CLICKSTREAM_APP_ID: !Ref AppId
-          ATHENA_WORKGROUP: !Ref Workgroup
-          ALLOWED_ORIGINS: !Join [',', !Ref AdminOrigins]
+          TABLE_NAME: !Ref Counts
+          APP_ID: !Ref AppId
   Api:
     Type: AWS::ApiGatewayV2::Api
     Properties:
-      Name: !Sub '${AWS::StackName}-api'
+      Name: !Sub '${AWS::StackName}'
       ProtocolType: HTTP
       CorsConfiguration:
-        AllowOrigins: !Ref AdminOrigins
-        AllowMethods: [GET, OPTIONS]
-        AllowHeaders: [Authorization, Content-Type]
-        MaxAge: 600
-  Integration:
+        AllowOrigins:
+          - https://modernpokerclub.com
+          - https://www.modernpokerclub.com
+          - https://admin.modernpokerclub.com
+          - https://admin.d32m7serxcqbdj.amplifyapp.com
+        AllowMethods: [GET, POST, OPTIONS]
+        AllowHeaders: [content-type, authorization]
+        MaxAge: 3600
+  CollectorIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref Api
       IntegrationType: AWS_PROXY
-      IntegrationUri: !GetAtt ReportFunction.Arn
+      IntegrationUri: !GetAtt Collector.Arn
       PayloadFormatVersion: '2.0'
-  Route:
+      TimeoutInMillis: 16000
+  ReportIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref Api
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt Report.Arn
+      PayloadFormatVersion: '2.0'
+      TimeoutInMillis: 26000
+  CollectorRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref Api
+      RouteKey: POST /collect
+      Target: !Sub 'integrations/${CollectorIntegration}'
+  ReportRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref Api
       RouteKey: GET /report
-      Target: !Join ['/', [integrations, !Ref Integration]]
+      Target: !Sub 'integrations/${ReportIntegration}'
   Stage:
     Type: AWS::ApiGatewayV2::Stage
+    DependsOn: [CollectorRoute, ReportRoute]
     Properties:
       ApiId: !Ref Api
-      StageName: $default
+      StageName: '$default'
       AutoDeploy: true
       DefaultRouteSettings:
-        ThrottlingBurstLimit: 10
-        ThrottlingRateLimit: 5
-  InvokePermission:
+        ThrottlingBurstLimit: 40
+        ThrottlingRateLimit: 10
+      RouteSettings:
+        'GET /report':
+          ThrottlingBurstLimit: 4
+          ThrottlingRateLimit: 1
+  CollectorPermission:
     Type: AWS::Lambda::Permission
     Properties:
+      FunctionName: !Ref Collector
       Action: lambda:InvokeFunction
-      FunctionName: !Ref ReportFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/POST/collect'
+  ReportPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref Report
+      Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub 'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/GET/report'
 Outputs:
+  CollectEndpoint:
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/collect'
   ReportEndpoint:
-    Value: !Sub '${Api.ApiEndpoint}/report'
-  AthenaWorkgroup:
-    Value: !Ref Workgroup
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/report'
+  TableName:
+    Value: !Ref Counts

@@ -1,0 +1,7 @@
+{
+  "name": "mpc-website-counter",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": { "test": "node --test *.test.js" },
+  "dependencies": { "@aws-sdk/client-dynamodb": "3.922.0", "@aws-sdk/lib-dynamodb": "3.922.0" }
+}
