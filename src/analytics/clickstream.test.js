@@ -1,91 +1,58 @@
-import { clickTarget, createWebsiteTracker, publicPage } from './clickstream';
-
-const config = { appId: 'mpc_web', endpoint: 'https://analytics.example.com/collect', hosts: ['localhost'] };
-let tracker;
-let now;
-const events = () => window.fetch.mock.calls.flatMap(([, options]) => JSON.parse(options.body));
-const settle = async () => { await Promise.resolve(); await Promise.resolve(); };
-
+import { createWebsiteTracker, publicPage, trafficSource } from './clickstream';
+const config = { appId: 'mpc_website', endpoint: 'https://counter.example.test/collect', hosts: ['modernpokerclub.com'] };
+let store, win, sequence;
 beforeEach(() => {
-  jest.useFakeTimers();
-  now = Date.parse('2026-11-02T12:00:00Z');
-  jest.spyOn(Date, 'now').mockImplementation(() => now);
-  localStorage.clear();
-  Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
-  Object.defineProperty(navigator, 'doNotTrack', { configurable: true, value: null });
-  Object.defineProperty(window, 'crypto', { configurable: true, value: { getRandomValues: array => {
-    array.forEach((_, index) => { array[index] = Math.floor(Math.random() * 256); }); return array;
-  } } });
-  window.fetch = jest.fn().mockResolvedValue({ ok: true });
+  jest.useFakeTimers(); sequence = 0; store = {};
+  win = { document: { referrer: 'https://google.com/search?q=private-wallet' },
+    location: { hostname: 'modernpokerclub.com' }, navigator: { userAgent: 'iPhone Mobile' },
+    crypto: { getRandomValues: bytes => { bytes.fill(++sequence); } },
+    localStorage: { getItem: key => store[key] || null, setItem: (key, value) => { store[key] = value; } },
+    fetch: jest.fn().mockResolvedValue({ ok: true, status: 200 }), setInterval, clearInterval,
+    addEventListener: jest.fn(), removeEventListener: jest.fn() };
 });
-afterEach(() => { if (tracker) tracker.stop(); tracker = null; jest.restoreAllMocks(); jest.useRealTimers(); });
-
-test('sends official Clickstream events without wallet URLs, query strings, or authentication', async () => {
-  window.history.replaceState({}, '', '/bridge?wallet=PRIVATE_WALLET&token=SECRET#signature');
-  tracker = createWebsiteTracker(config);
-  tracker.navigate(window.location.pathname);
-  await settle();
-  expect(events().map(event => event.event_type)).toEqual(['_first_open', '_session_start', '_page_view']);
-  expect(events()[2].attributes._page_url).toBe('http://localhost/bridge');
-  expect(JSON.stringify(events())).not.toMatch(/PRIVATE_WALLET|SECRET|signature/);
-  expect(window.fetch.mock.calls[0][0]).toBe('https://analytics.example.com/collect?appId=mpc_web&platform=Web');
-  expect(window.fetch.mock.calls[0][1].credentials).toBe('omit');
-  expect(window.fetch.mock.calls[0][1].headers.Authorization).toBeUndefined();
+afterEach(() => { jest.clearAllTimers(); jest.useRealTimers(); jest.restoreAllMocks(); });
+const settle = async () => { for (let i = 0; i < 8; i++) await Promise.resolve(); };
+const events = () => win.fetch.mock.calls.flatMap(call => JSON.parse(call[1].body).events);
+test('sends only page views with anonymous identifiers and fixed categories', async () => {
+  const t = createWebsiteTracker(config, win); t.navigate('/'); await settle();
+  t.navigate('/wallet/secret-address'); await settle();
+  expect(events().map(e => e.path)).toEqual(['/', '/other']);
+  expect(events()[0].source).toBe('Google'); expect(events()[0].device).toBe('Mobile');
+  expect(JSON.stringify(events())).not.toMatch(/private-wallet|secret-address|google.com/);
+  jest.advanceTimersByTime(60000); await settle();
+  expect(win.fetch).toHaveBeenCalledTimes(2); t.stop();
 });
-
-test('deduplicates route changes and keeps visitor/session identity across page reloads', async () => {
-  tracker = createWebsiteTracker(config);
-  tracker.navigate('/'); await settle();
-  tracker.navigate('/'); await settle();
-  const first = events()[0];
-  tracker.stop(); tracker = createWebsiteTracker(config);
-  tracker.navigate('/mint'); await settle();
-  expect(events().filter(event => event.event_type === '_first_open')).toHaveLength(1);
-  expect(events().filter(event => event.event_type === '_session_start')).toHaveLength(1);
-  expect(events().filter(event => event.event_type === '_page_view')).toHaveLength(2);
-  expect(events().every(event => event.unique_id === first.unique_id)).toBe(true);
-  expect(events().every(event => event.attributes._session_id === first.attributes._session_id)).toBe(true);
+test('route duplication does not count twice; reload retains visitor and session', async () => {
+  const t = createWebsiteTracker(config, win); t.navigate('/legal'); t.navigate('/legal'); await settle(); t.stop();
+  const other = createWebsiteTracker(config, win); other.navigate('/'); await settle();
+  expect(events()).toHaveLength(2);
+  expect(events()[1].visitorId).toBe(events()[0].visitorId);
+  expect(events()[1].sessionId).toBe(events()[0].sessionId); other.stop();
 });
-
-test('a session expires after 30 minutes of inactivity and does not treat idle time as engagement', async () => {
-  tracker = createWebsiteTracker(config);
-  tracker.navigate('/'); await settle();
-  const firstSession = events()[0].attributes._session_id;
-  now += 31 * 60000;
-  document.dispatchEvent(new Event('pointerdown'));
-  tracker.navigate('/mint'); await settle();
-  const sessions = events().filter(event => event.event_type === '_session_start');
-  expect(sessions).toHaveLength(2);
-  expect(sessions[1].attributes._session_id).not.toBe(firstSession);
-  expect(events().filter(event => event.event_type === '_user_engagement')).toHaveLength(0);
+test('a visit after 30 minutes creates a session but retains the visitor', async () => {
+  let now = 1800000000000; jest.spyOn(Date, 'now').mockImplementation(() => now);
+  const t = createWebsiteTracker(config, win); t.navigate('/'); await settle();
+  now += 1800001; t.navigate('/legal'); await settle();
+  expect(events()[1].visitorId).toBe(events()[0].visitorId);
+  expect(events()[1].sessionId).not.toBe(events()[0].sessionId); t.stop();
 });
-
-test('failed delivery retries the same event IDs without blocking navigation', async () => {
-  window.fetch.mockRejectedValueOnce(new Error('offline'));
-  tracker = createWebsiteTracker(config);
-  tracker.navigate('/'); await settle();
-  const ids = events().map(event => event.event_id);
-  now += 16000; await tracker.flush();
-  const retried = JSON.parse(window.fetch.mock.calls[1][1].body);
-  expect(retried.map(event => event.event_id)).toEqual(ids);
+test('transient retries keep event IDs; invalid events are not retried', async () => {
+  let now = 1800000000000; jest.spyOn(Date, 'now').mockImplementation(() => now);
+  win.fetch.mockResolvedValueOnce({ ok: false, status: 503 });
+  const t = createWebsiteTracker(config, win); t.navigate('/'); await settle();
+  now += 60000; await t.flush(); expect(events()[1].id).toBe(events()[0].id);
+  win.fetch.mockResolvedValueOnce({ ok: false, status: 400 }); t.navigate('/mint'); await settle();
+  now += 60000; await t.flush(); expect(win.fetch).toHaveBeenCalledTimes(3); t.stop();
 });
-
-test('tracking stays off for unconfigured/preview hosts and privacy choices', () => {
-  expect(createWebsiteTracker({ ...config, hosts: ['www.modernpokerclub.com'] })).toBeNull();
-  expect(createWebsiteTracker({ ...config, endpoint: 'http://analytics.example.com' })).toBeNull();
-  localStorage.setItem('mpc.website.analytics.optOut', '1');
-  expect(createWebsiteTracker(config)).toBeNull();
-  localStorage.clear();
-  Object.defineProperty(navigator, 'doNotTrack', { configurable: true, value: '1' });
-  expect(createWebsiteTracker(config)).toBeNull();
-  expect(window.fetch).not.toHaveBeenCalled();
+test('honors privacy preferences and excludes localhost/preview/HTTP endpoints', () => {
+  win.navigator.globalPrivacyControl = true; expect(createWebsiteTracker(config, win)).toBeNull();
+  win.navigator.globalPrivacyControl = false; win.navigator.doNotTrack = '1'; expect(createWebsiteTracker(config, win)).toBeNull();
+  win.navigator.doNotTrack = '0'; store['mpc.website.analytics.optOut'] = '1'; expect(createWebsiteTracker(config, win)).toBeNull();
+  store = {}; expect(createWebsiteTracker({ ...config, hosts: [] }, win)).toBeNull();
+  expect(createWebsiteTracker({ ...config, endpoint: 'http://localhost' }, win)).toBeNull();
 });
-
-test('only public pages and known button destinations are classified', () => {
-  expect(publicPage('/some-wallet-address')).toBe('/other');
-  expect(publicPage('/terms-and-conditions')).toBe('/legal');
-  expect(clickTarget('https://main.du6evc0snv7lm.amplifyapp.com/?token=SECRET', 'https://modernpokerclub.com')).toBe('play_game');
-  expect(clickTarget('https://www.youtube.com/stickyrice1?sub_confirmation=1', 'https://modernpokerclub.com')).toBe('youtube');
-  expect(clickTarget('https://malicious.example/?wallet=123', 'https://modernpokerclub.com')).toBeNull();
-  expect(clickTarget('mailto:private@example.com', 'https://modernpokerclub.com')).toBeNull();
+test('normalizes public paths and discards arbitrary referrer details', () => {
+  expect(publicPage('/privacy-policy')).toBe('/legal'); expect(publicPage('/mpokerclub')).toBe('/');
+  expect(trafficSource('https://private.example/user/id', 'modernpokerclub.com')).toBe('Other');
+  expect(trafficSource('https://www.modernpokerclub.com/legal', 'modernpokerclub.com')).toBe('Direct');
 });

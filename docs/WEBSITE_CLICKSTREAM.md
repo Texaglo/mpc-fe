@@ -1,57 +1,54 @@
-# Website Clickstream integration
+# Website visitor tracking
 
-## Status — 2026-11-02
+A lightweight, anonymous page-view counter backed by separate AWS serverless
+resources. This supersedes the earlier undeployed AWS Clickstream Guidance
+proposal. No Pinpoint, Athena or Kinesis is used.
 
-Implemented and locally tested. **Not collecting production visits yet.** The AWS
-Guidance pipeline has not been provisioned; monthly budget and the console owner's
-email are still needed. Website tracking is off unless explicitly enabled below.
+## Production configuration
 
-## Deployment configuration
+Amplify app `d32m7serxcqbdj`, branch **main**:
 
-Add these build-time values to the **main** branch of Amplify app `d32m7serxcqbdj`
-after the Clickstream application and HTTPS collection endpoint are healthy:
+- `REACT_APP_WEBSITE_ANALYTICS_ENABLED=true`
+- `REACT_APP_WEBSITE_ANALYTICS_APP_ID=mpc_website`
+- `REACT_APP_WEBSITE_ANALYTICS_ENDPOINT`: stack `mpc-website-counter` CollectEndpoint
+- `REACT_APP_WEBSITE_ANALYTICS_HOSTS=modernpokerclub.com,www.modernpokerclub.com`
 
-- `REACT_APP_CLICKSTREAM_ENABLED=true`
-- `REACT_APP_CLICKSTREAM_APP_ID`: the registered website application ID
-- `REACT_APP_CLICKSTREAM_ENDPOINT`: the pipeline's HTTPS `/collect` URL
-- `REACT_APP_CLICKSTREAM_HOSTS=modernpokerclub.com,www.modernpokerclub.com`
+Preserve other environment values and rebuild after changing these. Localhost and
+preview domains are excluded. The matching admin branch uses
+`REACT_APP_WEBSITE_ANALYTICS_API` for its authenticated reporting endpoint.
 
-Preserve all other branch environment variables. Rebuild the main branch after
-setting these values. Preview hosts and localhost are excluded unless explicitly
-listed. Use a separate Clickstream test application for test traffic.
+## Behavior and privacy
 
-## Collection behavior
+Each page load/SPA path change sends one event. No scroll/click/engagement
+heartbeats are collected. A session expires after 30 minutes without a page view.
+Anonymous visitor/session identifiers are stored locally; clearing storage creates
+a new visitor. Other browser tabs share these identifiers where possible.
 
-Uses the official [Clickstream HTTP API](https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/http-api.html)
-instead of automatic DOM capture, so the payload can be strictly allowlisted.
-Compatible with AWS Guidance `event_v2` processing.
+Only fixed public paths, broad source categories, device category, event time and
+random identifiers are sent. The collector hashes visitor/session identifiers and
+stores daily session counters. No full URLs, query strings, wallet addresses,
+account IDs, tokens, form values or referrer details are stored. HTTPS requests
+necessarily expose connection metadata to AWS, but the application does not log it.
 
-Events: `_first_open`, `_session_start`, `_page_view`, `_user_engagement`, and
-`mpc_cta_click`. Public CTA targets are game, YouTube, Discord, Magic Eden, NFT
-membership, migration, and legal pages. Event IDs remain unchanged on delivery
-retry. No application credentials are attached to requests.
+The tracker respects Global Privacy Control, Do Not Track and local storage
+`mpc.website.analytics.optOut=1` on initialization. Reload after changing an opt-out.
+Delivery is best effort, uses a bounded in-memory queue and retries transient
+errors with the original event ID. The server atomically deduplicates retries.
 
-Anonymous browser and session identifiers are saved in local storage. A session
-expires after 30 minutes of inactivity. Engagement excludes hidden tabs and time
-after 60 seconds of inactivity. Clearing browser storage creates a new visitor.
-Delivery is best effort; ad blockers, privacy choices, and network loss can reduce
-counts. A game CTA click is not a game login or a completed registration.
+The admin displays visitors, visits and page views for 7/30/90 days, plus daily
+trends, top pages, source categories and devices. These are anonymous browser
+counts, not verified people, game logins, or websocket presence. Reports can be
+up to a minute behind. Tracking starts at activation; historical visits cannot
+be reconstructed.
 
-Only known public paths, fixed page titles, referrer hostnames, basic device data,
-and fixed CTA categories are sent. Query strings, fragments, unknown URL paths,
-wallet addresses, login tokens, input values, and account identities are excluded.
-Standard ingestion infrastructure can still observe IP and User-Agent headers.
-The tracker respects Global Privacy Control, Do Not Track, and the local setting
-`mpc.website.analytics.optOut=1` on initialization. Stop/reload the page after
-changing this setting. No historical visits can be recovered by this integration.
+## Verification and rollback
 
-## Verification
+- `CI=true npm test -- --watchAll=false --runInBand --watchman=false src/analytics/clickstream.test.js`
+- `npm run build`
+- Test a page load, SPA navigation, and reload against the isolated test app.
+- Verify duplicate deliveries do not inflate counts and admin reports require auth.
 
-- Focused tracking tests: `CI=true npm test -- --watchAll=false --runInBand --watchman=false src/analytics/clickstream.test.js`
-- Production build: `npm run build`
-- After provisioning, verify one test visit, an SPA route change, and one game CTA
-  against the test application's raw S3 events and processed Athena rows. Then
-  enable the production application, and verify the admin's processed report.
-
-Rollback: set `REACT_APP_CLICKSTREAM_ENABLED=false` and rebuild the website. This
-does not stop billing for AWS resources; infrastructure lifecycle is separate.
+To stop collection, set the enabled flag to false and rebuild. Resource billing
+is separate; there is no fixed analytics subscription, but usage and storage are
+billable. Full infrastructure and deployment instructions live on the admin branch
+in `docs/WEBSITE_ANALYTICS_DEPLOYMENT.md`.
