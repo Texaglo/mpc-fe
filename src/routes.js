@@ -19,6 +19,7 @@ import Integrity from "./views/Integrity";
 import FreePlay from "./views/FreePlay";
 
 import QaTests from "./views/QaTests";
+import WebsiteAnalytics from "./views/WebsiteAnalytics";
 
 var routes = [
   { layout: "/home", path: "/qa-tests", name: "Safe game tests", component: QaTests, hidden: true, permission: "bots.view" },
@@ -32,6 +33,7 @@ var routes = [
     icon: "tim-icons icon-chart-pie-36",
     permission: 'overview.view',
   },
+  { layout: "/home", path: "/website-analytics", name: "Website Analytics", component: WebsiteAnalytics, permission: 'overview.view' },
   {
     layout: "/home",
     path: "/mpce-ledger",

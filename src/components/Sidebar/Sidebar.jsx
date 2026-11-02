@@ -63,7 +63,7 @@ class Sidebar extends React.Component {
                         activeClassName="active"
                       // onClick={() => this.props.toggleSidebar(prop.name)}
                       >
-                        <ConsoleIcon name={({ "/dashboard": "home", "/games": "controller", "/game-store": "wallet", "/pending-withdrawals": "settings", "/users": "user", "/audit-log": "clipboard", "/achievement": "trophy", "/tournament": "trophy" })[prop.path] || "settings"} />
+                        <ConsoleIcon name={({ "/dashboard": "home", "/website-analytics": "chart", "/games": "controller", "/game-store": "wallet", "/pending-withdrawals": "settings", "/users": "user", "/audit-log": "clipboard", "/achievement": "trophy", "/tournament": "trophy" })[prop.path] || "settings"} />
                         {rtlActive ? prop.rtlName : (prop.sidebarName || prop.name)}
                       </NavLink>
                     </li>}
