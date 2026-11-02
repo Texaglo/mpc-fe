@@ -20,6 +20,7 @@ import CustomerAcceptancePolicy from './CustomerAcceptancePolicy';
 import ResponsibleSocialGameplayPolicy from './ResponsibleSocialGameplayPolicy';
 
 import { logout, login } from '../store/actions/Auth';
+import WebsiteAnalytics from '../analytics/WebsiteAnalytics';
 
 import '../static/css/style.css';
 
@@ -58,6 +59,7 @@ class App extends Component {
         />
 
         <Router history={hist}>
+          <WebsiteAnalytics />
           <Switch>
             <Route exact path='/' component={props => <MPokerClub {...props} />} />
             <Route exact path='/About' component={props => <About {...props} />} />
