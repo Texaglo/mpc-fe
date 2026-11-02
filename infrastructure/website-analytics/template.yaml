@@ -5,6 +5,14 @@ Parameters:
     Type: String
   CodeKey:
     Type: String
+  EdgeToken:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    AllowedPattern: '[a-zA-Z0-9_-]+'
+  DetailsStartAt:
+    Type: String
+    Description: UTC activation timestamp for geography and hourly collection; preserve on updates.
   AppId:
     Type: String
     Default: mpc_website
@@ -104,6 +112,7 @@ Resources:
         Variables:
           TABLE_NAME: !Ref Counts
           APP_ID: !Ref AppId
+          EDGE_TOKEN: !Ref EdgeToken
           SITE_ORIGINS: https://modernpokerclub.com,https://www.modernpokerclub.com
   Report:
     Type: AWS::Lambda::Function
@@ -122,6 +131,7 @@ Resources:
         Variables:
           TABLE_NAME: !Ref Counts
           APP_ID: !Ref AppId
+          DETAILS_START_AT: !Ref DetailsStartAt
   Api:
     Type: AWS::ApiGatewayV2::Api
     Properties:
@@ -192,7 +202,58 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub 'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/GET/report'
+  GeoOriginPolicy:
+    Type: AWS::CloudFront::OriginRequestPolicy
+    Properties:
+      OriginRequestPolicyConfig:
+        Name: !Sub '${AWS::StackName}-country-region'
+        Comment: Coarse viewer geography only; no IP, city, coordinates or cookies forwarded as analytics fields.
+        CookiesConfig: {CookieBehavior: none}
+        QueryStringsConfig: {QueryStringBehavior: none}
+        HeadersConfig:
+          HeaderBehavior: whitelist
+          Headers:
+            - Origin
+            - Content-Type
+            - Access-Control-Request-Method
+            - Access-Control-Request-Headers
+            - CloudFront-Viewer-Country
+            - CloudFront-Viewer-Country-Region
+            - CloudFront-Viewer-Country-Region-Name
+  GeoEdge:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: MPC website visitor country/region enrichment; pay as you go.
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: counter-api
+            DomainName: !Sub '${Api}.execute-api.${AWS::Region}.amazonaws.com'
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols: [TLSv1.2]
+            OriginCustomHeaders:
+              - HeaderName: X-Mpc-Analytics-Edge-Token
+                HeaderValue: !Ref EdgeToken
+        DefaultCacheBehavior:
+          TargetOriginId: counter-api
+          ViewerProtocolPolicy: https-only
+          AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+          CachedMethods: [GET, HEAD]
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+          OriginRequestPolicyId: !Ref GeoOriginPolicy
+          Compress: true
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+      Tags:
+        - Key: Project
+          Value: MPC-Website-Analytics
 Outputs:
+  GeoCollectEndpoint:
+    Value: !Sub 'https://${GeoEdge.DomainName}/collect'
   CollectEndpoint:
     Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/collect'
   ReportEndpoint:

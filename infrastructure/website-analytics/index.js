@@ -1,7 +1,7 @@
 'use strict';
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, QueryCommand } = require('@aws-sdk/lib-dynamodb');
-const { datesFor, summarize } = require('./model');
+const { datesFor, queryDates, summarize, TIMEZONES } = require('./model');
 const db = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const cache = new Map();
 exports.handler = async event => {
@@ -9,6 +9,8 @@ exports.handler = async event => {
   if (event.requestContext?.http?.method !== 'GET') return respond(405, { message: 'Method not allowed' });
   const days = Number(event.queryStringParameters?.days || 30);
   if (![7, 30, 90].includes(days)) return respond(400, { message: 'Choose a 7, 30, or 90 day reporting period.' });
+  const timezone = event.queryStringParameters?.timezone || 'UTC';
+  if (!TIMEZONES.includes(timezone)) return respond(400, { message: 'Choose a supported reporting time zone.' });
   const authorization = event.headers?.authorization || '';
   if (!/^bearer [A-Za-z0-9._-]{20,4096}$/i.test(authorization)) return respond(401, { message: 'Sign in to the admin panel.' });
   try {
@@ -22,10 +24,10 @@ exports.handler = async event => {
     if (!user || !(user.role === 'admin' || (user.role === 'sub_admin' && Array.isArray(user.permissions) && user.permissions.includes('overview.view')))) {
       return respond(403, { message: 'Overview permission is required to view website analytics.' });
     }
-    const dates = datesFor(days), key = dates[0] + dates[dates.length - 1];
+    const now = Date.now(), dates = datesFor(days, now, timezone), key = timezone + dates[0] + dates[dates.length - 1];
     const cached = cache.get(key);
     if (cached && Date.now() - cached.at < 60000) return respond(200, cached.report);
-    const byDay = dates.map(date => ({ date, items: [] }));
+    const byDay = queryDates(dates, timezone).map(date => ({ date, items: [] }));
     let next = 0, count = 0;
     await Promise.all(Array.from({ length: 5 }, async () => {
       while (next < byDay.length) {
@@ -41,8 +43,8 @@ exports.handler = async event => {
         } while (cursor);
       }
     }));
-    const report = summarize(byDay);
-    if (cache.size > 6) cache.clear();
+    const report = summarize(byDay, now, { dates, timezone, detailsStartAt: process.env.DETAILS_START_AT });
+    if (cache.size > 18) cache.clear();
     cache.set(key, { at: Date.now(), report });
     return respond(200, report);
   } catch (_) {

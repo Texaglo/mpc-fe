@@ -1,7 +1,7 @@
 'use strict';
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, TransactWriteCommand } = require('@aws-sdk/lib-dynamodb');
-const { validate, transaction } = require('./model');
+const { validate, transaction, geography } = require('./model');
 const db = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 exports.handler = async event => {
   const respond = (statusCode, body) => ({ statusCode, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: JSON.stringify(body) });
@@ -15,9 +15,10 @@ exports.handler = async event => {
     events = validate(JSON.parse(body), process.env.APP_ID);
   } catch (_) { return respond(400, { message: 'Invalid visitor event' }); }
   try {
+    const geo = geography(event.headers, process.env.EDGE_TOKEN);
     // Two writes commit together: retry marker and session/page counters.
     for (const item of events) {
-      try { await db.send(new TransactWriteCommand(transaction(item, process.env.APP_ID, process.env.TABLE_NAME))); }
+      try { await db.send(new TransactWriteCommand(transaction(item, process.env.APP_ID, process.env.TABLE_NAME, Date.now(), geo))); }
       catch (error) {
         const reasons = error.CancellationReasons;
         if (error.name === 'TransactionCanceledException' && reasons?.[0]?.Code === 'ConditionalCheckFailed'

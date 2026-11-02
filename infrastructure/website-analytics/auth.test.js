@@ -49,3 +49,14 @@ test('collector treats only a dedupe conflict as success and permits retry after
   const conflict = Object.assign(Error('retry'), { name: 'TransactionCanceledException', CancellationReasons: [{ Code: 'None' }, { Code: 'TransactionConflict' }] });
   assert.equal((await load('collector.js', { send: async () => { throw conflict; } })(collect(sample()))).statusCode, 503);
 });
+
+test('report caches are isolated by time zone and unsupported zones are rejected', async () => {
+  let reads = 0;
+  const h = load('index.js', { send: async () => { reads++; return { Items: [] }; } });
+  assert.equal((await h(request)).statusCode, 200);
+  const local = { ...request, queryStringParameters: { days: '7', timezone: 'America/Jamaica' } };
+  assert.equal(JSON.parse((await h(local)).body).timezone, 'America/Jamaica');
+  assert.equal(reads, 16);
+  await h(local); assert.equal(reads, 16);
+  assert.equal((await h({ ...request, queryStringParameters: { timezone: 'Invalid' } })).statusCode, 400);
+});
